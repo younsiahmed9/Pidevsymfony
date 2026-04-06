@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Facture: {{ facture.numeroFacture }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">Facture {{ facture.numeroFacture }}</h1>
+
+    <table class="table">
+        <tr>
+            <th>ID:</th>
+            <td>{{ facture.id }}</td>
+        </tr>
+        <tr>
+            <th>Numéro:</th>
+            <td>{{ facture.numeroFacture }}</td>
+        </tr>
+        <tr>
+            <th>Montant:</th>
+            <td>${{ facture.montant }}</td>
+        </tr>
+        <tr>
+            <th>Date Facture:</th>
+            <td>{{ facture.dateFacture|date('Y-m-d H:i:s') }}</td>
+        </tr>
+        <tr>
+            <th>Date Échéance:</th>
+            <td>{{ facture.dateEcheance|date('Y-m-d') }}</td>
+        </tr>
+        <tr>
+            <th>Service:</th>
+            <td>
+                {% if facture.service %}
+                    <a href="{{ path('service_show', {'id': facture.service.id}) }}">{{ facture.service.nomService }}</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Produit:</th>
+            <td>
+                {% if facture.produit %}
+                    <a href="{{ path('produit_show', {'id': facture.produit.id}) }}">{{ facture.produit.nomProduit }}</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Statut:</th>
+            <td>
+                <span class="badge
+                    {% if facture.statut == 'payee' %}bg-success{% elseif facture.statut == 'en_attente' %}bg-warning{% else %}bg-danger{% endif %}">
+                    {{ facture.statut }}
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <th>Expirée:</th>
+            <td>
+                {% if facture.isExpired() %}
+                    <span class="badge bg-danger">OUI</span>
+                {% else %}
+                    <span class="badge bg-success">NON</span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+
+    <a href="{{ path('facture_edit', {'id': facture.id}) }}" class="btn btn-warning">Modifier</a>
+    <a href="{{ path('facture_index') }}" class="btn btn-secondary">Retour</a>
+</div>
+{% endblock %}

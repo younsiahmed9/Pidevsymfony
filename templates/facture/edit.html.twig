@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Facture: {{ facture.numeroFacture }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">Modifier Facture {{ facture.numeroFacture }}</h1>
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    
+    <div class="form-group mb-3">
+        {{ form_label(form.numeroFacture) }}
+        {{ form_widget(form.numeroFacture) }}
+        {% if form.numeroFacture.vars.errors|length > 0 %}
+            <div class="alert alert-danger mt-2">
+                {% for error in form.numeroFacture.vars.errors %}
+                    <p>{{ error.message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form_label(form.montant) }}
+        {{ form_widget(form.montant) }}
+        {% if form.montant.vars.errors|length > 0 %}
+            <div class="alert alert-danger mt-2">
+                {% for error in form.montant.vars.errors %}
+                    <p>{{ error.message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form_label(form.dateFacture) }}
+        {{ form_widget(form.dateFacture) }}
+        {% if form.dateFacture.vars.errors|length > 0 %}
+            <div class="alert alert-danger mt-2">
+                {% for error in form.dateFacture.vars.errors %}
+                    <p>{{ error.message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form_label(form.dateEcheance) }}
+        {{ form_widget(form.dateEcheance) }}
+        {% if form.dateEcheance.vars.errors|length > 0 %}
+            <div class="alert alert-danger mt-2">
+                {% for error in form.dateEcheance.vars.errors %}
+                    <p>{{ error.message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form_label(form.service) }}
+        {{ form_widget(form.service) }}
+        <small class="form-text text-muted">Au moins l'un des deux doit être rempli (Service ou Produit)</small>
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form_label(form.produit) }}
+        {{ form_widget(form.produit) }}
+        <small class="form-text text-muted">Au moins l'un des deux doit être rempli (Service ou Produit)</small>
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form_label(form.statut) }}
+        {{ form_widget(form.statut) }}
+        {% if form.statut.vars.errors|length > 0 %}
+            <div class="alert alert-danger mt-2">
+                {% for error in form.statut.vars.errors %}
+                    <p>{{ error.message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-success">Enregistrer</button>
+    <a href="{{ path('facture_index') }}" class="btn btn-secondary">Annuler</a>
+
+    {{ form_end(form) }}
+</div>
+{% endblock %}
