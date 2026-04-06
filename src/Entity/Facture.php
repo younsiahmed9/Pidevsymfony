@@ -3,11 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\FactureRepository;
+use App\Validator\RequireServiceOrProduit;
+use App\Validator\ValidDateRange;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: FactureRepository::class)]
+#[ValidDateRange]
+#[RequireServiceOrProduit]
 class Facture
 {
     #[ORM\Id]
