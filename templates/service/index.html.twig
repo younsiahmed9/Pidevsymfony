@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Services{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">Liste des Services</h1>
+    
+    <a href="{{ path('service_new') }}" class="btn btn-primary mb-3">Ajouter un Service</a>
+
+    {% if services|length > 0 %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Tarif</th>
+                    <th>Fréquence</th>
+                    <th>Statut</th>
+                    <th>Date Début</th>
+                    <th>Date Fin</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                    <tr>
+                        <td>{{ service.id }}</td>
+                        <td>{{ service.nomService }}</td>
+                        <td>{{ service.typeService }}</td>
+                        <td>${{ service.tarif }}</td>
+                        <td>{{ service.frequence ?? '-' }}</td>
+                        <td>
+                            <span class="badge
+                                {% if service.statut == 'actif' %}bg-success{% elseif service.statut == 'suspendu' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ service.statut }}
+                            </span>
+                        </td>
+                        <td>{{ service.dateDebut|date('Y-m-d')|default('-') }}</td>
+                        <td>{{ service.dateFin|date('Y-m-d')|default('-') }}</td>
+                        <td>
+                            <a href="{{ path('service_show', {'id': service.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                            <a href="{{ path('service_edit', {'id': service.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                            <form method="POST" action="{{ path('service_delete', {'id': service.id}) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ service.id) }}">
+                                <button class="btn btn-sm btn-danger">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">Aucun service trouvé.</div>
+    {% endif %}
+</div>
+{% endblock %}

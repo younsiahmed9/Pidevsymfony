@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Service: {{ service.nomService }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ service.nomService }}</h1>
+
+    <table class="table">
+        <tr>
+            <th>ID:</th>
+            <td>{{ service.id }}</td>
+        </tr>
+        <tr>
+            <th>Nom:</th>
+            <td>{{ service.nomService }}</td>
+        </tr>
+        <tr>
+            <th>Type:</th>
+            <td>{{ service.typeService }}</td>
+        </tr>
+        <tr>
+            <th>Tarif:</th>
+            <td>${{ service.tarif }}</td>
+        </tr>
+        <tr>
+            <th>Fréquence:</th>
+            <td>{{ service.frequence ?? '-' }}</td>
+        </tr>
+        <tr>
+            <th>Date Début:</th>
+            <td>{{ service.dateDebut|date('Y-m-d')|default('-') }}</td>
+        </tr>
+        <tr>
+            <th>Date Fin:</th>
+            <td>{{ service.dateFin|date('Y-m-d')|default('-') }}</td>
+        </tr>
+        <tr>
+            <th>Duration (jours):</th>
+            <td>{{ service.calculateDuration() ?? '-' }}</td>
+        </tr>
+        <tr>
+            <th>Statut:</th>
+            <td>
+                <span class="badge
+                    {% if service.statut == 'actif' %}bg-success{% elseif service.statut == 'suspendu' %}bg-warning{% else %}bg-danger{% endif %}">
+                    {{ service.statut }}
+                </span>
+            </td>
+        </tr>
+    </table>
+
+    <a href="{{ path('service_edit', {'id': service.id}) }}" class="btn btn-warning">Modifier</a>
+    <a href="{{ path('service_index') }}" class="btn btn-secondary">Retour</a>
+</div>
+{% endblock %}
