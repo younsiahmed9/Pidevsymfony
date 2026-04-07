@@ -6,19 +6,21 @@ use App\Entity\Admin;
 use App\Entity\Client;
 use App\Entity\User;
 use App\Form\RegistrationType;
-use App\Security\AppAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class AuthController extends AbstractController
 {
+    private const REGISTRATION_VERIFICATION_SESSION_KEY = 'pending_registration_verification';
+
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $passwordHasher
@@ -51,7 +53,7 @@ class AuthController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register', methods: ['GET', 'POST'])]
-    public function register(Request $request, UserAuthenticatorInterface $userAuthenticator, AppAuthenticator $appAuthenticator): Response
+    public function register(Request $request, MailerInterface $mailer): Response
     {
         // If user is already authenticated, redirect to home
         if ($this->getUser()) {
@@ -87,43 +89,138 @@ class AuthController extends AbstractController
                 $user->setRole('CLIENT');
             }
 
-            // Hash password
-            $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
-            $user->setPasswordHash($hashedPassword);
-            $user->setIsActive(true);
+            $passwordHash = $this->passwordHasher->hashPassword($user, $plainPassword);
+            $verificationCode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $expiresAt = (new \DateTimeImmutable('+10 minutes'))->getTimestamp();
 
-            // Persist user
-            $this->entityManager->persist($user);
+            $request->getSession()->set(self::REGISTRATION_VERIFICATION_SESSION_KEY, [
+                'email' => strtolower(trim((string) $user->getEmail())),
+                'fullName' => $user->getFullName(),
+                'passwordHash' => $passwordHash,
+                'roleChoice' => $roleChoice,
+                'adminCode' => $adminCode,
+                'cin' => (string) $form->get('cin')->getData(),
+                'phone' => (string) $form->get('phone')->getData(),
+                'verificationCode' => $verificationCode,
+                'expiresAt' => $expiresAt,
+            ]);
+
+            try {
+                $mailFrom = (string) ($_ENV['MAIL_FROM'] ?? $_SERVER['MAIL_FROM'] ?? 'no-reply@fintrack.local');
+                $emailMessage = (new Email())
+                    ->from($mailFrom)
+                    ->to((string) $user->getEmail())
+                    ->subject('FinTrack - Code de verification')
+                    ->text("Votre code de verification est: {$verificationCode}. Ce code expire dans 10 minutes.");
+
+                $mailer->send($emailMessage);
+            } catch (\Throwable) {
+                $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
+                $this->addFlash('error', 'Impossible d envoyer le mail de verification. Verifiez MAILER_DSN.');
+                return $this->redirectToRoute('app_register');
+            }
+
+            $this->addFlash('success', 'Un code de verification a ete envoye a votre email.');
+            return $this->redirectToRoute('app_register_verify_code');
+        }
+
+        return $this->render('auth/register.html.twig', [
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/register/verify-code', name: 'app_register_verify_code', methods: ['GET', 'POST'])]
+    public function verifyRegisterCode(Request $request): Response
+    {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+
+        $pendingRegistration = $request->getSession()->get(self::REGISTRATION_VERIFICATION_SESSION_KEY);
+        if (!is_array($pendingRegistration)) {
+            $this->addFlash('error', 'Aucune inscription en attente.');
+            return $this->redirectToRoute('app_register');
+        }
+
+        if ($request->isMethod('POST')) {
+            $submittedCode = trim((string) $request->request->get('verification_code', ''));
+            $expectedCode = (string) ($pendingRegistration['verificationCode'] ?? '');
+            $expiresAt = (int) ($pendingRegistration['expiresAt'] ?? 0);
+
+            if ($submittedCode === '' || strlen($submittedCode) !== 6) {
+                $this->addFlash('error', 'Entrez un code valide a 6 chiffres.');
+                return $this->redirectToRoute('app_register_verify_code');
+            }
+
+            if ($expiresAt < time()) {
+                $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
+                $this->addFlash('error', 'Le code a expire. Recommencez l inscription.');
+                return $this->redirectToRoute('app_register');
+            }
+
+            if (!hash_equals($expectedCode, $submittedCode)) {
+                $this->addFlash('error', 'Code de verification incorrect.');
+                return $this->redirectToRoute('app_register_verify_code');
+            }
+
+            $email = strtolower(trim((string) ($pendingRegistration['email'] ?? '')));
+            if ($email === '') {
+                $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
+                $this->addFlash('error', 'Donnees d inscription invalides.');
+                return $this->redirectToRoute('app_register');
+            }
+
+            $existingUser = $this->entityManager->getRepository(User::class)->findByEmail($email);
+            if ($existingUser) {
+                $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
+                $this->addFlash('error', 'Cet email est deja utilise.');
+                return $this->redirectToRoute('app_register');
+            }
+
+            $newUser = new User();
+            $newUser->setEmail($email);
+            $newUser->setFullName((string) ($pendingRegistration['fullName'] ?? ''));
+            $newUser->setPasswordHash((string) ($pendingRegistration['passwordHash'] ?? ''));
+            $newUser->setIsActive(true);
+
+            $roleChoice = (string) ($pendingRegistration['roleChoice'] ?? 'CLIENT');
+            $newUser->setRole($roleChoice === 'ADMIN' ? 'ADMIN' : 'CLIENT');
+
+            $this->entityManager->persist($newUser);
             $this->entityManager->flush();
 
-            // Create role-specific entity
             if ($roleChoice === 'ADMIN') {
                 $admin = new Admin();
-                $admin->setUser($user);
-                $admin->setAdminCode($adminCode);
+                $admin->setUser($newUser);
+                $admin->setAdminCode((string) ($pendingRegistration['adminCode'] ?? ''));
                 $this->entityManager->persist($admin);
             } else {
                 $client = new Client();
-                $client->setUser($user);
-                $cin = $form->get('cin')->getData();
-                $phone = $form->get('phone')->getData();
-                if ($cin) {
+                $client->setUser($newUser);
+                $cin = trim((string) ($pendingRegistration['cin'] ?? ''));
+                $phone = trim((string) ($pendingRegistration['phone'] ?? ''));
+                if ($cin !== '') {
                     $client->setCin($cin);
                 }
-                if ($phone) {
+                if ($phone !== '') {
                     $client->setPhone($phone);
                 }
                 $this->entityManager->persist($client);
             }
 
             $this->entityManager->flush();
+            $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
 
-            $this->addFlash('success', 'Registration successful! You are now signed in.');
-            return $userAuthenticator->authenticateUser($user, $appAuthenticator, $request);
+            $this->addFlash('success', 'Inscription validee. Connectez-vous maintenant.');
+            return $this->redirectToRoute('app_login');
         }
 
-        return $this->render('auth/register.html.twig', [
-            'form' => $form,
+        $expiresAt = (int) ($pendingRegistration['expiresAt'] ?? 0);
+        $minutesLeft = max(0, (int) ceil(($expiresAt - time()) / 60));
+
+        return $this->render('auth/verify_email_code.html.twig', [
+            'pendingEmail' => (string) ($pendingRegistration['email'] ?? ''),
+            'minutesLeft' => $minutesLeft,
         ]);
     }
 
