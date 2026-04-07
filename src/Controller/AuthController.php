@@ -135,17 +135,46 @@ class AuthController extends AbstractController
     }
 
     #[Route('/admin/dashboard', name: 'app_admin_dashboard')]
-    public function adminDashboard(): Response
+    public function adminDashboard(Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $userRepository = $this->entityManager->getRepository(User::class);
+        $searchTerm = trim((string) $request->query->get('q', ''));
+        $page = max(1, (int) $request->query->get('page', 1));
+        $perPage = 8;
 
         $totalUsers = $userRepository->count([]);
         $activeUsers = $userRepository->count(['isActive' => true]);
         $activeClients = $userRepository->count(['role' => 'CLIENT', 'isActive' => true]);
         $administrators = $userRepository->count(['role' => 'ADMIN']);
-        $users = $userRepository->findBy([], ['createdAt' => 'DESC']);
+
+        $queryBuilder = $userRepository->createQueryBuilder('u');
+
+        if ($searchTerm !== '') {
+            $normalizedTerm = mb_strtolower($searchTerm);
+            $queryBuilder
+                ->andWhere("LOWER(COALESCE(u.fullName, '')) LIKE :term OR LOWER(u.email) LIKE :term OR LOWER(u.role) LIKE :term")
+                ->setParameter('term', '%' . $normalizedTerm . '%');
+        }
+
+        $countQueryBuilder = clone $queryBuilder;
+        $filteredTotalUsers = (int) $countQueryBuilder
+            ->select('COUNT(u.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $totalPages = max(1, (int) ceil($filteredTotalUsers / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
+
+        $users = $queryBuilder
+            ->orderBy('u.createdAt', 'DESC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
 
         return $this->render('admin/dashboard.html.twig', [
             'stats' => [
@@ -155,6 +184,13 @@ class AuthController extends AbstractController
                 'administrators' => $administrators,
             ],
             'users' => $users,
+            'searchTerm' => $searchTerm,
+            'pagination' => [
+                'page' => $page,
+                'perPage' => $perPage,
+                'totalItems' => $filteredTotalUsers,
+                'totalPages' => $totalPages,
+            ],
         ]);
     }
 
@@ -167,12 +203,12 @@ class AuthController extends AbstractController
         $user = $this->entityManager->getRepository(User::class)->find($id);
         if (!$user) {
             $this->addFlash('error', 'User not found.');
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
         }
 
         if (!$this->isCsrfTokenValid('admin_edit_user_' . $user->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid edit token.');
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
         }
 
         $fullName = trim((string) $request->request->get('full_name', ''));
@@ -181,13 +217,13 @@ class AuthController extends AbstractController
 
         if ($email === '') {
             $this->addFlash('error', 'Email is required.');
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
         }
 
         $existingUser = $this->entityManager->getRepository(User::class)->findByEmail($email);
         if ($existingUser && $existingUser->getId() !== $user->getId()) {
             $this->addFlash('error', 'This email is already used by another user.');
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
         }
 
         $user->setFullName($fullName !== '' ? $fullName : null);
@@ -198,7 +234,7 @@ class AuthController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash('success', 'User updated successfully.');
-        return $this->redirectToRoute('app_admin_dashboard');
+        return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
     }
 
     #[Route('/admin/users/{id}/delete', name: 'app_admin_user_delete', methods: ['POST'])]
@@ -210,25 +246,40 @@ class AuthController extends AbstractController
         $user = $this->entityManager->getRepository(User::class)->find($id);
         if (!$user) {
             $this->addFlash('error', 'User not found.');
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
         }
 
         if (!$this->isCsrfTokenValid('admin_delete_user_' . $user->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid delete token.');
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
         }
 
         $currentUser = $this->getUser();
         if ($currentUser instanceof User && $currentUser->getId() === $user->getId()) {
             $this->addFlash('error', 'You cannot delete your own account.');
-            return $this->redirectToRoute('app_admin_dashboard');
+            return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
         }
 
         $this->entityManager->remove($user);
         $this->entityManager->flush();
 
         $this->addFlash('success', 'User deleted successfully.');
-        return $this->redirectToRoute('app_admin_dashboard');
+        return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
+    }
+
+    private function getDashboardRedirectParams(Request $request): array
+    {
+        $params = [];
+
+        $returnQuery = trim((string) $request->request->get('_return_q', ''));
+        if ($returnQuery !== '') {
+            $params['q'] = $returnQuery;
+        }
+
+        $returnPage = max(1, (int) $request->request->get('_return_page', 1));
+        $params['page'] = $returnPage;
+
+        return $params;
     }
 
     #[Route('/profile/update', name: 'app_profile_update', methods: ['POST'])]
@@ -299,5 +350,79 @@ class AuthController extends AbstractController
 
         $this->addFlash('success', 'Your profile has been updated successfully.');
         return $this->redirectToRoute('app_home');
+    }
+
+    #[Route('/api/admin/users', name: 'api_admin_users', methods: ['GET'])]
+    public function apiAdminUsers(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $userRepository = $this->entityManager->getRepository(User::class);
+        $searchTerm = trim((string) $request->query->get('q', ''));
+        $status = trim((string) $request->query->get('status', 'all'));
+        $role = trim((string) $request->query->get('role', 'all'));
+        $page = max(1, (int) $request->query->get('page', 1));
+        $perPage = 8;
+
+        $queryBuilder = $userRepository->createQueryBuilder('u');
+
+        if ($searchTerm !== '') {
+            $normalizedTerm = mb_strtolower($searchTerm);
+            $queryBuilder
+                ->andWhere("LOWER(COALESCE(u.fullName, '')) LIKE :term OR LOWER(u.email) LIKE :term OR LOWER(u.role) LIKE :term")
+                ->setParameter('term', '%' . $normalizedTerm . '%');
+        }
+
+        if ($status === 'active') {
+            $queryBuilder->andWhere('u.isActive = :active')->setParameter('active', true);
+        } elseif ($status === 'inactive') {
+            $queryBuilder->andWhere('u.isActive = :active')->setParameter('active', false);
+        }
+
+        if ($role === 'ADMIN' || $role === 'CLIENT') {
+            $queryBuilder->andWhere('u.role = :role')->setParameter('role', $role);
+        }
+
+        $countQueryBuilder = clone $queryBuilder;
+        $filteredTotalUsers = (int) $countQueryBuilder
+            ->select('COUNT(u.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $totalPages = max(1, (int) ceil($filteredTotalUsers / $perPage));
+        if ($page > $totalPages) {
+            $page = $totalPages;
+        }
+
+        $users = $queryBuilder
+            ->orderBy('u.createdAt', 'DESC')
+            ->setFirstResult(($page - 1) * $perPage)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+
+        $usersData = array_map(function (User $user) {
+            return [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'fullName' => $user->getFullName() ?: 'No full name',
+                'profilePhoto' => $user->getProfilePhoto(),
+                'role' => $user->getRole(),
+                'isActive' => $user->isActive(),
+                'createdAt' => $user->getCreatedAt()?->format('Y-m-d H:i') ?: '-',
+                'updatedAt' => $user->getUpdatedAt()?->format('Y-m-d H:i') ?: '-',
+            ];
+        }, $users);
+
+        return $this->json([
+            'success' => true,
+            'users' => $usersData,
+            'pagination' => [
+                'page' => $page,
+                'perPage' => $perPage,
+                'totalItems' => $filteredTotalUsers,
+                'totalPages' => $totalPages,
+            ],
+        ]);
     }
 }

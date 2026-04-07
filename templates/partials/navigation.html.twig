@@ -2,8 +2,8 @@
 <header class="navigation bg-tertiary">
 	<style>
 		.profile-avatar-btn {
-			width: 44px;
-			height: 44px;
+			width: 36px;
+			height: 36px;
 			border-radius: 50%;
 			border: 2px solid #fff;
 			background: #d9e2ff;
@@ -14,6 +14,7 @@
 			justify-content: center;
 			font-weight: 700;
 			color: #25314c;
+			font-size: 0.85rem;
 		}
 
 		.profile-avatar-btn img {
@@ -21,9 +22,31 @@
 			height: 100%;
 			object-fit: cover;
 		}
+
+		.navbar-actions {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			flex-wrap: wrap;
+			gap: 0.25rem 0.5rem;
+		}
+
+		/* Global modal layering fix for pages with fixed header/sidebar */
+		.modal {
+			z-index: 2000 !important;
+		}
+
+		.modal-backdrop {
+			z-index: 1990 !important;
+		}
+
+		.modal-dialog,
+		.modal-content {
+			pointer-events: auto;
+		}
 	</style>
-	<nav class="navbar navbar-expand-xl navbar-light text-start py-3">
-		<div class="container">
+	<nav class="navbar navbar-expand-xl navbar-light text-start py-1">
+		<div class="container-fluid d-flex align-items-center">
 			<a class="navbar-brand" href="{{ path('app_home') }}">
 				<img loading="prelaod" decoding="async" class="img-fluid" width="160" src="{{ asset('images/logo.png') }}" alt="FinTrack">
 			</a>
@@ -38,7 +61,7 @@
 						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}#contact">Contact</a></li>
 					</ul>
 				{% endif %}
-				<div class="navbar-actions ms-auto d-flex align-items-center justify-content-end flex-wrap gap-2 gap-lg-3">
+				<div class="navbar-actions ms-auto">
 					{% if app.user %}
 						<span class="text-dark">{{ app.user.fullName ?: app.user.email }}</span>
 						{% set initial = (app.user.fullName ?: app.user.email)|slice(0, 1)|upper %}
@@ -47,6 +70,12 @@
 							{% if profileImage %}
 								{% if profileImage starts with 'http://' or profileImage starts with 'https://' or profileImage starts with '/' %}
 									<img src="{{ profileImage }}" alt="{{ app.user.fullName ?: app.user.email }}">
+								{% elseif profileImage|length > 1 and profileImage|slice(1, 1) == ':' %}
+									<img src="{{ asset('uploads/profiles/' ~ (profileImage|replace({'\\\\': '/'})|split('/')|last)) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+								{% elseif profileImage starts with 'uploads/' %}
+									<img src="{{ asset(profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+								{% elseif '/' not in profileImage and '\\\\' not in profileImage %}
+									<img src="{{ asset('uploads/profiles/' ~ profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
 								{% else %}
 									<img src="{{ asset(profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
 								{% endif %}
@@ -78,10 +107,16 @@
 						<div class="modal-body">
 							<input type="hidden" name="_token" value="{{ csrf_token('profile_edit') }}">
 							<div class="mb-3 text-center">
-								<div class="profile-avatar-btn mx-auto mb-2" style="width:64px;height:64px;pointer-events:none;">
+								<div class="profile-avatar-btn mx-auto mb-2" style="width:52px;height:52px;pointer-events:none;">
 									{% if profileImage %}
 										{% if profileImage starts with 'http://' or profileImage starts with 'https://' or profileImage starts with '/' %}
 											<img src="{{ profileImage }}" alt="{{ app.user.fullName ?: app.user.email }}">
+										{% elseif profileImage|length > 1 and profileImage|slice(1, 1) == ':' %}
+											<img src="{{ asset('uploads/profiles/' ~ (profileImage|replace({'\\\\': '/'})|split('/')|last)) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+										{% elseif profileImage starts with 'uploads/' %}
+											<img src="{{ asset(profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+										{% elseif '/' not in profileImage and '\\\\' not in profileImage %}
+											<img src="{{ asset('uploads/profiles/' ~ profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
 										{% else %}
 											<img src="{{ asset(profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
 										{% endif %}
@@ -113,5 +148,27 @@
 			</div>
 		</div>
 	{% endif %}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			// Always place modals under <body> to avoid fixed layout overlays blocking inputs.
+			document.addEventListener('show.bs.modal', function (event) {
+				const modal = event.target;
+				if (modal && modal.classList.contains('modal') && modal.parentElement !== document.body) {
+					document.body.appendChild(modal);
+				}
+			});
+
+			// Clean any stale backdrop/lock state after closing modals.
+			document.addEventListener('hidden.bs.modal', function () {
+				if (!document.querySelector('.modal.show')) {
+					document.body.classList.remove('modal-open');
+					document.body.style.removeProperty('padding-right');
+					document.querySelectorAll('.modal-backdrop').forEach(function (el) {
+						el.remove();
+					});
+				}
+			});
+		});
+	</script>
 </header>
 <!-- /navigation -->
