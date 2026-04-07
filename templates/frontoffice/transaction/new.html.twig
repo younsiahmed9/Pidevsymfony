@@ -1,0 +1,114 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Nouvelle Transaction - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <!-- Bouton retour -->
+                <a href="{{ path('front_transaction_index') }}" class="text-muted text-decoration-none d-inline-block mb-3">
+                    <i class="fas fa-arrow-left me-1"></i> Retour aux transactions
+                </a>
+
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h3 class="h4 fw-bold mb-0">Effectuer une Transaction</h3>
+                        <p class="text-muted small">Dépôt, retrait ou transfert entre vos comptes / vers un tiers.</p>
+                    </div>
+                    
+                    <div class="card-body p-4 pt-2">
+                        
+                        <!-- Navigation entre les types -->
+                        <ul class="nav nav-pills nav-fill mb-4 p-1 bg-light rounded" id="transactionTabs">
+                            <li class="nav-item">
+                                <a class="nav-link fw-bold {{ app.request.attributes.get('_route') == 'front_transaction_depot' ? 'active' : '' }}" id="depot-tab" href="{{ path('front_transaction_depot') }}" role="tab">Dépôt</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-bold {{ app.request.attributes.get('_route') == 'front_transaction_transfert' ? 'active' : '' }}" id="transfert-tab" href="{{ path('front_transaction_transfert') }}" role="tab">Transfert</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-bold {{ app.request.attributes.get('_route') == 'front_transaction_retrait' ? 'active' : '' }}" id="retrait-tab" href="{{ path('front_transaction_retrait') }}" role="tab">Retrait</a>
+                            </li>
+                        </ul>
+
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                            
+                            <!-- Ces champs devraient être rendus dynamiquement dans le form par le Tab sélectionné ou via Turbo/JS,
+                                 mais voici la structure unifiée demandant de cacher ou afficher les options -->
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.type, 'Type de transaction', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.type, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.type) }}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.carte_source, 'Depuis (Source)', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.carte_source, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.carte_source) }}</div>
+                                </div>
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.carte_dest, 'Vers (Destination)', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.carte_dest, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.carte_dest) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.montant, 'Montant', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.montant, {'attr': {'class': 'form-control shadow-none', 'placeholder': '0.00'}}) }}
+                                    </div>
+                                    <div class="text-danger small mt-1">{{ form_errors(form.montant) }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.devise, 'Devise', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.devise, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.devise) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.description, 'Description / Motif', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control shadow-none', 'rows': '2', 'placeholder': 'Remboursement resto...'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.description) }}</div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    Valider l'opération
+                                </button>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Scripts for basic interaction (to change form type value on tab click, if standard form is used) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('#transactionTabs .nav-link');
+    const typeSelect = document.querySelector('select[name$="[type]"]'); // Assuming symfony form names it like tr_form[type]
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            // Route-level navigation handles the active tab state.
+            if(typeSelect) {
+                if(this.id === 'depot-tab') typeSelect.value = 'DEPOT';
+                if(this.id === 'transfert-tab') typeSelect.value = 'TRANSFERT';
+                if(this.id === 'retrait-tab') typeSelect.value = 'RETRAIT';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

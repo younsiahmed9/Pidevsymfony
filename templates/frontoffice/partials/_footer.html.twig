@@ -1,0 +1,60 @@
+<footer class="section-sm bg-tertiary">
+    <div class="container">
+        <div class="row justify-content-between">
+            <div class="col-lg-2 col-md-4 col-6 mb-4">
+                <div class="footer-widget">
+                    <h5 class="mb-4 text-primary font-secondary">Services</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Portefeuilles</a></li>
+                        <li class="mb-2"><a href="#">Cartes Virtuelles</a></li>
+                        <li class="mb-2"><a href="#">Virements Programmés</a></li>
+                        <li class="mb-2"><a href="#">Paiements</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6 mb-4">
+                <div class="footer-widget">
+                    <h5 class="mb-4 text-primary font-secondary">À Propos</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">L'Entreprise</a></li>
+                        <li class="mb-2"><a href="#">Carrières</a></li>
+                        <li class="mb-2"><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6 mb-4">
+                <div class="footer-widget">
+                    <h5 class="mb-4 text-primary font-secondary">Légal</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Conditions de service</a></li>
+                        <li class="mb-2"><a href="#">Politique de confidentialité</a></li>
+                        <li class="mb-2"><a href="#">Mentions légales</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12 mb-4">
+                <div class="footer-widget">
+                    <h5 class="mb-4 text-primary font-secondary">FinTrack</h5>
+                    <p>Votre partenaire financier pour la gestion simplifiée et en toute sécurité de votre argent au quotidien.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row align-items-center mt-5 text-center text-md-start">
+            <div class="col-lg-4">
+                <a href="{{ path('front_home_index') }}">
+                    <img loading="preload" decoding="async" class="img-fluid" width="160" src="{{ asset('images/logo.png') }}" alt="Wallet">
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6 mt-4 mt-lg-0">
+                <ul class="list-unstyled list-inline mb-0 text-lg-center">
+                    <li class="list-inline-item me-4"><a class="text-black" href="#"><i class="fab fa-facebook-f"></i></a></li>
+                    <li class="list-inline-item me-4"><a class="text-black" href="#"><i class="fab fa-twitter"></i></a></li>
+                    <li class="list-inline-item me-4"><a class="text-black" href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4 col-md-6 text-md-end mt-4 mt-md-0">
+                <p class="mb-0">&copy; {{ 'now'|date('Y') }} FinTrack. Tous droits réservés.</p>
+            </div>
+        </div>
+    </div>
+</footer>

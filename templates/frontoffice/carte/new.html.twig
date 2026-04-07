@@ -1,0 +1,65 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Créer une Carte Virtuelle - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <!-- Bouton retour -->
+                <a href="{{ path('front_carte_index') }}" class="text-muted text-decoration-none d-inline-block mb-3">
+                    <i class="fas fa-arrow-left me-1"></i> Retour aux cartes
+                </a>
+
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h3 class="h4 fw-bold mb-0">Nouvelle Carte Virtuelle</h3>
+                        <p class="text-muted small">Générez une carte pour vos paiements en ligne.</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                            
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.portefeuille, 'Portefeuille de rattachement', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.portefeuille, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.portefeuille) }}</div>
+                                <div class="form-text">La carte puisera ses fonds depuis ce portefeuille.</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.type, 'Type de carte', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.type, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.type) }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.devise, 'Devise', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.devise, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.devise) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.plafond, 'Plafond mensuel', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.plafond, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Ex: 1000'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.plafond) }}</div>
+                                <div class="form-text">Limitez vos dépenses avec ce plafond.</div>
+                            </div>
+
+                            <div class="d-grid mt-5">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-credit-card me-2"></i>Générer la carte
+                                </button>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

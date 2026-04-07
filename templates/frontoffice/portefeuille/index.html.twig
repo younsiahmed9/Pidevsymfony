@@ -1,0 +1,91 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Portefeuilles - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h2 class="h3 fw-bold mb-0">Mes Portefeuilles</h2>
+                <p class="text-muted">Gérez vos différents comptes et soldes</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <a href="{{ path('front_portefeuille_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Créer un portefeuille
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        {% if portefeuilles is empty %}
+                            <div class="text-center p-5">
+                                <div class="mb-3">
+                                    <i class="fas fa-wallet fa-3x text-muted opacity-50"></i>
+                                </div>
+                                <h5>Aucun portefeuille trouvé</h5>
+                                <p class="text-muted">Commencez par créer votre premier portefeuille.</p>
+                                <a href="{{ path('front_portefeuille_new') }}" class="btn btn-outline-primary mt-2">Créer maintenant</a>
+                            </div>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-4">Nom du Portefeuille</th>
+                                            <th>Devise Principale</th>
+                                            <th class="text-end">Solde Total</th>
+                                            <th class="text-end pe-4">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for portefeuille in portefeuilles %}
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-dark">
+                                                    <i class="fas fa-wallet text-primary me-2"></i> {{ portefeuille.nom }}
+                                                </td>
+                                                <td><span class="badge bg-secondary">{{ portefeuille.devise_principale }}</span></td>
+                                                <td class="text-end fw-bold">
+                                                    {{ portefeuille.solde_total|number_format(2, ',', ' ') }} {{ portefeuille.devise_principale }}
+                                                </td>
+                                                <td class="text-end pe-4">
+                                                    <a href="{{ path('front_portefeuille_show', {'id': portefeuille.id}) }}" class="btn btn-sm btn-outline-info me-1" title="Voir les détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ path('front_portefeuille_edit', {'id': portefeuille.id}) }}" class="btn btn-sm btn-outline-primary me-1" title="Modifier">
+                                                        <i class="fas fa-pen"></i>
+                                                    </a>
+                                                    <a href="{{ path('front_carte_new', {'portefeuille_id': portefeuille.id}) }}" class="btn btn-sm btn-outline-primary me-1" title="Créer une carte">
+                                                        <i class="fas fa-credit-card"></i>
+                                                    </a>
+                                                    
+                                                    <form method="post" action="{{ path('front_portefeuille_delete', {'id': portefeuille.id}) }}" class="d-inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce portefeuille ? Cette action est irréversible.');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ portefeuille.id) }}">
+                                                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if portefeuilles is not empty and portefeuilles.pageCount is defined %}
+                        <div class="card-footer bg-white py-3">
+                            <div class="d-flex justify-content-center">
+                                {{ knp_pagination_render(portefeuilles) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

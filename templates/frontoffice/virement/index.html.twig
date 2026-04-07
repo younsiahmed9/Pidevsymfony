@@ -1,0 +1,107 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Virements Programmés - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-6">
+                <h2 class="h3 fw-bold mb-0">Virements Programmés</h2>
+                <p class="text-muted">Automatisez vos envois d'argent récurrents</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <a href="{{ path('front_virement_new') }}" class="btn btn-primary">
+                    <i class="fas fa-calendar-plus me-2"></i>Programmer un virement
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        {% if virements is empty %}
+                            <div class="text-center p-5">
+                                <div class="mb-3">
+                                    <i class="fas fa-sync-alt fa-3x text-muted opacity-50"></i>
+                                </div>
+                                <h5>Aucun virement programmé</h5>
+                                <p class="text-muted">Vous n'avez pas encore d'opérations récurrentes configurées.</p>
+                                <a href="{{ path('front_virement_new') }}" class="btn btn-outline-primary mt-2">Configurer maintenant</a>
+                            </div>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-4">Destinataire</th>
+                                            <th>Montant</th>
+                                            <th>Fréquence</th>
+                                            <th>Prochaine Exé.</th>
+                                            <th>Statut</th>
+                                            <th class="text-end pe-4">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for virement in virements %}
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-dark">
+                                                    {{ virement.destinataire }}
+                                                    <div class="small text-muted fw-normal">{{ virement.description }}</div>
+                                                </td>
+                                                <td class="fw-bold">
+                                                    {{ virement.montant|number_format(2, ',', ' ') }} {{ virement.devise }}
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">
+                                                        {{ virement.frequence }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if virement.prochaine_execution %}
+                                                        {{ virement.prochaine_execution|date('d/m/Y') }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="badge {{ virement.actif ? 'bg-success' : 'bg-secondary' }}">
+                                                        {{ virement.actif ? 'Actif' : 'Désactivé' }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-end pe-4">
+                                                    <a href="{{ path('front_virement_show', {'id': virement.id}) }}" class="btn btn-sm btn-outline-info me-1" title="Voir">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ path('front_virement_edit', {'id': virement.id}) }}" class="btn btn-sm btn-outline-primary me-1" title="Modifier">
+                                                        <i class="fas fa-pen"></i>
+                                                    </a>
+
+                                                    <form method="post" action="{{ path('front_virement_delete', {'id': virement.id}) }}" class="d-inline-block" onsubmit="return confirm('Voulez-vous vraiment annuler ce virement programmé ?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ virement.id) }}">
+                                                        <button class="btn btn-sm btn-outline-danger" title="Supprimer (Annuler définitivement)">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if virements is not empty and virements.pageCount is defined %}
+                        <div class="card-footer bg-white py-3">
+                            <div class="d-flex justify-content-center">
+                                {{ knp_pagination_render(virements) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

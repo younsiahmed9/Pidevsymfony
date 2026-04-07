@@ -1,0 +1,59 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Détail du Virement - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <a href="{{ path('front_virement_index') }}" class="text-muted text-decoration-none d-inline-block mb-3">
+            <i class="fas fa-arrow-left me-1"></i> Retour aux virements programmés
+        </a>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <h3 class="h5 mb-0">Virement vers {{ virement.destinataire }}</h3>
+                <span class="badge {{ virement.actif ? 'bg-success' : 'bg-secondary' }}">{{ virement.actif ? 'Actif' : 'Désactivé' }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <p class="mb-1 text-muted">Montant</p>
+                        <p class="fw-bold fs-5 mb-0">{{ virement.montant|number_format(2, ',', ' ') }} {{ virement.devise }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1 text-muted">Fréquence</p>
+                        <p class="fw-bold mb-0">{{ virement.frequence }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1 text-muted">Carte source</p>
+                        <p class="mb-0">{{ virement.source_numero ? '**** ' ~ (virement.source_numero|slice(-4)) : '-' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1 text-muted">Carte destination</p>
+                        <p class="mb-0">{{ virement.dest_numero ? '**** ' ~ (virement.dest_numero|slice(-4)) : 'Externe' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1 text-muted">Prochaine exécution</p>
+                        <p class="mb-0">{{ virement.prochaine_execution ? virement.prochaine_execution|date('d/m/Y H:i') : '-' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1 text-muted">Statut</p>
+                        <p class="mb-0">{{ virement.statut }}</p>
+                    </div>
+                    <div class="col-12">
+                        <p class="mb-1 text-muted">Description</p>
+                        <p class="mb-0">{{ virement.description ?: '-' }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-white text-end">
+                <a href="{{ path('front_virement_edit', {'id': virement.id}) }}" class="btn btn-primary me-2">Modifier</a>
+                <form method="post" action="{{ path('front_virement_delete', {'id': virement.id}) }}" class="d-inline-block" onsubmit="return confirm('Voulez-vous vraiment annuler ce virement programmé ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ virement.id) }}">
+                    <button class="btn btn-outline-danger">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

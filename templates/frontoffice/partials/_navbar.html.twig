@@ -1,0 +1,58 @@
+<header class="navigation bg-tertiary">
+    <nav class="navbar navbar-expand-xl navbar-light text-center py-3">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('front_home_index') }}">
+                <img loading="preload" decoding="async" class="img-fluid" width="160" src="{{ asset('frontoffice/images/logo.png') }}" alt="FinTrack">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('front_home_index') }}">Accueil</a>
+                    </li>
+                    {% if app.user %}
+                        <li class="nav-item dropdown nav-hover-dropdown">
+                            <a class="nav-link dropdown-toggle" href="{{ path('front_portefeuille_index') }}" id="userPagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Mes Portefeuilles
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="userPagesDropdown">
+                                <li><a class="dropdown-item" href="{{ path('front_portefeuille_index') }}">Mes Portefeuilles</a></li>
+                                <li><a class="dropdown-item" href="{{ path('front_carte_index') }}">Mes Cartes</a></li>
+                                <li><a class="dropdown-item" href="{{ path('front_transaction_index') }}">Transactions</a></li>
+                                <li><a class="dropdown-item" href="{{ path('front_virement_index') }}">Virements</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+                <div class="d-flex align-items-center">
+                    {% if app.user %}
+                        <div class="dropdown">
+                            <a class="btn btn-outline-primary dropdown-toggle me-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i> {{ app.user.prenom }} {{ app.user.nom }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ path('front_profile_index') }}">Mon Profil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" class="btn btn-outline-primary">Connexion</a>
+                        <a href="{{ path('app_register') }}" class="btn btn-primary ms-2 ms-lg-3">Inscription</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<style>
+@media (min-width: 1200px) {
+    .nav-hover-dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+    }
+}
+</style>

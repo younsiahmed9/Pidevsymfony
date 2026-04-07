@@ -1,0 +1,13 @@
+<header class="topbar">
+    <input class="search" type="text" placeholder="What are you looking for?">
+    <div class="topbar-actions">
+        <button class="notif-btn" type="button" aria-label="Notifications">🔔</button>
+        <div class="user-info">
+            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="avatar">
+            <div>
+                <div class="user-name">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Admin User' }}</div>
+                <div class="user-role">{{ app.user ? (app.user.roles|join(', ')) : 'Manager' }}</div>
+            </div>
+        </div>
+    </div>
+</header>

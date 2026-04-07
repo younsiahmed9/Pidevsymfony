@@ -1,0 +1,39 @@
+<aside class="sidebar">
+    <div class="logo">FinTrack</div>
+    <nav class="main-menu">
+        {% set currentRoute = app.request.attributes.get('_route') %}
+        <ul>
+            <li class="{{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
+                <a href="{{ path('admin_dashboard') }}" class="text-decoration-none text-reset"><span>Overview</span></a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none text-reset"><span>Wallet</span></a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none text-reset"><span>Debit Card</span></a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none text-reset"><span>Analytics</span></a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none text-reset"><span>Log Activity</span></a>
+            </li>
+        </ul>
+    </nav>
+    <div class="preference">
+        <ul>
+            <li>
+                <a href="#" class="text-decoration-none text-reset"><span>Help Center</span></a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none text-reset"><span>Settings</span></a>
+            </li>
+            <li>
+                <a href="#" class="text-decoration-none text-reset"><span>Report</span></a>
+            </li>
+            <li>
+                <a href="{{ path('app_logout') }}" class="text-decoration-none text-reset"><span>Logout</span></a>
+            </li>
+        </ul>
+    </div>
+</aside>

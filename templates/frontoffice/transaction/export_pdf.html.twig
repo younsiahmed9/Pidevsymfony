@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Export Transactions - FinTrack</title>
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 12px;
+            color: #1e293b;
+            margin: 18px;
+        }
+        h1 {
+            margin: 0 0 8px;
+            font-size: 22px;
+            color: #1d4ed8;
+        }
+        .meta {
+            margin-bottom: 14px;
+            color: #475569;
+        }
+        .filters {
+            margin-bottom: 14px;
+            padding: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 7px;
+            vertical-align: top;
+        }
+        th {
+            background: #eff6ff;
+            color: #1e3a8a;
+            text-align: left;
+        }
+        .small {
+            color: #64748b;
+            font-size: 10px;
+        }
+        .empty {
+            margin-top: 16px;
+            padding: 12px;
+            border: 1px dashed #94a3b8;
+            background: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+    <h1>FinTrack - Export des transactions</h1>
+    <div class="meta">
+        Utilisateur: {{ user.prenom }} {{ user.nom }} ({{ user.email }})<br>
+        Généré le: {{ generatedAt|date('d/m/Y H:i') }}
+    </div>
+
+    <div class="filters">
+        <strong>Filtres appliqués:</strong><br>
+        Type: {{ filters.type != '' ? filters.type : 'Tous' }} |
+        Date début: {{ filters.date_start != '' ? filters.date_start : '-' }} |
+        Date fin: {{ filters.date_end != '' ? filters.date_end : '-' }} |
+        Recherche: {{ filters.q != '' ? filters.q : '-' }} |
+        Tri: {{ filters.sort }} {{ filters.direction|upper }}
+    </div>
+
+    {% if transactions is empty %}
+        <div class="empty">Aucune transaction trouvée pour ces critères.</div>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Statut</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trx in transactions %}
+                    <tr>
+                        <td>{{ trx.date|date('d/m/Y H:i') }}</td>
+                        <td>
+                            {{ trx.description ?: '-' }}
+                            {% if trx.source_numero %}
+                                <div class="small">Source: ....{{ trx.source_numero|slice(-4) }}</div>
+                            {% endif %}
+                            {% if trx.dest_numero %}
+                                <div class="small">Destination: ....{{ trx.dest_numero|slice(-4) }}</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ trx.type }}</td>
+                        <td>{{ trx.statut }}</td>
+                        <td>{{ trx.montant|number_format(2, ',', ' ') }} {{ trx.devise }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</body>
+</html>
