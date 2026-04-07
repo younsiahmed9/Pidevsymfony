@@ -114,9 +114,10 @@ class AuthController extends AbstractController
                     ->text("Votre code de verification est: {$verificationCode}. Ce code expire dans 10 minutes.");
 
                 $mailer->send($emailMessage);
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
                 $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
-                $this->addFlash('error', 'Impossible d envoyer le mail de verification. Verifiez MAILER_DSN.');
+                $errorMsg = 'Impossible d envoyer le mail de verification. Erreur: ' . $e->getMessage();
+                $this->addFlash('error', $errorMsg);
                 return $this->redirectToRoute('app_register');
             }
 
