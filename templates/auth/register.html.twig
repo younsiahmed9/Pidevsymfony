@@ -1,0 +1,90 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Register - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section bg-tertiary position-relative overflow-hidden">
+	<div class="container">
+		<div class="row justify-content-center align-items-start">
+			<div class="col-lg-5 mb-5 mb-lg-0">
+				<div class="block pe-0 pe-xl-5">
+					<p class="text-primary text-uppercase fw-bold mb-3">Sign Up</p>
+					<h1 class="mb-4">Create your FinTrack account</h1>
+					<p class="mb-4">Select CLIENT or ADMIN. Admin registration requires the server-side admin code before persistence.</p>
+					<a href="{{ path('app_login') }}" class="btn btn-outline-primary">Already have an account?</a>
+				</div>
+			</div>
+			<div class="col-lg-7">
+				<div class="bg-white p-4 p-md-5 shadow-sm">
+					<h2 class="h4 mb-4">Create account</h2>
+					{{ form_start(form) }}
+					<div class="row g-3">
+						<div class="col-md-6">
+							{{ form_label(form.email) }}
+							{{ form_widget(form.email, {'attr': {'class': 'form-control shadow-none'}}) }}
+							{{ form_errors(form.email) }}
+						</div>
+						<div class="col-md-6">
+							{{ form_label(form.fullName) }}
+							{{ form_widget(form.fullName, {'attr': {'class': 'form-control shadow-none'}}) }}
+							{{ form_errors(form.fullName) }}
+						</div>
+						<div class="col-md-6">
+							{{ form_label(form.plainPassword.first) }}
+							{{ form_widget(form.plainPassword.first, {'attr': {'class': 'form-control shadow-none'}}) }}
+							{{ form_errors(form.plainPassword.first) }}
+						</div>
+						<div class="col-md-6">
+							{{ form_label(form.plainPassword.second) }}
+							{{ form_widget(form.plainPassword.second, {'attr': {'class': 'form-control shadow-none'}}) }}
+							{{ form_errors(form.plainPassword.second) }}
+						</div>
+						<div class="col-md-6">
+							{{ form_label(form.roleChoice) }}
+							{{ form_widget(form.roleChoice, {'attr': {'class': 'form-control shadow-none', 'onchange': 'toggleAdminFields()'}}) }}
+							{{ form_errors(form.roleChoice) }}
+						</div>
+						<div class="col-md-6" id="adminFieldWrap">
+							{{ form_label(form.adminCode) }}
+							{{ form_widget(form.adminCode, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Required for ADMIN'}}) }}
+							{{ form_errors(form.adminCode) }}
+						</div>
+						<div class="col-md-6" id="cinFieldWrap">
+							{{ form_label(form.cin) }}
+							{{ form_widget(form.cin, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Optional'}}) }}
+						</div>
+						<div class="col-md-6" id="phoneFieldWrap">
+							{{ form_label(form.phone) }}
+							{{ form_widget(form.phone, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Optional'}}) }}
+						</div>
+					</div>
+					<div class="mt-4">
+						<button class="btn btn-primary w-100" type="submit">Register Account</button>
+					</div>
+					{{ form_end(form) }}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+function toggleAdminFields() {
+    const roleChoiceElement = document.getElementById('{{ form.roleChoice.vars.id }}');
+    const adminFieldWrap = document.getElementById('adminFieldWrap');
+    const cinFieldWrap = document.getElementById('cinFieldWrap');
+    const phoneFieldWrap = document.getElementById('phoneFieldWrap');
+
+    if (!roleChoiceElement) {
+        return;
+    }
+
+    const isAdmin = roleChoiceElement.value === 'ADMIN';
+    adminFieldWrap.style.display = isAdmin ? 'block' : 'none';
+    cinFieldWrap.style.display = isAdmin ? 'none' : 'block';
+    phoneFieldWrap.style.display = isAdmin ? 'none' : 'block';
+}
+
+document.addEventListener('DOMContentLoaded', toggleAdminFields);
+</script>
+{% endblock %}
