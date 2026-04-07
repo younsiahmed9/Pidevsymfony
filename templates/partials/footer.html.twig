@@ -1,0 +1,51 @@
+<footer class="section-sm bg-tertiary">
+	<div class="container">
+		<div class="row justify-content-between">
+			<div class="col-lg-4 col-md-12 newsletter-form mb-4">
+				<div style="background-color: #F4F4F4; padding: 35px;">
+					<h5 class="mb-4 text-primary font-secondary">FinTrack</h5>
+					<p class="mb-0">Manage your account, client data, and internal access with a secure Symfony authentication flow.</p>
+				</div>
+			</div>
+			<div class="col-lg-2 col-md-4 col-6 mb-4">
+				<div class="footer-widget">
+					<h5 class="mb-4 text-primary font-secondary">Account</h5>
+					<ul class="list-unstyled">
+						<li class="mb-2"><a href="{{ path('app_login') }}">Login</a></li>
+						<li class="mb-2"><a href="{{ path('app_register') }}">Register</a></li>
+						<li class="mb-2"><a href="{{ path('app_home') }}">Home</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-lg-2 col-md-4 col-6 mb-4">
+				<div class="footer-widget">
+					<h5 class="mb-4 text-primary font-secondary">Help</h5>
+					<ul class="list-unstyled">
+						<li class="mb-2"><a href="{{ path('app_home') }}#contact">Contact Us</a></li>
+						<li class="mb-2"><a href="{{ path('app_home') }}#how-it-works">How It Works</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="row align-items-center mt-5 text-center text-md-start">
+			<div class="col-lg-4">
+				<a href="{{ path('app_home') }}">
+					<img loading="prelaod" decoding="async" class="img-fluid" width="160" src="{{ asset('images/logo.png') }}" alt="FinTrack">
+				</a>
+			</div>
+			<div class="col-lg-4 col-md-6 mt-4 mt-lg-0">
+				<ul class="list-unstyled list-inline mb-0 text-lg-center">
+					<li class="list-inline-item me-4"><a class="text-black" href="#">Privacy Policy</a></li>
+					<li class="list-inline-item me-4"><a class="text-black" href="#">Terms &amp; Conditions</a></li>
+				</ul>
+			</div>
+			<div class="col-lg-4 col-md-6 text-md-end mt-4 mt-md-0">
+				<ul class="list-unstyled list-inline mb-0 social-icons">
+					<li class="list-inline-item me-3"><a title="Facebook" class="text-black" href="#"><i class="fab fa-facebook-f"></i></a></li>
+					<li class="list-inline-item me-3"><a title="Twitter" class="text-black" href="#"><i class="fab fa-twitter"></i></a></li>
+					<li class="list-inline-item me-3"><a title="Instagram" class="text-black" href="#"><i class="fab fa-instagram"></i></a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>

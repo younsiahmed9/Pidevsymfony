@@ -1,0 +1,43 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Login - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section bg-tertiary position-relative overflow-hidden">
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="block pe-0 pe-xl-5">
+                    <p class="text-primary text-uppercase fw-bold mb-3">Login</p>
+                    <h1 class="mb-4">Access your FinTrack account</h1>
+                    <p class="mb-4">Use your email and password to sign in. The login flow is handled by a custom Symfony authenticator.</p>
+                    <a href="{{ path('app_register') }}" class="btn btn-outline-primary">Create an account</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="bg-white p-4 p-md-5 shadow-sm">
+                    <h2 class="h4 mb-4">Sign in</h2>
+                    {% if error %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ error.messageKey | trans(error.messageData, 'security') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                    <form method="post" action="{{ path('app_login') }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control shadow-none" id="email" name="email" value="{{ last_username }}" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control shadow-none" id="password" name="password" required>
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

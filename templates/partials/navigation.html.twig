@@ -1,0 +1,174 @@
+<!-- navigation -->
+<header class="navigation bg-tertiary">
+	<style>
+		.profile-avatar-btn {
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			border: 2px solid #fff;
+			background: #d9e2ff;
+			padding: 0;
+			overflow: hidden;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 700;
+			color: #25314c;
+			font-size: 0.85rem;
+		}
+
+		.profile-avatar-btn img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.navbar-actions {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			flex-wrap: wrap;
+			gap: 0.25rem 0.5rem;
+		}
+
+		/* Global modal layering fix for pages with fixed header/sidebar */
+		.modal {
+			z-index: 2000 !important;
+		}
+
+		.modal-backdrop {
+			z-index: 1990 !important;
+		}
+
+		.modal-dialog,
+		.modal-content {
+			pointer-events: auto;
+		}
+	</style>
+	<nav class="navbar navbar-expand-xl navbar-light text-start py-1">
+		<div class="container-fluid d-flex align-items-center">
+			<a class="navbar-brand" href="{{ path('app_home') }}">
+				<img loading="prelaod" decoding="async" class="img-fluid" width="160" src="{{ asset('images/logo.png') }}" alt="FinTrack">
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				{% if not is_granted('ROLE_ADMIN') %}
+					<ul class="navbar-nav ms-0 me-auto mb-2 mb-lg-0">
+						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Home</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}#services">Services</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}#how-it-works">How It Works</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}#contact">Contact</a></li>
+					</ul>
+				{% endif %}
+				<div class="navbar-actions ms-auto">
+					{% if app.user %}
+						<span class="text-dark">{{ app.user.fullName ?: app.user.email }}</span>
+						{% set initial = (app.user.fullName ?: app.user.email)|slice(0, 1)|upper %}
+						{% set profileImage = app.user.profilePhoto %}
+						<button class="profile-avatar-btn" type="button" data-bs-toggle="modal" data-bs-target="#profileEditModal" title="Edit Profile">
+							{% if profileImage %}
+								{% if profileImage starts with 'http://' or profileImage starts with 'https://' or profileImage starts with '/' %}
+									<img src="{{ profileImage }}" alt="{{ app.user.fullName ?: app.user.email }}">
+								{% elseif profileImage|length > 1 and profileImage|slice(1, 1) == ':' %}
+									<img src="{{ asset('uploads/profiles/' ~ (profileImage|replace({'\\\\': '/'})|split('/')|last)) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+								{% elseif profileImage starts with 'uploads/' %}
+									<img src="{{ asset(profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+								{% elseif '/' not in profileImage and '\\\\' not in profileImage %}
+									<img src="{{ asset('uploads/profiles/' ~ profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+								{% else %}
+									<img src="{{ asset(profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+								{% endif %}
+							{% else %}
+								{{ initial }}
+							{% endif %}
+						</button>
+						{% if is_granted('ROLE_ADMIN') %}
+							<a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-primary">Admin</a>
+						{% endif %}
+						<a href="{{ path('app_logout') }}" class="btn btn-primary">Logout</a>
+					{% else %}
+						<a href="{{ path('app_login') }}" class="btn btn-outline-primary">Log In</a>
+						<a href="{{ path('app_register') }}" class="btn btn-primary">Sign Up</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</nav>
+	{% if app.user %}
+		<div class="modal fade" id="profileEditModal" tabindex="-1" aria-labelledby="profileEditModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="profileEditModalLabel">Edit Profile</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<form method="post" action="{{ path('app_profile_update') }}" enctype="multipart/form-data">
+						<div class="modal-body">
+							<input type="hidden" name="_token" value="{{ csrf_token('profile_edit') }}">
+							<div class="mb-3 text-center">
+								<div class="profile-avatar-btn mx-auto mb-2" style="width:52px;height:52px;pointer-events:none;">
+									{% if profileImage %}
+										{% if profileImage starts with 'http://' or profileImage starts with 'https://' or profileImage starts with '/' %}
+											<img src="{{ profileImage }}" alt="{{ app.user.fullName ?: app.user.email }}">
+										{% elseif profileImage|length > 1 and profileImage|slice(1, 1) == ':' %}
+											<img src="{{ asset('uploads/profiles/' ~ (profileImage|replace({'\\\\': '/'})|split('/')|last)) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+										{% elseif profileImage starts with 'uploads/' %}
+											<img src="{{ asset(profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+										{% elseif '/' not in profileImage and '\\\\' not in profileImage %}
+											<img src="{{ asset('uploads/profiles/' ~ profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+										{% else %}
+											<img src="{{ asset(profileImage) }}" alt="{{ app.user.fullName ?: app.user.email }}">
+										{% endif %}
+									{% else %}
+										{{ initial }}
+									{% endif %}
+								</div>
+							</div>
+							<div class="mb-3">
+								<label class="form-label" for="profile_full_name">Full Name</label>
+								<input class="form-control shadow-none" id="profile_full_name" type="text" name="full_name" value="{{ app.user.fullName ?: '' }}" required>
+							</div>
+							<div class="mb-3">
+								<label class="form-label" for="profile_email">Email</label>
+								<input class="form-control shadow-none" id="profile_email" type="email" name="email" value="{{ app.user.email }}" required>
+							</div>
+							<div class="mb-1">
+								<label class="form-label" for="profile_photo_file">Profile Photo (JPG, PNG, WEBP, GIF)</label>
+								<input class="form-control shadow-none" id="profile_photo_file" type="file" name="profile_photo_file" accept="image/*">
+								<div class="form-text">Max size: 5MB. Leave empty to keep current photo.</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+							<button type="submit" class="btn btn-primary">Save Changes</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	{% endif %}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			// Always place modals under <body> to avoid fixed layout overlays blocking inputs.
+			document.addEventListener('show.bs.modal', function (event) {
+				const modal = event.target;
+				if (modal && modal.classList.contains('modal') && modal.parentElement !== document.body) {
+					document.body.appendChild(modal);
+				}
+			});
+
+			// Clean any stale backdrop/lock state after closing modals.
+			document.addEventListener('hidden.bs.modal', function () {
+				if (!document.querySelector('.modal.show')) {
+					document.body.classList.remove('modal-open');
+					document.body.style.removeProperty('padding-right');
+					document.querySelectorAll('.modal-backdrop').forEach(function (el) {
+						el.remove();
+					});
+				}
+			});
+		});
+	</script>
+</header>
+<!-- /navigation -->
