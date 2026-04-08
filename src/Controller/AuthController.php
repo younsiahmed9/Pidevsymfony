@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Admin;
 use App\Entity\Client;
+use App\Entity\PasswordResetRequest;
 use App\Entity\User;
 use App\Form\RegistrationType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,6 +16,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class AuthController extends AbstractController
@@ -49,6 +51,105 @@ class AuthController extends AbstractController
         return $this->render('auth/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
+        ]);
+    }
+
+    #[Route('/forgot-password', name: 'app_forgot_password', methods: ['GET', 'POST'])]
+    public function forgotPassword(Request $request, MailerInterface $mailer): Response
+    {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+
+        if ($request->isMethod('POST')) {
+            $email = strtolower(trim((string) $request->request->get('email', '')));
+            if ($email === '') {
+                $this->addFlash('error', 'Please enter your email address.');
+                return $this->redirectToRoute('app_forgot_password');
+            }
+
+            $user = $this->entityManager->getRepository(User::class)->findByEmail($email);
+            if ($user instanceof User) {
+                $plainToken = bin2hex(random_bytes(32));
+                $tokenHash = hash('sha256', $plainToken);
+                $expiresAt = new \DateTimeImmutable('+30 minutes');
+
+                $resetRequest = new PasswordResetRequest();
+                $resetRequest->setEmail($email);
+                $resetRequest->setTokenHash($tokenHash);
+                $resetRequest->setExpiresAt($expiresAt);
+                $this->entityManager->persist($resetRequest);
+                $this->entityManager->flush();
+
+                $resetUrl = $this->generateUrl('app_reset_password', [
+                    'token' => $plainToken,
+                ], UrlGeneratorInterface::ABSOLUTE_URL);
+
+                $mailFrom = (string) ($_ENV['MAIL_FROM'] ?? $_SERVER['MAIL_FROM'] ?? 'no-reply@fintrack.local');
+                $emailMessage = (new Email())
+                    ->from($mailFrom)
+                    ->to($email)
+                    ->subject('FinTrack - Reset your password')
+                    ->text("You requested a password reset. Use this link: {$resetUrl}\n\nThis link expires in 30 minutes.");
+
+                $mailer->send($emailMessage);
+            }
+
+            $this->addFlash('success', 'If the email exists, a reset link has been sent.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render('auth/forgot_password.html.twig');
+    }
+
+    #[Route('/reset-password/{token}', name: 'app_reset_password', methods: ['GET', 'POST'])]
+    public function resetPassword(Request $request, string $token, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+
+        $tokenHash = hash('sha256', $token);
+        $resetRequest = $this->entityManager->getRepository(PasswordResetRequest::class)->findOneBy(['tokenHash' => $tokenHash]);
+
+        if (!$resetRequest instanceof PasswordResetRequest || $resetRequest->getUsedAt() !== null || $resetRequest->getExpiresAt() < new \DateTimeImmutable()) {
+            $this->addFlash('error', 'Invalid or expired reset link.');
+            return $this->redirectToRoute('app_forgot_password');
+        }
+
+        if ($request->isMethod('POST')) {
+            $newPassword = (string) $request->request->get('password', '');
+            $confirmPassword = (string) $request->request->get('confirm_password', '');
+
+            if (strlen($newPassword) < 8) {
+                $this->addFlash('error', 'Password must be at least 8 characters long.');
+                return $this->redirectToRoute('app_reset_password', ['token' => $token]);
+            }
+
+            if ($newPassword !== $confirmPassword) {
+                $this->addFlash('error', 'Passwords do not match.');
+                return $this->redirectToRoute('app_reset_password', ['token' => $token]);
+            }
+
+            $user = $this->entityManager->getRepository(User::class)->findByEmail((string) $resetRequest->getEmail());
+            if (!$user instanceof User) {
+                $this->addFlash('error', 'Account not found.');
+                return $this->redirectToRoute('app_forgot_password');
+            }
+
+            $user->setPasswordHash($passwordHasher->hashPassword($user, $newPassword));
+            $user->setUpdatedAt(new \DateTime());
+
+            $resetRequest->setUsedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'Your password has been updated. You can now log in.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render('auth/reset_password.html.twig', [
+            'token' => $token,
+            'email' => $resetRequest->getEmail(),
         ]);
     }
 
