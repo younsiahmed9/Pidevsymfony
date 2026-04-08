@@ -18,6 +18,7 @@
 				<div class="bg-white p-4 p-md-5 shadow-sm">
 					<h2 class="h4 mb-4">Create account</h2>
 					{{ form_start(form) }}
+					{{ form_widget(form.faceDescriptor, {'attr': {'data-face-signup-input': 'true'}}) }}
 					<div class="row g-3">
 						<div class="col-md-6">
 							{{ form_label(form.email) }}
@@ -57,6 +58,17 @@
 							{{ form_label(form.phone) }}
 							{{ form_widget(form.phone, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Optional'}}) }}
 						</div>
+						<div class="col-12">
+							<div class="border rounded-3 p-3 bg-light">
+								<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+									<div>
+										<strong>Face ID (Optional)</strong>
+										<div class="small text-muted" data-face-signup-status>You can add Face ID now, or skip and add it later from profile.</div>
+									</div>
+									<button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#signupFaceIdModal">Capture Face ID</button>
+								</div>
+							</div>
+						</div>
 					</div>
 					<div class="mt-4">
 						<button class="btn btn-primary w-100" type="submit">Register Account</button>
@@ -67,6 +79,27 @@
 		</div>
 	</div>
 </section>
+
+<div class="modal fade" id="signupFaceIdModal" tabindex="-1" aria-labelledby="signupFaceIdModalLabel" aria-hidden="true" data-face-id-capture-modal="true" data-face-id-target="#{{ form.faceDescriptor.vars.id }}">
+	<div class="modal-dialog modal-dialog-centered modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="signupFaceIdModalLabel">Capture Face ID for Signup</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
+					<video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
+				</div>
+				<p class="text-muted mb-0" data-face-id-status>Allow camera access, then capture your face.</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-primary" data-face-id-capture>Capture Face ID</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 function toggleAdminFields() {
@@ -86,5 +119,14 @@ function toggleAdminFields() {
 }
 
 document.addEventListener('DOMContentLoaded', toggleAdminFields);
+
+document.addEventListener('faceid:capture-success', function () {
+	const statusElement = document.querySelector('[data-face-signup-status]');
+	if (statusElement) {
+		statusElement.textContent = 'Face ID captured successfully. It will be linked after email verification.';
+		statusElement.classList.remove('text-muted');
+		statusElement.classList.add('text-success');
+	}
+});
 </script>
 {% endblock %}

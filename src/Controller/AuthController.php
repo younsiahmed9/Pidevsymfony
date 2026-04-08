@@ -18,6 +18,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class AuthController extends AbstractController
 {
@@ -52,6 +53,12 @@ class AuthController extends AbstractController
             'last_username' => $lastUsername,
             'error' => $error,
         ]);
+    }
+
+    #[Route('/face-id/login', name: 'app_face_id_login', methods: ['POST'])]
+    public function faceIdLogin(): Response
+    {
+        throw new \LogicException('This route is handled by the FaceIdAuthenticator.');
     }
 
     #[Route('/forgot-password', name: 'app_forgot_password', methods: ['GET', 'POST'])]
@@ -177,6 +184,7 @@ class AuthController extends AbstractController
             $plainPassword = $form->get('plainPassword')->getData();
             $roleChoice = $form->get('roleChoice')->getData();
             $adminCode = (string) $form->get('adminCode')->getData();
+            $faceDescriptorJson = trim((string) $form->get('faceDescriptor')->getData());
 
             // Validate ADMIN signup
             if ($roleChoice === 'ADMIN') {
@@ -202,6 +210,7 @@ class AuthController extends AbstractController
                 'adminCode' => $adminCode,
                 'cin' => (string) $form->get('cin')->getData(),
                 'phone' => (string) $form->get('phone')->getData(),
+                'faceDescriptor' => $faceDescriptorJson,
                 'verificationCode' => $verificationCode,
                 'expiresAt' => $expiresAt,
             ]);
@@ -284,6 +293,15 @@ class AuthController extends AbstractController
             $newUser->setFullName((string) ($pendingRegistration['fullName'] ?? ''));
             $newUser->setPasswordHash((string) ($pendingRegistration['passwordHash'] ?? ''));
             $newUser->setIsActive(true);
+
+            $faceDescriptorJson = trim((string) ($pendingRegistration['faceDescriptor'] ?? ''));
+            if ($faceDescriptorJson !== '') {
+                $decodedDescriptor = json_decode($faceDescriptorJson, true);
+                if (is_array($decodedDescriptor) && count($decodedDescriptor) === 4096) {
+                    $normalizedDescriptor = array_values(array_map(static fn ($value) => (float) $value, $decodedDescriptor));
+                    $newUser->setFaceTemplate(json_encode($normalizedDescriptor));
+                }
+            }
 
             $roleChoice = (string) ($pendingRegistration['roleChoice'] ?? 'CLIENT');
             $newUser->setRole($roleChoice === 'ADMIN' ? 'ADMIN' : 'CLIENT');
@@ -549,6 +567,38 @@ class AuthController extends AbstractController
 
         $this->addFlash('success', 'Your profile has been updated successfully.');
         return $this->redirectToRoute('app_home');
+    }
+
+    #[Route('/face-id/enroll', name: 'app_face_id_enroll', methods: ['POST'])]
+    public function enrollFaceId(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            $this->addFlash('error', 'User session is invalid. Please sign in again.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $descriptorJson = trim((string) $request->request->get('face_descriptor', ''));
+        if ($descriptorJson === '') {
+            $this->addFlash('error', 'No face descriptor was captured. Please try again.');
+            return $this->redirect($request->headers->get('referer') ?: $this->generateUrl('app_home'));
+        }
+
+        $descriptor = json_decode($descriptorJson, true);
+        if (!is_array($descriptor) || count($descriptor) !== 4096) {
+            $this->addFlash('error', 'Invalid Face ID template. Please capture again.');
+            return $this->redirect($request->headers->get('referer') ?: $this->generateUrl('app_home'));
+        }
+
+        $normalizedDescriptor = array_values(array_map(static fn ($value) => (float) $value, $descriptor));
+        $user->setFaceTemplate(json_encode($normalizedDescriptor, JSON_THROW_ON_ERROR));
+        $user->setUpdatedAt(new \DateTime());
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Face ID has been enrolled successfully.');
+        return $this->redirect($request->headers->get('referer') ?: $this->generateUrl('app_home'));
     }
 
     #[Route('/api/admin/users', name: 'api_admin_users', methods: ['GET'])]

@@ -6,6 +6,7 @@ use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -78,6 +79,10 @@ class RegistrationType extends AbstractType
             ->add('adminCode', PasswordType::class, [
                 'label' => 'Admin Code (Required - if registering as Administrator)',
                 'attr' => ['class' => 'form-control', 'placeholder' => 'Admin code'],
+                'required' => false,
+                'mapped' => false,
+            ])
+            ->add('faceDescriptor', HiddenType::class, [
                 'required' => false,
                 'mapped' => false,
             ]);

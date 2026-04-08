@@ -38,9 +38,37 @@
                         </div>
                         <button class="btn btn-primary w-100" type="submit">Login</button>
                     </form>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-outline-dark w-100" data-bs-toggle="modal" data-bs-target="#faceIdLoginModal">Login with Face ID</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="faceIdLoginModal" tabindex="-1" aria-labelledby="faceIdLoginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="faceIdLoginModalLabel">Login with Face ID</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ path('app_face_id_login') }}" data-face-id-form>
+                <div class="modal-body">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('face_id_login') }}">
+                    <input type="hidden" name="face_descriptor" data-face-id-input>
+                    <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
+                        <video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
+                    </div>
+                    <p class="text-muted mb-0" data-face-id-status>Allow camera access, then click login with Face ID.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-face-id-submit>Scan and Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -127,16 +127,54 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getFaceTemplate()
+    public function getFaceTemplate(): mixed
     {
         return $this->faceTemplate;
     }
 
-    public function setFaceTemplate($faceTemplate): static
+    public function setFaceTemplate(mixed $faceTemplate): static
     {
         $this->faceTemplate = $faceTemplate;
 
         return $this;
+    }
+
+    public function getFaceTemplateAsString(): ?string
+    {
+        $faceTemplate = $this->faceTemplate;
+
+        if ($faceTemplate === null) {
+            return null;
+        }
+
+        if (is_resource($faceTemplate)) {
+            @rewind($faceTemplate);
+            $contents = stream_get_contents($faceTemplate);
+            return $contents !== false && $contents !== '' ? $contents : null;
+        }
+
+        $faceTemplateString = trim((string) $faceTemplate);
+        return $faceTemplateString !== '' ? $faceTemplateString : null;
+    }
+
+    public function getFaceDescriptor(): array
+    {
+        $faceTemplateString = $this->getFaceTemplateAsString();
+        if ($faceTemplateString === null) {
+            return [];
+        }
+
+        $decoded = json_decode($faceTemplateString, true);
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        return array_values(array_map(static fn ($value) => (float) $value, $decoded));
+    }
+
+    public function hasFaceTemplate(): bool
+    {
+        return $this->getFaceTemplateAsString() !== null;
     }
 
     public function getRole(): ?string

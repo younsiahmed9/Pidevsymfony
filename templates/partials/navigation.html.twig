@@ -138,10 +138,44 @@
 								<input class="form-control shadow-none" id="profile_photo_file" type="file" name="profile_photo_file" accept="image/*">
 								<div class="form-text">Max size: 5MB. Leave empty to keep current photo.</div>
 							</div>
+							<div class="mt-4 p-3 border rounded-3 bg-light">
+								<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+									<div>
+										<strong>Face ID</strong>
+										<div class="small text-muted">Register your face to sign in without a password.</div>
+									</div>
+									<button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#faceIdEnrollModal">{{ app.user.hasFaceTemplate ? 'Update Face ID' : 'Register Face ID' }}</button>
+								</div>
+							</div>
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
 							<button type="submit" class="btn btn-primary">Save Changes</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	{% endif %}
+	{% if app.user %}
+		<div class="modal fade" id="faceIdEnrollModal" tabindex="-1" aria-labelledby="faceIdEnrollModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="faceIdEnrollModalLabel">Register Face ID</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<form method="post" action="{{ path('app_face_id_enroll') }}" data-face-id-form>
+						<div class="modal-body">
+							<input type="hidden" name="face_descriptor" data-face-id-input>
+							<div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
+								<video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
+							</div>
+							<p class="text-muted mb-0" data-face-id-status>Allow camera access, then capture your face to enroll it.</p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+							<button type="submit" class="btn btn-primary" data-face-id-submit>Capture and Save Face ID</button>
 						</div>
 					</form>
 				</div>
