@@ -16,28 +16,36 @@ class ServiceRepository extends ServiceEntityRepository
         parent::__construct($registry, Service::class);
     }
 
-//    /**
-//     * @return Service[] Returns an array of Service objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('s.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return Service[]
+     */
+    public function findAdvanced(?string $search = null, ?string $type = null, ?string $status = null, ?string $sort = null, ?string $order = 'ASC'): array
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->andWhere('s.isDeleted = :deleted')
+            ->setParameter('deleted', false);
 
-//    public function findOneBySomeField($value): ?Service
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if ($search) {
+            $qb->andWhere('s.nomService LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        if ($type) {
+            $qb->andWhere('s.typeService = :type')
+               ->setParameter('type', $type);
+        }
+
+        if ($status) {
+            $qb->andWhere('s.statut = :status')
+               ->setParameter('status', $status);
+        }
+
+        if ($sort) {
+            $qb->orderBy('s.' . $sort, $order);
+        } else {
+            $qb->orderBy('s.id', 'DESC');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

@@ -1,0 +1,51 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Accueil - FinTrack{% endblock %}
+
+{% block body %}
+<section class="hero-section py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Gérez vos finances, simplement et intelligemment</h1>
+                <p class="lead text-muted mb-5">FinTrack vous accompagne dans la gestion de vos services, factures et produits financiers avec une interface intuitive et des outils puissants.</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ path('front_service_index') }}" class="btn btn-primary btn-lg">Découvrir nos services</a>
+                    <a href="{{ path('admin_dashboard') }}" class="btn btn-outline-dark btn-lg">Accès Admin</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-5 mt-lg-0">
+                <img src="{{ asset('images/logo.png') }}" alt="FinTrack Hero" class="img-fluid rounded shadow-lg p-4 bg-white" style="max-height: 400px;" onerror="this.src='https://via.placeholder.com/500x300?text=FinTrack+Finance'">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features py-5">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-4">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h4>Sécurisé</h4>
+                    <p class="text-muted">Vos données sont protégées par les meilleurs standards de sécurité.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h4>Analyses</h4>
+                    <p class="text-muted">Visualisez vos dépenses et revenus en un clin d'œil.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <i class="fas fa-mobile-alt fa-3x text-primary mb-3"></i>
+                    <h4>Accessible</h4>
+                    <p class="text-muted">Une plateforme responsive, accessible partout, tout le temps.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -183,7 +183,7 @@ class FactureService
     public function getTauxRecouvrement(): float
     {
         $total = $this->getTotalMontantFactures();
-        if ($total === 0) {
+        if ($total == 0) {
             return 0;
         }
 

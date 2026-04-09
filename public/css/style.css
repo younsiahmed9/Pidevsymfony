@@ -1,0 +1,146 @@
+/* FinTrack Custom Styles */
+
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0a58ca;
+    --secondary: #6c757d;
+    --success: #198754;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --info: #0dcaf0;
+    --light: #f8f9fa;
+    --dark: #212529;
+}
+
+/* General Layout */
+section {
+    padding: 60px 0;
+}
+
+.section-title {
+    font-weight: 700;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: var(--primary);
+}
+
+/* Navigation */
+.navbar-brand img {
+    max-height: 50px;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--dark) !important;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: var(--primary) !important;
+}
+
+/* Service Cards */
+.service-card {
+    border: 0;
+    border-radius: 12px;
+    background: #fff;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.icon-box {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border-radius: 10px;
+}
+
+/* Sidebar Filters */
+.filter-sidebar {
+    background: var(--light);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 25px;
+}
+
+.form-select, .form-control {
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+}
+
+.form-select:focus, .form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* Badges */
+.badge-subtle {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.7rem;
+}
+
+.bg-success-subtle { background-color: #d1e7dd; color: #0f5132; }
+.bg-warning-subtle { background-color: #fff3cd; color: #664d03; }
+.bg-danger-subtle { background-color: #f8d7da; color: #842029; }
+.bg-info-subtle { background-color: #cff4fc; color: #055160; }
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Footer */
+.footer {
+    border-top: 1px solid #eee;
+}
+
+.social-links a {
+    width: 35px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eee;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.social-links a:hover {
+    background: var(--primary);
+    color: #fff !important;
+}

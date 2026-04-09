@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute]
 class RequireServiceOrProduit extends Constraint
 {
-    public string $message = 'La facture doit être liée à au moins un Service ou un Produit.';
+    public string $message = 'Veuillez sélectionner un produit OU un service';
 
     public function getTargets(): string|array
     {

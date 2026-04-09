@@ -1,4 +1,31 @@
--- phpMyAdmin SQL Dump
+# 1. Installer: https://cli.github.com/ (ou chocolatey)
+choco install gh
+
+# 2. Authentifier:
+gh auth login
+# Suivre les étapes interactives
+
+# 3. Pousser:
+cd "c:\Users\syrine\Downloads\projet sym\Pidevsymfony"
+git push -u origin service# 1. Installer: https://cli.github.com/ (ou chocolatey)
+choco install gh
+
+# 2. Authentifier:
+gh auth login
+# Suivre les étapes interactives
+
+# 3. Pousser:
+cd "c:\Users\syrine\Downloads\projet sym\Pidevsymfony"
+git push -u origin service# 1. Installer: https://cli.github.com/ (ou chocolatey)
+choco install gh
+
+# 2. Authentifier:
+gh auth login
+# Suivre les étapes interactives
+
+# 3. Pousser:
+cd "c:\Users\syrine\Downloads\projet sym\Pidevsymfony"
+git push -u origin service-- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --

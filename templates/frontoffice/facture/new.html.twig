@@ -1,0 +1,99 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Nouvelle Facture{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-primary text-white p-4 rounded-top-4">
+            <h3 class="mb-0">➕ Générer une facture</h3>
+        </div>
+        
+        <div class="card-body p-4">
+            {# MESSAGES FLASH #}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show rounded-3" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+            
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.numeroFacture, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.numeroFacture) }}
+                        {{ form_errors(form.numeroFacture) }}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.montant, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.montant) }}
+                        {{ form_errors(form.montant) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.dateFacture, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.dateFacture) }}
+                        {{ form_errors(form.dateFacture) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.dateEcheance, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.dateEcheance) }}
+                        {{ form_errors(form.dateEcheance) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.service, 'Service (si applicable)', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.service) }}
+                        {{ form_errors(form.service) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.produit, 'Produit (si applicable)', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.produit) }}
+                        {{ form_errors(form.produit) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form_label(form.statut, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.statut) }}
+                        {{ form_errors(form.statut) }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-5 pt-3 border-top d-flex gap-2">
+                {{ form_widget(form.save) }}
+                <a href="{{ path('front_facture_index') }}" class="btn btn-outline-secondary px-4">
+                    <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+                </a>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

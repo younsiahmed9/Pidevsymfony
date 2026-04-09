@@ -1,0 +1,74 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Modifier Produit: {{ produit.getNomProduit }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h3>✏️ Modifier le produit</h3>
+        </div>
+        
+        <div class="card-body">
+            {# AFFICHAGE DES MESSAGES FLASH #}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+            
+            {# DÉSACTIVER LA VALIDATION HTML5 #}
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.nomProduit, 'Nom du produit', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.nomProduit) }}
+                    {{ form_errors(form.nomProduit) }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.typeProduit, 'Type de produit', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.typeProduit) }}
+                    {{ form_errors(form.typeProduit) }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.montant, 'Montant (DT)', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.montant) }}
+                    {{ form_errors(form.montant) }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.codeUnique, 'Code unique', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.codeUnique) }}
+                    {{ form_errors(form.codeUnique) }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.statut, 'Statut', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.statut) }}
+                    {{ form_errors(form.statut) }}
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                {{ form_widget(form.save) }}
+                <a href="{{ path('front_produit_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

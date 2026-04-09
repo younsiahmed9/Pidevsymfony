@@ -1,0 +1,97 @@
+{% extends 'backoffice/base_admin.html.twig' %}
+
+{% block title %}Back Office - Gestion Services{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    <h1 class="mb-4">🔧 Back Office - Gestion des Services</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Services</h5>
+                    <p class="card-text display-4">{{ services|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Services Actifs</h5>
+                    <p class="card-text display-4">{{ servicesActifs|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Suspendus</h5>
+                    <p class="card-text display-4">{{ servicesSuspendus|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Expirés</h5>
+                    <p class="card-text display-4">{{ servicesExpires|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <a href="{{ path('admin_service_stats') }}" class="btn btn-lg btn-outline-primary">📊 Voir Statistiques Complètes</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">📋 Liste de tous les Services</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Tarif</th>
+                        <th>Fréquence</th>
+                        <th>Statut</th>
+                        <th>Dates</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                        <tr>
+                            <td>#{{ service.id }}</td>
+                            <td><strong>{{ service.nomService }}</strong></td>
+                            <td>{{ service.typeService }}</td>
+                            <td>${{ service.tarif }}</td>
+                            <td>{{ service.frequence ?? '-' }}</td>
+                            <td>
+                                <span class="badge bg-{{ service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') }}">
+                                    {{ service.statut }}
+                                </span>
+                            </td>
+                            <td>
+                                <small>
+                                    Début: {{ service.dateDebut|date('d/m')|default('-') }}<br>
+                                    Fin: {{ service.dateFin|date('d/m')|default('-') }}
+                                </small>
+                            </td>
+                            <td>
+                                <a href="{{ path('admin_service_show', {id: service.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

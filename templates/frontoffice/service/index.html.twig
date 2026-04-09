@@ -1,0 +1,257 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Plateforme de Services - FinTrack{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Creative Tab System */
+    .nav-pills-custom .nav-link {
+        border-radius: 12px;
+        padding: 15px 30px;
+        font-weight: 700;
+        color: #4b5563;
+        background: white;
+        margin: 0 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .nav-pills-custom .nav-link.active {
+        background-color: #0d6efd;
+        color: white;
+        transform: translateY(-5px);
+    }
+
+    /* Card & List Styles */
+    .card-creative {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 30px;
+        background: white;
+        transition: transform 0.3s;
+    }
+    .card-creative:hover {
+        transform: translateY(-5px);
+    }
+    .filter-section {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .badge-status {
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="section-title">Gestion des Services, Produits & Factures</h2>
+        <p class="text-muted">Accédez à l'ensemble de vos ressources financières en un seul endroit.</p>
+    </div>
+
+    <!-- Navigation par Onglets -->
+    <ul class="nav nav-pills nav-pills-custom justify-content-center mb-5" id="pills-tab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link {{ activeTab == 'services' ? 'active' : '' }}" id="pills-services-tab" data-bs-toggle="pill" data-bs-target="#pills-services" type="button">⚙️ Services</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link {{ activeTab == 'produits' ? 'active' : '' }}" id="pills-produits-tab" data-bs-toggle="pill" data-bs-target="#pills-produits" type="button">📦 Produits</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link {{ activeTab == 'factures' ? 'active' : '' }}" id="pills-factures-tab" data-bs-toggle="pill" data-bs-target="#pills-factures" type="button">📄 Factures</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+        <!-- SECTION SERVICES -->
+        <div class="tab-pane fade {{ activeTab == 'services' ? 'show active' : '' }}" id="pills-services" role="tabpanel">
+            <div class="filter-section d-flex justify-content-between align-items-center flex-wrap gap-3 shadow-sm border">
+                <form method="GET" class="d-flex gap-2 flex-grow-1">
+                    <input type="hidden" name="tab" value="services">
+                    <input type="text" name="searchS" class="form-control rounded-pill" placeholder="Rechercher un service..." value="{{ currentSearchS }}">
+                    <select name="typeS" class="form-select rounded-pill" style="width: auto;">
+                        <option value="">Type</option>
+                        <option value="abonnement" {{ currentTypeS == 'abonnement' ? 'selected' }}>Abonnement</option>
+                        <option value="facture" {{ currentTypeS == 'facture' ? 'selected' }}>Facture</option>
+                    </select>
+                    <select name="statusS" class="form-select rounded-pill" style="width: auto;">
+                        <option value="">Statut</option>
+                        <option value="actif" {{ currentStatusS == 'actif' ? 'selected' }}>Actif</option>
+                        <option value="suspendu" {{ currentStatusS == 'suspendu' ? 'selected' }}>Suspendu</option>
+                        <option value="expire" {{ currentStatusS == 'expire' ? 'selected' }}>Expiré</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="fas fa-search"></i></button>
+                </form>
+                <a href="{{ path('front_service_new') }}" class="btn btn-success rounded-pill px-4">+ Nouveau Service</a>
+            </div>
+
+            <div class="row g-4">
+                {% for service in services %}
+                    <div class="col-md-4">
+                        <div class="card card-creative h-100 border-0 shadow-sm">
+                            <div class="card-body p-4 text-center">
+                                <div class="icon-box bg-light rounded-circle p-3 d-inline-block mb-3">
+                                    <i class="fas fa-concierge-bell fa-2x text-primary"></i>
+                                </div>
+                                <h5 class="fw-bold">{{ service.nomService }}</h5>
+                                <div class="h4 text-primary fw-bold mb-3">${{ service.tarif }}</div>
+                                <span class="badge badge-status bg-{{ service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') }}-subtle text-{{ service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') }} border border-{{ service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') }}">
+                                    {{ service.statut|upper }}
+                                </span>
+                                <div class="mt-4 pt-3 border-top d-flex gap-2">
+                                    <a href="{{ path('front_service_show', {id: service.id}) }}" class="btn btn-sm btn-outline-primary flex-grow-1 rounded-pill">Détails</a>
+                                    <a href="{{ path('front_service_edit', {id: service.id}) }}" class="btn btn-sm btn-outline-warning rounded-pill"><i class="fas fa-edit"></i></a>
+                                    <form method="POST" action="{{ path('front_service_delete', {id: service.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir archiver ce service ?')" style="display: inline-block;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ service.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger rounded-pill" title="Archiver">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12 text-center py-5 text-muted">Aucun service trouvé.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- SECTION PRODUITS -->
+        <div class="tab-pane fade {{ activeTab == 'produits' ? 'show active' : '' }}" id="pills-produits" role="tabpanel">
+            <div class="filter-section d-flex justify-content-between align-items-center flex-wrap gap-3 shadow-sm border">
+                <form method="GET" class="d-flex gap-2 flex-grow-1">
+                    <input type="hidden" name="tab" value="produits">
+                    <input type="text" name="searchP" class="form-control rounded-pill" placeholder="Rechercher un produit..." value="{{ currentSearchP }}">
+                    <select name="typeP" class="form-select rounded-pill" style="width: auto;">
+                        <option value="">Type</option>
+                        <option value="carte_cadeau" {{ currentTypeP == 'carte_cadeau' ? 'selected' }}>Carte Cadeau</option>
+                        <option value="carte_abonnement" {{ currentTypeP == 'carte_abonnement' ? 'selected' }}>Carte Abonnement</option>
+                        <option value="carte_prepayee" {{ currentTypeP == 'carte_prepayee' ? 'selected' }}>Carte Prépayée</option>
+                    </select>
+                    <select name="statusP" class="form-select rounded-pill" style="width: auto;">
+                        <option value="">Statut</option>
+                        <option value="disponible" {{ currentStatusP == 'disponible' ? 'selected' }}>Disponible</option>
+                        <option value="vendu" {{ currentStatusP == 'vendu' ? 'selected' }}>Vendu</option>
+                        <option value="expire" {{ currentStatusP == 'expire' ? 'selected' }}>Expiré</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="fas fa-search"></i></button>
+                </form>
+                <a href="{{ path('front_produit_new') }}" class="btn btn-success rounded-pill px-4">+ Nouveau Produit</a>
+            </div>
+
+            <div class="row g-4">
+                {% for produit in produits %}
+                    <div class="col-md-4">
+                        <div class="card card-creative h-100 border-0 shadow-sm">
+                            <div class="card-body p-4 text-center">
+                                <div class="icon-box bg-light rounded-circle p-3 d-inline-block mb-3">
+                                    <i class="fas fa-box-open fa-2x text-primary"></i>
+                                </div>
+                                <h5 class="fw-bold">{{ produit.nomProduit }}</h5>
+                                <div class="h4 text-success fw-bold mb-3">${{ produit.montant }}</div>
+                                <span class="badge badge-status bg-{{ produit.statut == 'disponible' ? 'success' : (produit.statut == 'vendu' ? 'warning' : 'danger') }}-subtle text-{{ produit.statut == 'disponible' ? 'success' : (produit.statut == 'vendu' ? 'warning' : 'danger') }} border border-{{ produit.statut == 'disponible' ? 'success' : (produit.statut == 'vendu' ? 'warning' : 'danger') }}">
+                                    {{ produit.statut|upper }}
+                                </span>
+                                <div class="mt-4 pt-3 border-top d-flex gap-2">
+                                    <a href="{{ path('front_produit_show', {id: produit.id}) }}" class="btn btn-sm btn-outline-primary flex-grow-1 rounded-pill">Détails</a>
+                                    <a href="{{ path('front_produit_edit', {id: produit.id}) }}" class="btn btn-sm btn-outline-warning rounded-pill"><i class="fas fa-edit"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12 text-center py-5 text-muted">Aucun produit trouvé.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- SECTION FACTURES -->
+        <div class="tab-pane fade {{ activeTab == 'factures' ? 'show active' : '' }}" id="pills-factures" role="tabpanel">
+            <div class="filter-section d-flex justify-content-between align-items-center flex-wrap gap-3 shadow-sm border">
+                <form method="GET" class="d-flex gap-2 flex-grow-1">
+                    <input type="hidden" name="tab" value="factures">
+                    <input type="text" name="searchF" class="form-control rounded-pill" placeholder="N° de facture ou montant..." value="{{ currentSearchF }}">
+                    <select name="statusF" class="form-select rounded-pill" style="width: auto;">
+                        <option value="">Statut</option>
+                        <option value="payee" {{ currentStatusF == 'payee' ? 'selected' }}>Payée</option>
+                        <option value="impayee" {{ currentStatusF == 'impayee' ? 'selected' }}>Impayée</option>
+                        <option value="en_attente" {{ currentStatusF == 'en_attente' ? 'selected' }}>En Attente</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="fas fa-search"></i></button>
+                </form>
+                <a href="{{ path('front_facture_new') }}" class="btn btn-success rounded-pill px-4">+ Nouvelle Facture</a>
+            </div>
+
+            <div class="card card-creative border-0 shadow-sm overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted">
+                            <tr>
+                                <th class="ps-4">Numéro</th>
+                                <th>Cible</th>
+                                <th>Montant</th>
+                                <th>Échéance</th>
+                                <th>Statut</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for facture in factures %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">{{ facture.numeroFacture }}</td>
+                                    <td>
+                                        {% if facture.service %}
+                                            <span class="small text-muted">⚙️ {{ facture.service.nomService }}</span>
+                                        {% elseif facture.produit %}
+                                            <span class="small text-muted">📦 {{ facture.produit.nomProduit }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="text-primary fw-bold">${{ facture.montant }}</span></td>
+                                    <td><span class="small text-muted">{{ facture.dateEcheance|date('d/m/Y') }}</span></td>
+                                    <td>
+                                        <span class="badge badge-status bg-{{ facture.statut == 'payee' ? 'success' : (facture.statut == 'impayee' ? 'danger' : 'warning') }}-subtle text-{{ facture.statut == 'payee' ? 'success' : (facture.statut == 'impayee' ? 'danger' : 'warning') }}">
+                                            {{ facture.statut|upper }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="{{ path('front_facture_show', {id: facture.id}) }}" class="btn btn-sm btn-light text-primary rounded-circle p-2"><i class="fas fa-eye"></i></a>
+                                        <a href="{{ path('front_facture_edit', {id: facture.id}) }}" class="btn btn-sm btn-light text-warning rounded-circle p-2"><i class="fas fa-edit"></i></a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="6" class="text-center py-5 text-muted">Aucune facture trouvée.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Keep active tab on page reload / search
+    var tabs = document.querySelectorAll('button[data-bs-toggle="pill"]');
+    tabs.forEach(function(tab) {
+        tab.addEventListener('shown.bs.tab', function(event) {
+            var tabName = event.target.id.replace('pills-', '').replace('-tab', '');
+            // Update all forms hidden 'tab' inputs
+            document.querySelectorAll('input[name="tab"]').forEach(function(input) {
+                input.value = tabName;
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

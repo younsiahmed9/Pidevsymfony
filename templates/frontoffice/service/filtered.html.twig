@@ -1,0 +1,48 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Services Filtrés - {{ filterName }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>📋 {{ filterName }}</h1>
+            <p class="text-muted">Total: <strong>{{ services|length }}</strong> services</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('front_service_index') }}" class="btn btn-outline-secondary">← Retour</a>
+        </div>
+    </div>
+
+    {% if services|length > 0 %}
+        <div class="row">
+            {% for service in services %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-{{ service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') }} text-white">
+                            <h5 class="card-title mb-0">{{ service.nomService }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <strong>Type:</strong> {{ service.typeService }}<br>
+                                <strong>Tarif:</strong> ${{ service.tarif }}<br>
+                                <strong>Fréquence:</strong> {{ service.frequence ?? '-' }}<br>
+                                <strong>Statut:</strong> 
+                                <span class="badge bg-{{ service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') }}">
+                                    {{ service.statut }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <a href="{{ path('front_service_show', {id: service.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                            <a href="{{ path('front_service_edit', {id: service.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">Aucun service trouvé.</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'backoffice/base_admin.html.twig' %}
+
+{% block title %}Modifier Produit{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-warning text-dark py-3">
+            <h3 class="card-title mb-0"><i class="fas fa-edit me-2"></i>Modifier le Produit</h3>
+        </div>
+        <div class="card-body p-4">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.nomProduit) }}
+                    {{ form_widget(form.nomProduit) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.nomProduit) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.typeProduit) }}
+                    {{ form_widget(form.typeProduit) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.typeProduit) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.montant) }}
+                    {{ form_widget(form.montant) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.montant) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.codeUnique) }}
+                    {{ form_widget(form.codeUnique) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.codeUnique) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.statut) }}
+                    {{ form_widget(form.statut) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.statut) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+                <button type="submit" class="btn btn-warning px-4 rounded-pill">
+                    <i class="fas fa-save me-2"></i>Enregistrer
+                </button>
+                <a href="{{ path('admin_produit_index') }}" class="btn btn-outline-secondary px-4 rounded-pill">
+                    <i class="fas fa-arrow-left me-2"></i>Annuler
+                </a>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

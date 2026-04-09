@@ -31,5 +31,10 @@ class RequireServiceOrProduitValidator extends ConstraintValidator
             $this->context->buildViolation($constraint->message)
                 ->addViolation();
         }
+
+        if (null !== $service && null !== $produit) {
+            $this->context->buildViolation("Une facture ne peut pas être liée à la fois à un service ET à un produit.")
+                ->addViolation();
+        }
     }
 }

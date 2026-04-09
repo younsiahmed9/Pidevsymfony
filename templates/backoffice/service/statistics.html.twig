@@ -1,0 +1,182 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Back Office - Statistiques Services{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    <h1 class="mb-4">📊 Statistiques Services</h1>
+
+    <!-- KPIs Principaux -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Total Services</h6>
+                    <p class="display-3">{{ totalServices }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Services Actifs</h6>
+                    <p class="display-3">{{ countActifs }}</p>
+                    <small>{{ percentActifs|number_format(1, '.', ',') }}%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Suspendus</h6>
+                    <p class="display-3">{{ countSuspendus }}</p>
+                    <small>{{ percentSuspendus|number_format(1, '.', ',') }}%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h6 class="card-title">Expirés</h6>
+                    <p class="display-3">{{ countExpires }}</p>
+                    <small>{{ percentExpires|number_format(1, '.', ',') }}%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques Financières -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">💰 Tarif Total (Services Actifs)</h5>
+                    <p class="display-4">${{ totalTarif|number_format(2, '.', ',') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">📈 Tarif Moyen</h5>
+                    <p class="display-4">${{ averageTarif|number_format(2, '.', ',') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Par Type -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">📂 Services par Type</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Abonnements:</strong>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: {{ countAbonnements > 0 ? (countAbonnements / totalServices * 100) : 0 }}%">
+                                {{ countAbonnements }} ({{ countAbonnements > 0 ? (countAbonnements / totalServices * 100)|number_format(1, '.', ',') : 0 }}%)
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Factures:</strong>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: {{ countFactures > 0 ? (countFactures / totalServices * 100) : 0 }}%">
+                                {{ countFactures }} ({{ countFactures > 0 ? (countFactures / totalServices * 100)|number_format(1, '.', ',') : 0 }}%)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Par Fréquence -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">⏰ Services par Fréquence</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Mensuel:</strong>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: {{ countMensuel > 0 ? (countMensuel / totalServices * 100) : 0 }}%">
+                                {{ countMensuel }} ({{ countMensuel > 0 ? (countMensuel / totalServices * 100)|number_format(1, '.', ',') : 0 }}%)
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Annuel:</strong>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" style="width: {{ countAnnuel > 0 ? (countAnnuel / totalServices * 100) : 0 }}%">
+                                {{ countAnnuel }} ({{ countAnnuel > 0 ? (countAnnuel / totalServices * 100)|number_format(1, '.', ',') : 0 }}%)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres rapides -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">🔍 Accès Rapide</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ path('admin_service_by_statut', {statut: 'actif'}) }}" class="btn btn-success">Services Actifs</a>
+                    <a href="{{ path('admin_service_by_statut', {statut: 'suspendu'}) }}" class="btn btn-warning">Services Suspendus</a>
+                    <a href="{{ path('admin_service_by_statut', {statut: 'expire'}) }}" class="btn btn-danger">Services Expirés</a>
+                    <a href="{{ path('admin_service_by_type', {type: 'abonnement'}) }}" class="btn btn-info">Abonnements</a>
+                    <a href="{{ path('admin_service_by_type', {type: 'facture'}) }}" class="btn btn-info">Factures</a>
+                    <a href="{{ path('admin_service_index') }}" class="btn btn-outline-secondary">Retour</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau détaillé -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">📋 Détail de tous les Services</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Type</th>
+                        <th>Tarif</th>
+                        <th>Fréquence</th>
+                        <th>Statut</th>
+                        <th>Durée (jours)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                        <tr onclick="window.location='{{ path('admin_service_show', {id: service.id}) }}'" style="cursor: pointer;">
+                            <td>#{{ service.id }}</td>
+                            <td><strong>{{ service.nomService }}</strong></td>
+                            <td>{{ service.typeService }}</td>
+                            <td>${{ service.tarif }}</td>
+                            <td>{{ service.frequence ?? '-' }}</td>
+                            <td>
+                                <span class="badge bg-{{ service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') }}">
+                                    {{ service.statut }}
+                                </span>
+                            </td>
+                            <td>{{ service.calculateDuration() ?? '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

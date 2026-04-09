@@ -1,0 +1,83 @@
+{% extends 'backoffice/base_admin.html.twig' %}
+
+{% block title %}Modifier Service{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-warning text-dark py-3">
+            <h3 class="card-title mb-0"><i class="fas fa-edit me-2"></i>Modifier le Service</h3>
+        </div>
+        <div class="card-body p-4">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.nomService) }}
+                    {{ form_widget(form.nomService) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.nomService) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.typeService) }}
+                    {{ form_widget(form.typeService) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.typeService) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.tarif) }}
+                    {{ form_widget(form.tarif) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.tarif) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.frequence) }}
+                    {{ form_widget(form.frequence) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.frequence) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateDebut) }}
+                    {{ form_widget(form.dateDebut) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.dateDebut) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateFin) }}
+                    {{ form_widget(form.dateFin) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.dateFin) }}
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.statut) }}
+                    {{ form_widget(form.statut) }}
+                    <div class="text-danger small mt-1">
+                        {{ form_errors(form.statut) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-top">
+                {{ form_widget(form.save) }}
+                <a href="{{ path('admin_service_index') }}" class="btn btn-outline-secondary px-4 rounded-pill">
+                    <i class="fas fa-arrow-left me-2"></i>Annuler
+                </a>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
