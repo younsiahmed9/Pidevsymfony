@@ -1,0 +1,142 @@
+{% extends "base.html.twig" %}
+
+
+{% block title %}{{ title }} - FinTrack{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .admin-page {
+        min-height: calc(100vh - 145px);
+        overflow: visible;
+        padding-bottom: 2rem;
+    }
+    
+    .users-board {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 14px 35px rgba(17, 24, 39, 0.08);
+        background: #ffffff;
+    }
+
+    .users-board-header {
+        background: linear-gradient(120deg, #123a7b 0%, #2258a8 100%);
+        color: #fff;
+        padding: 1rem 1.25rem;
+    }
+
+    .users-board-title {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container px-4 mt-5 admin-page">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card users-board">
+                <div class="users-board-header">
+                    <h5 class="users-board-title">{{ title }}</h5>
+                </div>
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        {{ form_errors(form) }}
+                    
+                        <div class="mb-3">
+                            <label class="form-label">Nom du Budget</label>
+                            {{ form_widget(form.nom_budget) }}
+                            {% if form.nom_budget.vars.errors|length > 0 %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.nom_budget.vars.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Montant Totale</label>
+                            {{ form_widget(form.montant_total) }}
+                            {% if form.montant_total.vars.errors|length > 0 %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.montant_total.vars.errors %}
+                                        <i class="fas fa-exclamation-circle"></i> {{ error.message }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Période</label>
+                            {{ form_widget(form.periode) }}
+                            {{ form_errors(form.periode) }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Statut</label>
+                            {{ form_widget(form.statut) }}
+                            {{ form_errors(form.statut) }}
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('app_client_dashboard') }}" class="btn btn-outline-secondary">Annuler</a>
+                            <button class="btn btn-primary px-4">{{ button_label|default('Enregistrer') }}</button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const nomInput = document.getElementById('budget_nom_budget');
+    const montantInput = document.getElementById('budget_montant_total');
+
+    form.addEventListener('submit', function(e) {
+        let hasError = false;
+        let errorMessage = "";
+
+        // Reset previous custom styling
+        nomInput.classList.remove('is-invalid');
+        montantInput.classList.remove('is-invalid');
+
+        // Check Nom
+        if (!nomInput.value.trim()) {
+            hasError = true;
+            nomInput.classList.add('is-invalid');
+            errorMessage += "Le nom du budget ne peut pas être vide.\n";
+        } else if (nomInput.value.trim().length < 3) {
+            hasError = true;
+            nomInput.classList.add('is-invalid');
+            errorMessage += "Le nom doit contenir au moins 3 caractères.\n";
+        }
+
+        // Check Montant
+        if (!montantInput.value.trim()) {
+            hasError = true;
+            montantInput.classList.add('is-invalid');
+            errorMessage += "Le montant ne peut pas être vide.\n";
+        } else if (isNaN(montantInput.value.replace(',', '.'))) {
+            hasError = true;
+            montantInput.classList.add('is-invalid');
+            errorMessage += "Le montant doit être un nombre valide.\n";
+        } else if (parseFloat(montantInput.value.replace(',', '.')) <= 0) {
+            hasError = true;
+            montantInput.classList.add('is-invalid');
+            errorMessage += "Le montant doit être supérieur à zéro.\n";
+        }
+
+        if (hasError) {
+            e.preventDefault();
+            alert(errorMessage);
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,410 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Admin Dashboard - FinTrack{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .admin-page { min-height: calc(100vh - 145px); padding-bottom: 2rem; }
+    .admin-sidebar { border: 0; border-radius: 16px; box-shadow: 0 12px 28px rgba(17,24,39,0.08); background: linear-gradient(180deg, #071a34 0%, #0b2347 100%); }
+    .admin-sidebar .card-body { padding: 1rem; }
+    .admin-menu-nav { display: flex; flex-direction: column; gap: 0.6rem; }
+    .admin-menu-group-title { color: #8fa9d6; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 0.6rem; }
+    .admin-menu-btn { text-align: left; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.65rem 0.9rem; background: rgba(255,255,255,0.04); color: #d6e4ff; font-weight: 600; transition: all 0.2s ease; width: 100%; }
+    .admin-menu-btn.active, .admin-menu-btn:hover { background: #1f4fa1; border-color: #5f8fe4; color: #fff; }
+    
+    .stat-card { border: 0; border-radius: 18px; transition: transform 0.2s; color: #fff; overflow: hidden; position: relative; }
+    .stat-card:hover { transform: translateY(-5px); }
+    .bg-gradient-primary { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+    .bg-gradient-success { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); }
+    .bg-gradient-danger { background: linear-gradient(135deg, #991b1b 0%, #ef4444 100%); }
+    .bg-gradient-info { background: linear-gradient(135deg, #1e40af 0%, #60a5fa 100%); }
+
+    .users-board { border: 0; border-radius: 18px; overflow: hidden; box-shadow: 0 14px 35px rgba(17,24,39,0.08); background: #fff; }
+    .users-board-header { background: linear-gradient(120deg, #123a7b 0%, #2258a8 100%); color: #fff; padding: 1rem 1.25rem; }
+    .users-board-title { margin: 0; font-size: 1.05rem; font-weight: 700; }
+    
+    .chart-card { border: 0; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: 400px; margin-bottom: 2rem; }
+    .chart-container { position: relative; height: 320px; width: 100%; }
+    .recent-activity-item { border-left: 3px solid #ddd; padding-left: 15px; margin-bottom: 20px; position: relative; }
+    .recent-activity-item::before { content: ""; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; }
+    .activity-budget { border-color: #10b981; }
+    .activity-budget::before { background: #10b981; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4 mt-4 admin-page">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Tableau de Bord Administrateur</h1>
+        <div>
+            <a href="{{ path('app_admin_export_users') }}" class="btn btn-primary">
+                <i class="fas fa-file-export me-2"></i>Exporter Données (CSV)
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4 admin-layout">
+        <div class="col-lg-3">
+            <div class="card admin-sidebar">
+                <div class="card-body">
+                    <p class="admin-menu-group-title">Navigation Admin</p>
+                    <div class="admin-menu-nav nav" role="tablist">
+                        <button class="admin-menu-btn active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-pane" type="button" role="tab">Vue d'Ensemble</button>
+                        <button class="admin-menu-btn" id="gestion-user-tab" data-bs-toggle="tab" data-bs-target="#users-management-pane" type="button" role="tab">Gestion Utilisateurs</button>
+                        <button class="admin-menu-btn" id="gestion-depense-tab" data-bs-toggle="tab" data-bs-target="#gestion-depense-pane" type="button" role="tab">Gestion Financements</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="tab-content admin-content">
+                
+                {# Tab 1: Vue d'Ensemble #}
+                <div class="tab-pane fade show active" id="overview-pane" role="tabpanel">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="card stat-card bg-gradient-primary p-3">
+                                <h6 class="text-uppercase small font-weight-bold opacity-75">Dépenses Totales</h6>
+                                <h2 class="mb-0">{{ stats.totalExpenses|number_format(2, ',', ' ') }} €</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card bg-gradient-success p-3">
+                                <h6 class="text-uppercase small font-weight-bold opacity-75">Balance Globale</h6>
+                                <h2 class="mb-0">{{ stats.globalBalance|number_format(2, ',', ' ') }} €</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card bg-gradient-info p-3">
+                                <h6 class="text-uppercase small font-weight-bold opacity-75">Clients Actifs</h6>
+                                <h2 class="mb-0">{{ stats.activeClients }}</h2>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stat-card bg-gradient-danger p-3">
+                                <h6 class="text-uppercase small font-weight-bold opacity-75">Administrateurs</h6>
+                                <h2 class="mb-0">{{ stats.administrators }}</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-lg-7">
+                            <div class="card chart-card p-4">
+                                <h5 class="card-title mb-4">Évolution des Dépenses</h5>
+                                <div class="chart-container">
+                                    <canvas id="evolutionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="card chart-card p-4">
+                                <h5 class="card-title mb-4">Top Catégories</h5>
+                                <div class="chart-container">
+                                    <canvas id="categoriesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card users-board">
+                        <div class="users-board-header">
+                            <h5 class="users-board-title">Activité Récente de la Plateforme</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for activity in recentActivity %}
+                                <div class="recent-activity-item {{ activity.type == 'budget' ? 'activity-budget' : '' }}">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>{{ activity.user }}</strong>
+                                        <small class="text-muted">{{ activity.date|date('d/m/Y H:i') }}</small>
+                                    </div>
+                                    <p class="mb-0">
+                                        {{ activity.type == 'budget' ? 'A créé un budget' : 'A enregistré une dépense' }} 
+                                        : <span class="badge bg-light text-dark">{{ activity.detail }}</span> 
+                                        de <span class="font-weight-bold">{{ activity.amount }} €</span>
+                                    </p>
+                                </div>
+                            {% else %}
+                                <p class="text-center py-4">Aucune activité récente.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Tab 2: Gestion Utilisateurs #}
+                <div class="tab-pane fade" id="users-management-pane" role="tabpanel">
+                    <div class="card users-board">
+                        <div class="users-board-header">
+                            <h5 class="users-board-title">Liste des Utilisateurs</h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table align-middle m-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Utilisateur</th>
+                                        <th>Email</th>
+                                        <th>Rôle</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                        <tr>
+                                            <td><strong>{{ user.fullName ?: 'Non défini' }}</strong></td>
+                                            <td>{{ user.email }}</td>
+                                            <td><span class="badge {{ user.role == 'ADMIN' ? 'bg-warning' : 'bg-primary' }}">{{ user.role }}</span></td>
+                                            <td>
+                                                <span class="badge {{ user.isActive ? 'bg-success' : 'bg-danger' }}">
+                                                    {{ user.isActive ? 'Actif' : 'Inactif' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <form action="{{ path('app_admin_user_update', {id: user.id}) }}" method="POST" style="display:inline;">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('admin_edit_user_' ~ user.id) }}">
+                                                    <input type="hidden" name="full_name" value="{{ user.fullName }}">
+                                                    <input type="hidden" name="email" value="{{ user.email }}">
+                                                    <input type="hidden" name="is_active" value="{{ user.isActive ? '0' : '1' }}">
+                                                    <button class="btn btn-sm btn-outline-secondary">{{ user.isActive ? 'Désactiver' : 'Activer' }}</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {# Tab 3: Gestion Financements (Recovery) #}
+                <div class="tab-pane fade" id="gestion-depense-pane" role="tabpanel">
+                    <div class="card users-board">
+                        <div class="users-board-header">
+                            <h5 class="users-board-title">Récupération de fonds & Financement</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="alert alert-warning">
+                                <strong>Mode Financement :</strong> Utilisez cette section pour renflouer le budget d'un utilisateur en cas de perte de fonds ou pour un remboursement.
+                            </div>
+                            
+                            <div id="fundFormArea">
+                                <h6>Recharger un Budget spécifique</h6>
+                                <p class="small text-muted mb-4">Choisissez le budget de l'utilisateur à créditer.</p>
+
+                                <div class="row" id="fundForm">
+                                    <div class="col-md-5 mb-3">
+                                        <label class="form-label">Sélectionner le Budget</label>
+                                        <select id="fundBudgetSelect" class="form-select">
+                                            <option value="">-- Choisir un budget --</option>
+                                            {% for budget in allBudgets %}
+                                                <option value="{{ budget.id }}" data-token="{{ csrf_token('admin_fund_budget_' ~ budget.id) }}">
+                                                    [{{ budget.id }}] {{ budget.nomBudget }} - {{ budget.utilisateur.fullName }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5 mb-3">
+                                        <label class="form-label">Montant à envoyer (€)</label>
+                                        <input type="number" id="fundAmountInput" class="form-control" placeholder="0.00" step="0.01">
+                                    </div>
+                                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                                        <button type="button" onclick="executeFunding()" class="btn btn-success w-100">
+                                            <i class="fas fa-hand-holding-usd me-1"></i> Créditer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-5">
+
+                            <h6>Tous les Budgets de la Plateforme</h6>
+                            <p class="small text-muted mb-4">Cliquez sur "Sélectionner" pour charger un budget dans l'outil de crédit ci-dessus.</p>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Utilisateur</th>
+                                            <th>Nom du Budget</th>
+                                            <th>Montant Total</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for budget in allBudgets %}
+                                            <tr>
+                                                <td><span class="user-id-pill">{{ budget.id }}</span></td>
+                                                <td><strong>{{ budget.utilisateur.fullName }}</strong></td>
+                                                <td>{{ budget.nomBudget }}</td>
+                                                <td><span class="badge bg-soft-success text-success font-weight-bold">{{ budget.montantTotal }} €</span></td>
+                                                <td>
+                                                    <button type="button" 
+                                                            onclick="selectBudgetForFunding('{{ budget.id }}')" 
+                                                            class="btn btn-sm btn-outline-primary">
+                                                        Sélectionner
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <script>
+                                function selectBudgetForFunding(id) {
+                                    const select = document.getElementById('fundBudgetSelect');
+                                    select.value = id;
+                                    // Smooth scroll to form
+                                    document.getElementById('fundFormArea').scrollIntoView({ behavior: 'smooth' });
+                                }
+
+                                function executeFunding() {
+                                    const select = document.getElementById('fundBudgetSelect');
+                                    const amountInput = document.getElementById('fundAmountInput');
+                                    const id = select.value;
+                                    const amount = amountInput.value;
+                                    const token = select.options[select.selectedIndex]?.getAttribute('data-token');
+
+                                    if (!id || !amount || amount <= 0) {
+                                        alert('Veuillez sélectionner un budget et un montant supérieur à 0.');
+                                        return;
+                                    }
+
+                                    if (!confirm('Confirmer le versement de ' + amount + ' € sur ce budget ?')) return;
+
+                                    const form = document.createElement('form');
+                                    form.method = 'POST';
+                                    form.action = '/admin/budget/fund/' + id;
+
+                                    const tokenField = document.createElement('input');
+                                    tokenField.type = 'hidden';
+                                    tokenField.name = '_token';
+                                    tokenField.value = token;
+
+                                    const amountField = document.createElement('input');
+                                    amountField.type = 'hidden';
+                                    amountField.name = 'amount';
+                                    amountField.value = amount;
+
+                                    form.appendChild(tokenField);
+                                    form.appendChild(amountField);
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- EVOLUTION CHART (Line with Gradient) ---
+        const ctxEvolution = document.getElementById('evolutionChart').getContext('2d');
+        const gradientBlue = ctxEvolution.createLinearGradient(0, 0, 0, 300);
+        gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+        gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+        new Chart(ctxEvolution, {
+            type: 'line',
+            data: {
+                labels: [{% for stat in monthlyStats %}'{{ stat.month }}',{% endfor %}],
+                datasets: [{
+                    label: 'Dépenses du mois',
+                    data: [{% for stat in monthlyStats %}{{ stat.total }},{% endfor %}],
+                    borderColor: '#3b82f6',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#3b82f6',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    backgroundColor: gradientBlue,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        cornerRadius: 8,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+                        ticks: { color: '#64748b', font: { size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748b', font: { size: 11 } }
+                    }
+                }
+            }
+        });
+
+        // --- CATEGORIES CHART (Donut Premium) ---
+        const ctxCategories = document.getElementById('categoriesChart').getContext('2d');
+        new Chart(ctxCategories, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for cat in topCategories %}'{{ cat.label }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for cat in topCategories %}{{ cat.count }},{% endfor %}],
+                    backgroundColor: [
+                        '#1e40af', // Indigo 800
+                        '#3b82f6', // Blue 500
+                        '#60a5fa', // Blue 400
+                        '#93c5fd', // Blue 300
+                        '#bfdbfe'  // Blue 200
+                    ],
+                    hoverOffset: 15,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: { size: 12, weight: '600' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        padding: 10,
+                        cornerRadius: 8
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

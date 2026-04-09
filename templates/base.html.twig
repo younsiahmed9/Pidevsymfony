@@ -1,52 +1,133 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
 	<meta charset="utf-8">
-	<title>{% block title %}FinTrack{% endblock %}</title>
+	<title>{% block title %}FinTrack - Wallet Service{% endblock %}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-	<meta name="description" content="FinTrack financial management platform">
-	<meta name="author" content="FinTrack">
+	<meta name="description" content="This is meta description">
 	<link rel="shortcut icon" href="{{ asset('images/favicon.png') }}" type="image/x-icon">
 	<link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/x-icon">
-	<meta name="theme-name" content="wallet" />
-
+  
+	<!-- # Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+
+	<!-- # CSS Plugins -->
 	<link rel="stylesheet" href="{{ asset('plugins/slick/slick.css') }}">
 	<link rel="stylesheet" href="{{ asset('plugins/font-awesome/fontawesome.min.css') }}">
 	<link rel="stylesheet" href="{{ asset('plugins/font-awesome/brands.css') }}">
 	<link rel="stylesheet" href="{{ asset('plugins/font-awesome/solid.css') }}">
+
+	<!-- # Main Style Sheet -->
 	<link rel="stylesheet" href="{{ asset('css/style.css') }}">
-	{% block stylesheets %}{% endblock %}
+
+    {% block stylesheets %}
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #1e40af; }
+
+        /* Select and inputs improved readability */
+        select, input, .form-control, .form-select {
+            color: #000000 !important;
+        }
+        
+        select option {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Table text readability */
+        .table {
+            color: #000000 !important;
+        }
+    </style>
+    {% endblock %}
+
+    {% block javascripts %}
+        {% block importmap %}{{ importmap('app') }}{% endblock %}
+    {% endblock %}
 </head>
+
 <body>
-    {% include 'partials/navigation.html.twig' %}
 
-    {% for type, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="container mt-4">
-                <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-        {% endfor %}
-    {% endfor %}
+<!-- navigation -->
+<header class="navigation bg-tertiary">
+	<nav class="navbar navbar-expand-xl navbar-light text-center py-3">
+		<div class="container">
+			<a class="navbar-brand" href="{{ path('app_home') }}">
+				<img loading="preload" decoding="async" class="img-fluid" width="160" src="{{ asset('images/img1.png') }}" alt="Wallet">
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+					<li class="nav-item"> <a class="nav-link" href="{{ path('app_home') }}">Home</a></li>
+                    <!-- Update with actual routes later -->
+					<li class="nav-item"> <a class="nav-link" href="#!">About</a></li>
+                    <li class="nav-item"> <a class="nav-link" href="#!">Services</a></li>
+				</ul>
+				<div class="dropdown">
+					<button class="btn btn-outline-primary dropdown-toggle" type="button" id="loginDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+						Log In
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="loginDropdown">
+						<li><a class="dropdown-item" href="/login?type=user">Utilisateur (Frontend)</a></li>
+						<li><a class="dropdown-item" href="/login?type=admin">Administrateur (Backend)</a></li>
+					</ul>
+				</div>
+				<!-- account btn --> <a href="#!" class="btn btn-primary ms-2 ms-lg-3">Sign Up</a>
+			</div>
+		</div>
+	</nav>
+</header>
+<!-- /navigation -->
 
-    <main>
-        {% block body %}{% endblock %}
-    </main>
+{% block body %}{% endblock %}
 
-	{% block footer %}
-		{% include 'partials/footer.html.twig' %}
-	{% endblock %}
+<footer class="section-sm bg-tertiary">
+	<div class="container">
+		<div class="row align-items-center mt-5 text-center text-md-start">
+			<div class="col-lg-4">
+        <a href="{{ path('app_home') }}">
+          <img loading="preload" decoding="async" class="img-fluid" width="160" src="{{ asset('images/img1.png') }}" alt="FinTrack">
+        </a>
+			</div>
+			<div class="col-lg-4 col-md-6 mt-4 mt-lg-0">
+				<ul class="list-unstyled list-inline mb-0 text-lg-center">
+					<li class="list-inline-item me-4"><a class="text-black" href="#!">Privacy Policy</a>
+					</li>
+					<li class="list-inline-item me-4"><a class="text-black" href="#!">Terms &amp; Conditions</a>
+					</li>
+				</ul>
+			</div>
+			<div class="col-lg-4 col-md-6 text-md-end mt-4 mt-md-0">
+				<ul class="list-unstyled list-inline mb-0 social-icons">
+					<li class="list-inline-item me-3"><a title="Facebook" class="text-black" href="#"><i class="fab fa-facebook-f"></i></a>
+					</li>
+					<li class="list-inline-item me-3"><a title="Twitter" class="text-black" href="#"><i class="fab fa-twitter"></i></a>
+					</li>
+					<li class="list-inline-item me-3"><a title="Instagram" class="text-black" href="#"><i class="fab fa-instagram"></i></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
 
-	<script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
-	<script src="{{ asset('plugins/bootstrap/bootstrap.bundle.min.js') }}"></script>
-	<script src="{{ asset('plugins/slick/slick.min.js') }}"></script>
-	<script src="{{ asset('plugins/scrollmenu/scrollmenu.min.js') }}"></script>
-	<script src="{{ asset('js/script.js') }}"></script>
-	{% block javascripts %}{% endblock %}
+
+<!-- # JS Plugins -->
+<script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('plugins/bootstrap/bootstrap.min.js') }}"></script>
+<script src="{{ asset('plugins/slick/slick.min.js') }}"></script>
+<script src="{{ asset('plugins/scrollmenu/scrollmenu.min.js') }}"></script>
+
+<!-- Main Script -->
+<script src="{{ asset('js/script.js') }}"></script>
+
 </body>
 </html>

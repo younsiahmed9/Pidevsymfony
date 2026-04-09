@@ -2,36 +2,40 @@
 
 namespace App\Controller;
 
-use App\Entity\Utilisateur;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-final class SecurityController extends AbstractController
+class SecurityController extends AbstractController
 {
     #[Route(path: '/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
-        /** @var Utilisateur|null $user */
-        $user = $this->getUser();
+        $request->getSession()->start();
+        $type = $request->query->get('type', 'user');
 
-        if ($user instanceof Utilisateur) {
-            if (strtolower(trim((string) $user->getUserIdentifier())) === 'admin@fintrack.com') {
-                return $this->redirectToRoute('admin_index');
-            }
-
-            return $this->redirectToRoute('front_dashboard_index');
-        }
-
+        // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
+        // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $response = $this->render('frontoffice/auth/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
-        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-        $response->headers->set('Pragma', 'no-cache');
+        return $this->render('security/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error,
+            'type' => $type
+        ]);
+    }
 
-        return $response;
+    #[Route(path: '/login_redirect', name: 'app_login_redirect')]
+    public function loginRedirect(): Response
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
+
+        return $this->redirectToRoute('app_client_dashboard');
     }
 
     #[Route(path: '/logout', name: 'app_logout')]

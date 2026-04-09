@@ -87,11 +87,9 @@ $(window).on("load", function () {
   videoPopupInit();
 
   // table of content
-  if (typeof ScrollMenu !== "undefined" && $("#TableOfContents a").length) {
-    new ScrollMenu("#TableOfContents a", {
-      duration: 400,
-      activeOffset: 40,
-      scrollOffset: 10,
-    });
-  }
+  new ScrollMenu("#TableOfContents a", {
+    duration: 400,
+    activeOffset: 40,
+    scrollOffset: 10,
+  });
 })(jQuery);
