@@ -1,0 +1,75 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Détails Facture - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-5 rounded-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Facture: {{ facture.numeroFacture }}</h2>
+                        <a href="{{ path('front_facture_index') }}" class="btn btn-outline-secondary px-4">
+                            <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+                        </a>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center">
+                            <div class="bg-light rounded-circle p-4 d-inline-block mb-3">
+                                <i class="fas fa-file-invoice-dollar fa-5x text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h3 class="fw-bold mb-1">{{ facture.numeroFacture }}</h3>
+                            <p class="text-muted mb-3">Date de facture: <span class="fw-bold">{{ facture.dateFacture|date('d F Y') }}</span></p>
+                            
+                            <div class="mb-4">
+                                <span class="h2 text-primary fw-bold">${{ facture.montant }}</span>
+                                <span class="badge bg-{{ facture.statut == 'payee' ? 'success' : (facture.statut == 'impayee' ? 'danger' : 'warning') }} ms-2">
+                                    {{ facture.statut|upper }}
+                                </span>
+                            </div>
+
+                            <div class="list-group list-group-flush border-top">
+                                <div class="list-group-item d-flex justify-content-between py-3">
+                                    <span class="text-muted">Type de cible</span>
+                                    <span class="fw-bold">
+                                        {% if facture.service %}
+                                            <span class="text-info">⚙️ Service: {{ facture.service.nomService }}</span>
+                                        {% elseif facture.produit %}
+                                            <span class="text-success">📦 Produit: {{ facture.produit.nomProduit }}</span>
+                                        {% else %}
+                                            <span class="text-muted small">Aucun</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between py-3">
+                                    <span class="text-muted">Date d'échéance</span>
+                                    <span class="{{ facture.dateEcheance < date() and facture.statut != 'payee' ? 'text-danger fw-bold' : '' }}">
+                                        {{ facture.dateEcheance|date('d F Y') }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 d-flex gap-2">
+                                <a href="{{ path('front_facture_edit', {id: facture.id}) }}" class="btn btn-warning px-4">
+                                    <i class="fas fa-edit me-2"></i> Modifier
+                                </a>
+                                
+                                <form method="POST" action="{{ path('front_facture_delete', {id: facture.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir archiver cette facture ?')" style="display: inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ facture.id) }}">
+                                    <button class="btn btn-danger px-4">
+                                        <i class="fas fa-trash me-2"></i> Archiver
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

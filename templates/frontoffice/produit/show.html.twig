@@ -1,0 +1,74 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Produit: {{ produit.getNomProduit }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-info text-white p-4">
+            <h2 class="mb-0">📦 Détails du Produit</h2>
+        </div>
+        
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-6 border-end">
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Nom du Produit</label>
+                        <h3 class="fw-bold">{{ produit.nomProduit }}</h3>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Montant</label>
+                        <h4 class="text-primary fw-bold">{{ produit.montant }} DT</h4>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Type</label>
+                        <span class="badge bg-info-subtle text-info p-2 rounded-pill">
+                            {{ produit.typeProduit|replace({'_': ' '})|capitalize }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-6 ps-md-5">
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Code Unique</label>
+                        <code class="fs-4">{{ produit.codeUnique }}</code>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Statut</label>
+                        <span class="badge bg-{{ produit.statut == 'disponible' ? 'success' : (produit.statut == 'vendu' ? 'warning' : 'danger') }} fs-6">
+                            {{ produit.statut|capitalize }}
+                        </span>
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="text-muted small text-uppercase fw-bold mb-1 d-block">Date de Création</label>
+                        <p class="mb-0 text-muted"><i class="far fa-calendar-alt me-2"></i>{{ produit.dateCreation|date('d/m/Y H:i') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-footer bg-light p-4 d-flex justify-content-between align-items-center border-0 rounded-bottom-4">
+            <a href="{{ path('front_produit_index') }}" class="btn btn-outline-secondary px-4">
+                <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+            </a>
+            
+            <div class="d-flex gap-2">
+                <a href="{{ path('front_produit_edit', {id: produit.id}) }}" class="btn btn-warning px-4">
+                    <i class="fas fa-edit me-2"></i> Modifier
+                </a>
+                
+                <form method="POST" action="{{ path('front_produit_delete', {id: produit.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir archiver ce produit ?')" style="display: inline-block;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ produit.id) }}">
+                    <button class="btn btn-danger px-4">
+                        <i class="fas fa-trash me-2"></i> Archiver
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

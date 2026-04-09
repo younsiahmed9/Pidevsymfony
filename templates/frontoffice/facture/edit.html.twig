@@ -1,0 +1,35 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Modifier Facture - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4 rounded-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">Modifier la Facture: {{ facture.numeroFacture }}</h2>
+                        <a href="{{ path('front_facture_index') }}" class="btn btn-sm btn-outline-secondary">Retour</a>
+                    </div>
+
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                        <div class="row g-3">
+                            <div class="col-md-6">{{ form_row(form.numeroFacture) }}</div>
+                            <div class="col-md-6">{{ form_row(form.montant) }}</div>
+                            <div class="col-md-6">{{ form_row(form.statut) }}</div>
+                            <div class="col-md-6">{{ form_row(form.dateFacture) }}</div>
+                            <div class="col-md-6">{{ form_row(form.dateEcheance) }}</div>
+                            <div class="col-md-6">{{ form_row(form.service) }}</div>
+                            <div class="col-md-6">{{ form_row(form.produit) }}</div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button class="btn btn-primary btn-lg">Mettre à jour la Facture</button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

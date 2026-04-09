@@ -1,0 +1,118 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Factures - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">Mes Factures</h2>
+                <p class="text-muted">Consultez et gérez vos factures de services et produits.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Filtres -->
+            <div class="col-lg-3 mb-4">
+                <div class="filter-sidebar shadow-sm">
+                    <h5 class="mb-4">🔍 Recherche & Filtres</h5>
+                    <form method="GET" action="{{ path('front_facture_index') }}">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">N° Facture</label>
+                            <input type="text" name="search" class="form-control" placeholder="ex: FAC-2026..." value="{{ currentSearch }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Statut</label>
+                            <select name="status" class="form-select">
+                                <option value="">Tous les statuts</option>
+                                <option value="payee" {{ currentStatus == 'payee' ? 'selected' }}>Payée</option>
+                                <option value="impayee" {{ currentStatus == 'impayee' ? 'selected' }}>Impayée</option>
+                                <option value="en_attente" {{ currentStatus == 'en_attente' ? 'selected' }}>En attente</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm">Filtrer</button>
+                            <a href="{{ path('front_facture_index') }}" class="btn btn-outline-secondary btn-sm">Réinitialiser</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Liste Factures -->
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <p class="mb-0 text-muted"><strong>{{ factures|length }}</strong> factures listées</p>
+                    <a href="{{ path('front_facture_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouvelle Facture
+        </a>
+                </div>
+
+                <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 12px;">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">N° Facture</th>
+                                    <th>Cible</th>
+                                    <th>Montant</th>
+                                    <th>Échéance</th>
+                                    <th>Statut</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for facture in factures %}
+                                    <tr>
+                                        <td class="ps-4"><strong>{{ facture.numeroFacture }}</strong></td>
+                                        <td>
+                                            {% if facture.service %}
+                                                <span class="badge bg-info-subtle text-info border border-info-subtle">Service: {{ facture.service.nomService }}</span>
+                                            {% elseif facture.produit %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle">Produit: {{ facture.produit.nomProduit }}</span>
+                                            {% else %}
+                                                <span class="text-muted small">Aucun</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><span class="fw-bold text-primary">${{ facture.montant }}</span></td>
+                                        <td>
+                                            <span class="small {{ facture.dateEcheance < date() and facture.statut != 'payee' ? 'text-danger fw-bold' : 'text-muted' }}">
+                                                {{ facture.dateEcheance|date('d/m/Y') }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ facture.statut == 'payee' ? 'success' : (facture.statut == 'impayee' ? 'danger' : 'warning') }}-subtle text-{{ facture.statut == 'payee' ? 'success' : (facture.statut == 'impayee' ? 'danger' : 'warning') }}">
+                                                {{ facture.statut|upper }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="btn-group">
+                                                <a href="{{ path('front_facture_show', {id: facture.id}) }}" class="btn btn-sm btn-outline-secondary" title="Voir">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('front_facture_edit', {id: facture.id}) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="POST" action="{{ path('front_facture_delete', {id: facture.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir archiver cette facture ?')" style="display: inline-block;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ facture.id) }}">
+                                                <button class="btn btn-sm btn-outline-danger" title="Archiver">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td colspan="6" class="text-center py-5 text-muted">Aucune facture disponible.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
