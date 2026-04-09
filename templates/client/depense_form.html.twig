@@ -1,0 +1,152 @@
+{% extends "base.html.twig" %}
+
+
+{% block title %}{{ title }} - FinTrack{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .admin-page {
+        min-height: calc(100vh - 145px);
+        overflow: visible;
+        padding-bottom: 2rem;
+    }
+    
+    .users-board {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 14px 35px rgba(17, 24, 39, 0.08);
+        background: #ffffff;
+    }
+
+    .users-board-header {
+        background: linear-gradient(120deg, #123a7b 0%, #2258a8 100%);
+        color: #fff;
+        padding: 1rem 1.25rem;
+    }
+
+    .users-board-title {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+
+    /* Fix for dropdown visibility and interaction */
+    select.form-control {
+        appearance: auto !important;
+        -webkit-appearance: menulist !important;
+        color: #333 !important;
+        background-color: #fff !important;
+    }
+    
+    select option {
+        color: #333 !important;
+        background-color: #fff !important;
+        padding: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container px-4 mt-5 admin-page">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card users-board">
+                <div class="users-board-header">
+                    <h5 class="users-board-title">{{ title }}</h5>
+                </div>
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        {{ form_errors(form) }}
+                    
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Catégorie</label>
+                                {{ form_widget(form.categorie) }}
+                                {% if form.categorie.vars.errors|length > 0 %}
+                                    <div class="text-danger mt-1">{% for error in form.categorie.vars.errors %}<i class="fas fa-exclamation-circle"></i> {{ error.message }}{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Montant</label>
+                                {{ form_widget(form.montant) }}
+                                {% if form.montant.vars.errors|length > 0 %}
+                                    <div class="text-danger mt-1">{% for error in form.montant.vars.errors %}<i class="fas fa-exclamation-circle"></i> {{ error.message }}{% endfor %}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Date de la dépense</label>
+                                {{ form_widget(form.dateDepense) }}
+                                {{ form_errors(form.dateDepense) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mode de paiement</label>
+                                {{ form_widget(form.modePaiement) }}
+                                {{ form_errors(form.modePaiement) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description (Optionnel)</label>
+                            {{ form_widget(form.description) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('app_client_dashboard') }}" class="btn btn-outline-secondary">Annuler</a>
+                            <button class="btn btn-success px-4">{{ button_label|default('Enregistrer') }}</button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const categorieInput = document.getElementById('depense_categorie');
+    const montantInput = document.getElementById('depense_montant');
+
+    form.addEventListener('submit', function(e) {
+        let hasError = false;
+        let errorMessage = "";
+
+        // Reset
+        categorieInput.classList.remove('is-invalid');
+        montantInput.classList.remove('is-invalid');
+
+        // Check Categorie
+        if (!categorieInput.value.trim()) {
+            hasError = true;
+            categorieInput.classList.add('is-invalid');
+            errorMessage += "La catégorie ne peut pas être vide.\n";
+        }
+
+        // Check Montant
+        if (!montantInput.value.trim()) {
+            hasError = true;
+            montantInput.classList.add('is-invalid');
+            errorMessage += "Le montant ne peut pas être vide.\n";
+        } else if (isNaN(montantInput.value.replace(',', '.'))) {
+            hasError = true;
+            montantInput.classList.add('is-invalid');
+            errorMessage += "Le montant doit être un nombre valide.\n";
+        } else if (parseFloat(montantInput.value.replace(',', '.')) <= 0) {
+            hasError = true;
+            montantInput.classList.add('is-invalid');
+            errorMessage += "Le montant doit être supérieur à zéro.\n";
+        }
+
+        if (hasError) {
+            e.preventDefault();
+            alert(errorMessage);
+        }
+    });
+});
+</script>
+{% endblock %}

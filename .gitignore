@@ -18,3 +18,14 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+# Local test files
+/check_*.php
+/test_*.php
+/fix_*.php
+/force_*.php
+/*.sql
+/.idea/
+/.vscode/
+/.env.local
+
