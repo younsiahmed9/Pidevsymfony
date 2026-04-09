@@ -1,128 +1,153 @@
-{% extends 'base.html.twig' %}
+{% extends 'backoffice/base.html.twig' %}
 
 {% block title %}Admin Dashboard - FinTrack{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <style>
-        .admin-page {
-            min-height: calc(100vh - 145px);
-            overflow: visible;
-            padding-bottom: 2rem;
+        .backoffice-dashboard {
+            display: grid;
+            gap: 1.5rem;
         }
 
-        .admin-layout {
-            align-items: stretch;
-            min-height: 100%;
-        }
-
-        .admin-sidebar {
-            border: 0;
-            border-radius: 16px;
-            box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
-            height: auto;
-            overflow: hidden;
-            background: linear-gradient(180deg, #071a34 0%, #0b2347 100%);
-        }
-
-        .admin-sidebar .card-body {
-            height: 100%;
-            overflow-y: auto;
-            padding: 1rem;
-        }
-
-        .admin-menu-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 0.6rem;
-        }
-
-        .admin-menu-group-title {
-            color: #8fa9d6;
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 700;
-            margin: 0 0 0.6rem;
-        }
-
-        .admin-menu-btn {
-            text-align: left;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 0.65rem 0.9rem;
-            background: rgba(255, 255, 255, 0.04);
-            color: #d6e4ff;
-            font-weight: 600;
-            transition: all 0.2s ease;
+        .backoffice-dashboard .card {
             width: 100%;
+            align-items: stretch;
+            box-sizing: border-box;
         }
 
-        .admin-menu-btn.active,
-        .admin-menu-btn:hover {
-            background: #1f4fa1;
-            border-color: #5f8fe4;
-            color: #fff;
-        }
-
-        .admin-content {
-            height: auto;
-            overflow: visible;
-            padding-right: 0.35rem;
-        }
-
-        .chart-card {
+        .hero-card,
+        .section-card,
+        .kpi-card {
             border: 0;
-            border-radius: 16px;
-            box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
-            height: 100%;
+            border-radius: 24px;
+            box-shadow: 0 14px 36px rgba(17, 24, 39, 0.08);
+            background: #fff;
         }
 
-        .chart-card .card-header {
-            background: #f7f9fc;
-            border-bottom: 1px solid #e8edf5;
-            font-weight: 700;
-        }
-
-        .chart-wrap {
-            position: relative;
-            min-height: 280px;
-        }
-
-        .users-board {
-            border: 0;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 14px 35px rgba(17, 24, 39, 0.08);
-            background: #ffffff;
-        }
-
-        .users-board-header {
-            background: linear-gradient(120deg, #123a7b 0%, #2258a8 100%);
+        .hero-card {
+            background: linear-gradient(135deg, #06162d 0%, #123a7b 50%, #1f6feb 100%);
             color: #fff;
-            padding: 1rem 1.25rem;
+            box-shadow: 0 18px 45px rgba(9, 29, 62, 0.22);
         }
 
-        .users-board-title {
+        .hero-card .card-body,
+        .section-card .card-body,
+        .kpi-card .card-body {
+            width: 100%;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        .hero-eyebrow,
+        .section-eyebrow,
+        .kpi-label,
+        .module-title,
+        .section-title,
+        .chart-title {
             margin: 0;
-            font-size: 1.05rem;
+        }
+
+        .hero-eyebrow {
+            margin-bottom: 0.35rem;
+            font-size: 0.76rem;
             font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .users-count-badge {
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            color: #fff;
-            font-weight: 600;
+        .hero-title {
+            margin: 0 0 0.65rem;
+            font-size: clamp(1.6rem, 2.2vw, 2.25rem);
+            font-weight: 800;
+        }
+
+        .hero-text,
+        .section-text,
+        .card-text-muted,
+        .table-muted,
+        .wallet-owner {
+            color: #6b7f9e;
+        }
+
+        .hero-text {
+            max-width: 60rem;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .hero-meta {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 1rem;
+            padding: 0.45rem 0.8rem;
             border-radius: 999px;
-            padding: 0.35rem 0.75rem;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #fff;
+            font-size: 0.84rem;
+            font-weight: 600;
         }
 
-        .users-table {
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .kpi-label {
+            color: #6b7f9e;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.35rem;
+        }
+
+        .kpi-value {
+            margin: 0;
+            color: #173058;
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.05;
+        }
+
+        .section-card {
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e6edf7;
+            background: #f8fbff;
+        }
+
+        .section-title {
+            color: #173058;
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .toolbar-card {
+            padding: 1rem;
+            border: 1px solid #e5edf8;
+            border-radius: 18px;
+            background: #f8fbff;
+        }
+
+        .table-shell {
+            overflow: auto;
+            border: 1px solid #e7edf6;
+            border-radius: 18px;
+            background: #fff;
+        }
+
+        .clean-table {
             margin-bottom: 0;
         }
 
-        .users-table thead th {
+        .clean-table thead th {
             background: #f7f9fc;
             color: #2f3f5a;
             font-size: 0.78rem;
@@ -132,817 +157,538 @@
             border-bottom: 1px solid #e8edf5;
             white-space: nowrap;
             padding: 0.85rem;
-            position: sticky;
-            top: 0;
-            z-index: 1;
         }
 
-        .users-table tbody td {
+        .clean-table tbody td {
             border-bottom: 1px solid #eef2f8;
             padding: 0.85rem;
             vertical-align: middle;
         }
 
-        .users-table tbody tr:hover {
+        .clean-table tbody tr:hover {
             background: #f9fbff;
-        }
-
-        .user-id-pill {
-            display: inline-block;
-            min-width: 36px;
-            text-align: center;
-            border-radius: 999px;
-            padding: 0.2rem 0.55rem;
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #1e3a5f;
-            background: #e8f1ff;
         }
 
         .avatar-fallback {
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: #eef3ff;
-            color: #264472;
-            font-weight: 700;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid #e3ebf8;
+            font-weight: 800;
+            background: #eef4ff;
+            color: #173058;
+            border: 1px solid #dbe6f7;
         }
 
-        .name-cell {
-            line-height: 1.15;
+        .user-name-main {
+            font-weight: 700;
+            color: #173058;
         }
 
-        .name-main {
-            font-weight: 600;
-            color: #1f2e49;
+        .user-name-sub,
+        .wallet-owner,
+        .table-muted {
+            font-size: 0.82rem;
+            color: #6b7f9e;
         }
 
-        .name-sub {
-            color: #7083a0;
-            font-size: 0.78rem;
-        }
-
-        .role-chip,
-        .status-chip {
+        .pill {
+            display: inline-flex;
+            align-items: center;
             border-radius: 999px;
             padding: 0.35rem 0.7rem;
             font-size: 0.74rem;
             font-weight: 700;
         }
 
-        .role-admin {
+        .pill-admin {
             background: #fff1bf;
             color: #7b5a00;
         }
 
-        .role-client {
-            background: #d7efff;
-            color: #0d4c73;
+        .pill-client {
+            background: #dff1ff;
+            color: #0d4f73;
         }
 
-        .status-active {
+        .pill-active {
             background: #d9f6e6;
             color: #0f6a40;
         }
 
-        .date-cell {
-            color: #5f7190;
-            font-size: 0.82rem;
-            white-space: nowrap;
+        .pill-soft {
+            background: #eaf2ff;
+            color: #0d4f9d;
         }
 
-        .users-table-wrap {
-            max-height: 52vh;
-            overflow: auto;
+        .module-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
 
-        .actions-cell {
-            min-width: 170px;
-            white-space: nowrap;
+        .module-card {
+            padding: 1rem;
+            border-radius: 18px;
+            border: 1px solid #e5ecf6;
+            background: #fff;
         }
 
-        .action-inline-form {
-            display: inline;
-        }
-
-        .wallet-toolbar {
-            gap: 0.75rem;
-        }
-
-        .wallet-toolbar .form-control,
-        .wallet-toolbar .form-select {
-            min-height: 42px;
-        }
-
-        .wallet-owner {
-            font-size: 0.82rem;
-            color: #5f7190;
-        }
-
-        .wallet-kpi-card {
-            border: 0;
+        .module-icon {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 14px;
-            box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
-            height: 100%;
+            margin-bottom: 0.75rem;
+            background: #eaf2ff;
+            color: #0d6efd;
         }
 
-        .wallet-kpi-label {
-            color: #5f7190;
-            font-size: 0.8rem;
+        .module-title {
             margin-bottom: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+            color: #173058;
+            font-weight: 700;
         }
 
-        .wallet-kpi-value {
-            color: #1f2e49;
-            font-weight: 800;
-            font-size: 1.55rem;
-            line-height: 1.1;
+        .module-text {
+            margin: 0;
+            color: #6b7f9e;
+            font-size: 0.88rem;
         }
 
-        .wallet-kpi-sub {
-            color: #6f85a8;
-            font-size: 0.8rem;
+        .wallet-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
 
-        .wallet-chart-wrap {
-            min-height: 250px;
-            position: relative;
+        .wallet-chart-grid {
+            display: grid;
+            grid-template-columns: 1.7fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
 
-        @media (max-width: 991.98px) {
-            .admin-page {
-                height: auto;
-                overflow: visible;
+        .chart-box {
+            min-height: 220px;
+            border-radius: 18px;
+            border: 1px solid #e5ecf6;
+            background: #fff;
+            padding: 1rem;
+        }
+
+        .chart-title {
+            color: #173058;
+            font-weight: 700;
+        }
+
+        .chart-subtitle {
+            margin: 0 0 0.85rem;
+            color: #6b7f9e;
+            font-size: 0.86rem;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #6b7f9e;
+            font-size: 0.9rem;
+            padding: 1rem 0 0.5rem;
+        }
+
+        @media (max-width: 1199.98px) {
+            .kpi-grid,
+            .module-grid,
+            .wallet-kpi-grid,
+            .wallet-chart-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .kpi-grid,
+            .module-grid,
+            .wallet-kpi-grid,
+            .wallet-chart-grid {
+                grid-template-columns: 1fr;
             }
 
-            .admin-menu-nav {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            .admin-menu-btn {
-                width: auto;
-                border-radius: 999px;
-                background: #f5f8ff;
-                color: #24416b;
-                border-color: #d9e2f2;
-            }
-
-            .admin-content {
-                padding-right: 0;
-            }
-
-            .users-table-wrap {
-                max-height: none;
+            .section-header,
+            .hero-card .card-body,
+            .section-card .card-body,
+            .kpi-card .card-body {
+                padding: 1rem;
             }
         }
     </style>
 {% endblock %}
 
-{% block footer %}{% endblock %}
-
 {% block body %}
-<div class="container-fluid px-4 mt-4 admin-page">
-    <h1 class="mb-3">Admin Dashboard</h1>
+    {% set total_users = total_users|default(stats.totalUsers|default(0)) %}
+    {% set active_clients = active_clients|default(stats.activeClients|default(0)) %}
+    {% set administrators = administrators|default(stats.administrators|default(0)) %}
+    {% set total_portefeuilles = total_portefeuilles|default(portefeuilles|length|default(0)) %}
+    {% set total_balance = total_balance|default(portefeuilleStats.totalSolde|default(total_solde_portefeuilles|default(0))) %}
+    {% set total_cards = total_cards|default(portefeuilleStats.totalCards|default(0)) %}
+    {% set total_solde_portefeuilles = total_solde_portefeuilles|default(portefeuilleStats.totalSolde|default(0)) %}
+    {% set proprietaires_count = proprietaires_count|default(portefeuilleStats.totalOwners|default(0)) %}
+    {% set cartes_count = cartes_count|default(portefeuilleStats.totalCards|default(0)) %}
+    {% set cartes_actives_count = cartes_actives_count|default(portefeuilleStats.activeCards|default(0)) %}
+    {% set devises_utilisees_count = devises_utilisees_count|default(portefeuilleStats.totalDevises|default(0)) %}
+    {% set card_types = card_types|default(portefeuilleStats.cardTypes|default([])) %}
+    {% set transactions_count = transactions_count|default(kpis.nb_transactions|default(0)) %}
 
-    <div class="row g-4 admin-layout">
-        <div class="col-lg-3">
-            <div class="card admin-sidebar">
-                <div class="card-body">
-                    <p class="admin-menu-group-title">Admin Menu</p>
-                    <div class="admin-menu-nav nav" role="tablist" aria-label="Admin menu tabs">
-                        <button class="admin-menu-btn" id="gestion-compte-tab" data-bs-toggle="tab" data-bs-target="#gestion-compte-pane" type="button" role="tab" aria-controls="gestion-compte-pane" aria-selected="false">gestion_compte</button>
-                        <button class="admin-menu-btn" id="gestion-depense-tab" data-bs-toggle="tab" data-bs-target="#gestion-depense-pane" type="button" role="tab" aria-controls="gestion-depense-pane" aria-selected="false">gestion_depense</button>
-                        <button class="admin-menu-btn" id="gestion-document-tab" data-bs-toggle="tab" data-bs-target="#gestion-document-pane" type="button" role="tab" aria-controls="gestion-document-pane" aria-selected="false">gestion_document</button>
-                        <button class="admin-menu-btn" id="gestion-service-produit-tab" data-bs-toggle="tab" data-bs-target="#gestion-service-produit-pane" type="button" role="tab" aria-controls="gestion-service-produit-pane" aria-selected="false">gestion_service_et_produit</button>
-                        <button class="admin-menu-btn active" id="gestion-user-tab" data-bs-toggle="tab" data-bs-target="#users-management-pane" type="button" role="tab" aria-controls="users-management-pane" aria-selected="true">gestion_user</button>
-                        <button class="admin-menu-btn" id="gestion-portefeuille-tab" data-bs-toggle="tab" data-bs-target="#gestion-portefeuille-pane" type="button" role="tab" aria-controls="gestion-portefeuille-pane" aria-selected="false">gestion-portefeuille</button>
-                    </div>
-                </div>
+    <div class="backoffice-dashboard">
+        <section class="card hero-card">
+            <div class="card-body">
+                <div class="hero-eyebrow">FinTrack backoffice</div>
+                <h1 class="hero-title">Admin dashboard</h1>
+                <p class="hero-text">A cleaner command center for the system. Keep an eye on users, wallets, cards and documents from a single organized view.</p>
+                <div class="hero-meta">Logged in as admin</div>
             </div>
-        </div>
+        </section>
 
-        <div class="col-lg-9">
-            <div class="tab-content admin-content">
-                <div class="tab-pane fade show active" id="users-management-pane" role="tabpanel" aria-labelledby="gestion-user-tab">
-                    <div class="alert alert-info">
-                        <strong>Users Management</strong> - All user statistics and management data are available below.
-                    </div>
+        <section class="kpi-grid" aria-label="KPI statistics">
+            <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Total users</p><p class="kpi-value">{{ total_users }}</p><p class="card-text-muted">System wide</p></div></div>
+            <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Active clients</p><p class="kpi-value">{{ active_clients }}</p><p class="card-text-muted">Client accounts</p></div></div>
+            <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Administrators</p><p class="kpi-value">{{ administrators }}</p><p class="card-text-muted">Admin users</p></div></div>
+            <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Portefeuilles</p><p class="kpi-value">{{ total_portefeuilles }}</p><p class="card-text-muted">Wallets tracked</p></div></div>
+            <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Total balance</p><p class="kpi-value">{{ total_balance|number_format(2, '.', ',') }}</p><p class="card-text-muted">Combined holdings</p></div></div>
+            <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Cards</p><p class="kpi-value">{{ total_cards }}</p><p class="card-text-muted">Virtual cards</p></div></div>
+        </section>
 
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <div class="card text-white bg-primary">
-                                <div class="card-body">
-                                    <h5 class="card-title">Total Users</h5>
-                                    <p class="card-text display-6">{{ stats.totalUsers }}</p>
-                                    <p class="card-text small">System wide</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <div class="card text-white bg-success">
-                                <div class="card-body">
-                                    <h5 class="card-title">Active Clients</h5>
-                                    <p class="card-text display-6">{{ stats.activeClients }}</p>
-                                    <p class="card-text small">Client accounts</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <div class="card text-white bg-warning">
-                                <div class="card-body">
-                                    <h5 class="card-title">Administrators</h5>
-                                    <p class="card-text display-6">{{ stats.administrators }}</p>
-                                    <p class="card-text small">Admin users</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 mb-3">
-                            <div class="card text-white bg-info">
-                                <div class="card-body">
-                                    <h5 class="card-title">System Status</h5>
-                                    <p class="card-text">{{ stats.activeUsers }} tracked users</p>
-                                    <p class="card-text small">System online</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-lg-7 mb-3 mb-lg-0">
-                            <div class="card chart-card">
-                                <div class="card-header">Statistics Overview (Bar)</div>
-                                <div class="card-body">
-                                    <div class="chart-wrap">
-                                        <canvas id="usersBarChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <section class="card section-card" id="users-management">
+            <div class="section-header">
+                <h2 class="section-title">Users Management</h2>
+                <p class="section-text">Search, sort and manage account data from one place.</p>
+            </div>
+            <div class="card-body">
+                <form class="toolbar-card mb-3" method="get" action="{{ path('admin_dashboard') }}#users-management">
+                    <div class="row g-3 align-items-end">
                         <div class="col-lg-5">
-                            <div class="card chart-card">
-                                <div class="card-header">Users Distribution (Circular)</div>
-                                <div class="card-body">
-                                    <div class="chart-wrap">
-                                        <canvas id="usersDoughnutChart"></canvas>
-                                    </div>
-                                </div>
-                            </div>
+                            <label class="form-label mb-1">Search</label>
+                            <input type="search" name="q" class="form-control" value="{{ search|default('') }}" placeholder="Name, email, role or ID">
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label mb-1">Sort</label>
+                            <select class="form-select" name="sort">
+                                <option value="id" {{ sort == 'id' ? 'selected' : '' }}>ID</option>
+                                <option value="nom" {{ sort == 'nom' ? 'selected' : '' }}>Name</option>
+                                <option value="email" {{ sort == 'email' ? 'selected' : '' }}>Email</option>
+                                <option value="role" {{ sort == 'role' ? 'selected' : '' }}>Role</option>
+                                <option value="solde" {{ sort == 'solde' ? 'selected' : '' }}>Balance</option>
+                                <option value="created_at" {{ sort == 'created_at' ? 'selected' : '' }}>Created date</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-4">
+                            <label class="form-label mb-1">Order</label>
+                            <select class="form-select" name="direction">
+                                <option value="desc" {{ direction == 'desc' ? 'selected' : '' }}>DESC</option>
+                                <option value="asc" {{ direction == 'asc' ? 'selected' : '' }}>ASC</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-3 d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                            <a href="{{ path('admin_dashboard') }}#users-management" class="btn btn-outline-secondary">Reset</a>
                         </div>
                     </div>
+                </form>
 
-                    <div class="card mb-4 users-board">
-                        <div class="users-board-header d-flex justify-content-between align-items-center">
-                            <h5 class="users-board-title">All Users</h5>
-                            <span class="users-count-badge">{{ stats.totalUsers }} users</span>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive users-table-wrap">
-                                <table class="table users-table align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Photo</th>
-                                            <th>Full Name</th>
-                                            <th>Email</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
-                                            <th>Balance</th>
-                                            <th>Created</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for user in users %}
-                                            {% set fullName = (user.prenom ~ ' ' ~ user.nom)|trim %}
-                                            <tr>
-                                                <td><span class="user-id-pill">{{ user.id }}</span></td>
-                                                <td>
-                                                    <div class="avatar-fallback">
-                                                        {{ (fullName ?: user.email)|slice(0,1)|upper }}
-                                                    </div>
-                                                </td>
-                                                <td class="name-cell">
-                                                    <div class="name-main">{{ fullName ?: 'No full name' }}</div>
-                                                    <div class="name-sub">ID: {{ user.id }}</div>
-                                                </td>
-                                                <td class="name-sub">{{ user.email }}</td>
-                                                <td>
-                                                    <span class="role-chip {{ user.role|lower == 'admin' ? 'role-admin' : 'role-client' }}">
-                                                        {{ user.role|upper }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="status-chip status-active">Active</span>
-                                                </td>
-                                                <td class="date-cell">{{ user.solde|number_format(2, '.', ',') }}</td>
-                                                <td class="date-cell">{{ user.created_at ? user.created_at|date('Y-m-d H:i') : '-' }}</td>
-                                                <td class="actions-cell">
-                                                    <button class="btn btn-sm btn-outline-primary" type="button">Edit</button>
-                                                    <button class="btn btn-sm btn-outline-danger ms-1" type="button">Delete</button>
-                                                </td>
-                                            </tr>
+                <div class="table-shell">
+                    <table class="table clean-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Photo</th>
+                                <th>Full name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Balance</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users|default([]) %}
+                                {% set fallbackName = (user.prenom|default('') ~ ' ' ~ user.nom|default(''))|trim %}
+                                {% set fullName = user.full_name|default(fallbackName) %}
+                                <tr>
+                                    <td><span class="pill pill-soft">{{ user.id }}</span></td>
+                                    <td><div class="avatar-fallback">{{ (fullName ?: user.email)|slice(0, 1)|upper }}</div></td>
+                                    <td>
+                                        <div class="user-name-main">{{ fullName ?: 'No full name' }}</div>
+                                        <div class="user-name-sub">ID: {{ user.id }}</div>
+                                    </td>
+                                    <td class="user-name-sub">{{ user.email }}</td>
+                                    <td><span class="pill {{ (user.role|lower == 'admin') ? 'pill-admin' : 'pill-client' }}">{{ user.role|upper }}</span></td>
+                                    <td><span class="pill pill-active">{{ user.is_active ? 'Active' : 'Inactive' }}</span></td>
+                                    <td class="table-muted">{{ user.solde|number_format(2, '.', ',') }}</td>
+                                    <td class="table-muted">
+                                        {% if user.created_at %}
+                                            {{ user.created_at|date('Y-m-d H:i') }}
                                         {% else %}
-                                            <tr>
-                                                <td colspan="9" class="text-center py-4">No users found.</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="gestion-compte-pane" role="tabpanel" aria-labelledby="gestion-compte-tab">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0">gestion_compte</h5>
-                            <span class="badge bg-primary">Profile</span>
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">Administrator profile section.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="gestion-depense-pane" role="tabpanel" aria-labelledby="gestion-depense-tab">
-                    <div class="card">
-                        <div class="card-header"><h5 class="card-title mb-0">gestion_depense</h5></div>
-                        <div class="card-body"><p class="mb-0">Section de gestion des depenses.</p></div>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="gestion-document-pane" role="tabpanel" aria-labelledby="gestion-document-tab">
-                    <div class="card">
-                        <div class="card-header"><h5 class="card-title mb-0">gestion_document</h5></div>
-                        <div class="card-body"><p class="mb-0">Section de gestion des documents.</p></div>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="gestion-service-produit-pane" role="tabpanel" aria-labelledby="gestion-service-produit-tab">
-                    <div class="card">
-                        <div class="card-header"><h5 class="card-title mb-0">gestion_service_et_produit</h5></div>
-                        <div class="card-body"><p class="mb-0">Section de gestion des services et produits.</p></div>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="gestion-portefeuille-pane" role="tabpanel" aria-labelledby="gestion-portefeuille-tab">
-                    <div class="card users-board">
-                        <div class="users-board-header d-flex justify-content-between align-items-center">
-                            <h5 class="users-board-title">Gestion Portefeuille</h5>
-                            <span class="users-count-badge" id="portefeuilleCountBadge">{{ portefeuilles|length }} portefeuilles</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3 mb-3">
-                                <div class="col-xl-2 col-md-4 col-6">
-                                    <div class="card wallet-kpi-card">
-                                        <div class="card-body">
-                                            <p class="wallet-kpi-label">Portefeuilles</p>
-                                            <p class="wallet-kpi-value mb-1">{{ portefeuilleStats.totalPortefeuilles }}</p>
-                                            <p class="wallet-kpi-sub mb-0">Nombre total</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-3 col-md-4 col-6">
-                                    <div class="card wallet-kpi-card">
-                                        <div class="card-body">
-                                            <p class="wallet-kpi-label">Solde Cumule</p>
-                                            <p class="wallet-kpi-value mb-1">{{ portefeuilleStats.totalSolde|number_format(2, '.', ',') }}</p>
-                                            <p class="wallet-kpi-sub mb-0">Somme des soldes</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-2 col-md-4 col-6">
-                                    <div class="card wallet-kpi-card">
-                                        <div class="card-body">
-                                            <p class="wallet-kpi-label">Proprietaires</p>
-                                            <p class="wallet-kpi-value mb-1">{{ portefeuilleStats.totalOwners }}</p>
-                                            <p class="wallet-kpi-sub mb-0">Clients distincts</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-2 col-md-4 col-6">
-                                    <div class="card wallet-kpi-card">
-                                        <div class="card-body">
-                                            <p class="wallet-kpi-label">Cartes</p>
-                                            <p class="wallet-kpi-value mb-1">{{ portefeuilleStats.totalCards }}</p>
-                                            <p class="wallet-kpi-sub mb-0">Total cartes</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-3 col-md-8 col-12">
-                                    <div class="card wallet-kpi-card">
-                                        <div class="card-body">
-                                            <p class="wallet-kpi-label">Cartes Actives</p>
-                                            <p class="wallet-kpi-value mb-1">{{ portefeuilleStats.activeCards }}</p>
-                                            <p class="wallet-kpi-sub mb-0">{{ portefeuilleStats.totalDevises }} devises utilisees</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row g-3 mb-4">
-                                <div class="col-lg-7">
-                                    <div class="card chart-card h-100">
-                                        <div class="card-header">Types de cartes</div>
-                                        <div class="card-body">
-                                            <div class="wallet-chart-wrap">
-                                                <canvas id="walletTypeChart"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-5">
-                                    <div class="card chart-card h-100">
-                                        <div class="card-header">Statistiques par type</div>
-                                        <div class="card-body">
-                                            <div class="table-responsive">
-                                                <table class="table table-sm align-middle mb-0">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Type</th>
-                                                            <th class="text-end">Nombre</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for item in portefeuilleStats.cardTypes %}
-                                                            <tr>
-                                                                <td>{{ item.type }}</td>
-                                                                <td class="text-end fw-bold">{{ item.total }}</td>
-                                                            </tr>
-                                                        {% else %}
-                                                            <tr>
-                                                                <td colspan="2" class="text-center text-muted py-3">Aucune carte trouvee.</td>
-                                                            </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <form method="get" action="{{ path('admin_dashboard') }}#gestion-portefeuille-pane" id="portefeuilleFilterForm" class="row wallet-toolbar align-items-end mb-3">
-                                <div class="col-lg-5 col-md-12">
-                                    <label class="form-label mb-1">Recherche dynamique</label>
-                                    <input
-                                        id="portefeuilleSearchInput"
-                                        type="search"
-                                        name="pf_q"
-                                        class="form-control"
-                                        value="{{ portefeuilleFilters.q }}"
-                                        placeholder="Nom portefeuille, devise, email propriétaire..."
-                                    >
-                                </div>
-                                <div class="col-lg-3 col-md-6">
-                                    <label class="form-label mb-1">Tri</label>
-                                    <select name="pf_sort" class="form-select">
-                                        <option value="created_at" {% if portefeuilleFilters.sort == 'created_at' %}selected{% endif %}>Date création</option>
-                                        <option value="id" {% if portefeuilleFilters.sort == 'id' %}selected{% endif %}>ID</option>
-                                        <option value="nom" {% if portefeuilleFilters.sort == 'nom' %}selected{% endif %}>Nom</option>
-                                        <option value="owner" {% if portefeuilleFilters.sort == 'owner' %}selected{% endif %}>Propriétaire</option>
-                                        <option value="solde_total" {% if portefeuilleFilters.sort == 'solde_total' %}selected{% endif %}>Solde</option>
-                                        <option value="devise" {% if portefeuilleFilters.sort == 'devise' %}selected{% endif %}>Devise</option>
-                                    </select>
-                                </div>
-                                <div class="col-lg-2 col-md-6">
-                                    <label class="form-label mb-1">Ordre</label>
-                                    <select name="pf_direction" class="form-select">
-                                        <option value="desc" {% if portefeuilleFilters.direction == 'desc' %}selected{% endif %}>DESC</option>
-                                        <option value="asc" {% if portefeuilleFilters.direction == 'asc' %}selected{% endif %}>ASC</option>
-                                    </select>
-                                </div>
-                                <div class="col-lg-2 col-md-12 d-grid">
-                                    <a class="btn btn-outline-secondary" href="{{ path('admin_dashboard') }}#gestion-portefeuille-pane">Reset</a>
-                                </div>
-                            </form>
-
-                            <div class="d-flex justify-content-end mb-3">
-                                <a
-                                    id="portefeuilleExportPdfLink"
-                                    class="btn btn-primary"
-                                    href="{{ path('admin_portefeuille_export_pdf', {
-                                        pf_q: portefeuilleFilters.q,
-                                        pf_sort: portefeuilleFilters.sort,
-                                        pf_direction: portefeuilleFilters.direction
-                                    }) }}"
-                                >
-                                    <i class="fas fa-file-pdf me-1"></i> Export PDF
-                                </a>
-                            </div>
-
-                            <div class="table-responsive users-table-wrap">
-                                <table class="table users-table align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Nom</th>
-                                            <th>Propriétaire</th>
-                                            <th>Solde</th>
-                                            <th>Devise</th>
-                                            <th>Créé le</th>
-                                            <th>Mis à jour</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="portefeuilleTableBody">
-                                        {% for portefeuille in portefeuilles %}
-                                            {% set ownerName = (portefeuille.owner_prenom ~ ' ' ~ portefeuille.owner_nom)|trim %}
-                                            <tr
-                                                data-search="{{ (portefeuille.id ~ ' ' ~ portefeuille.nom ~ ' ' ~ ownerName ~ ' ' ~ portefeuille.owner_email ~ ' ' ~ portefeuille.devise_principale)|lower }}"
-                                                data-id="{{ portefeuille.id }}"
-                                                data-nom="{{ portefeuille.nom|lower }}"
-                                                data-owner="{{ ownerName|lower }} {{ portefeuille.owner_email|lower }}"
-                                                data-solde="{{ portefeuille.solde_total }}"
-                                                data-devise="{{ portefeuille.devise_principale|lower }}"
-                                                data-created="{{ portefeuille.created_at ? portefeuille.created_at|date('U') : 0 }}"
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <button
+                                                class="btn btn-sm btn-outline-primary"
+                                                type="button"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editUserModal-{{ user.id }}"
                                             >
-                                                <td><span class="user-id-pill">{{ portefeuille.id }}</span></td>
-                                                <td class="name-main">{{ portefeuille.nom }}</td>
-                                                <td>
-                                                    <div class="name-main">{{ ownerName ?: portefeuille.owner_email }}</div>
-                                                    <div class="wallet-owner">{{ portefeuille.owner_email }}</div>
-                                                </td>
-                                                <td class="date-cell">{{ portefeuille.solde_total|number_format(2, '.', ',') }}</td>
-                                                <td><span class="role-chip role-client">{{ portefeuille.devise_principale }}</span></td>
-                                                <td class="date-cell">{{ portefeuille.created_at ? portefeuille.created_at|date('Y-m-d H:i') : '-' }}</td>
-                                                <td class="date-cell">{{ portefeuille.updated_at ? portefeuille.updated_at|date('Y-m-d H:i') : '-' }}</td>
-                                            </tr>
-                                        {% else %}
-                                            <tr id="portefeuilleServerEmptyRow">
-                                                <td colspan="7" class="text-center py-4">Aucun portefeuille trouvé.</td>
-                                            </tr>
-                                        {% endfor %}
-                                        <tr id="portefeuilleNoResultsRow" style="display: none;">
-                                            <td colspan="7" class="text-center py-4">Aucun resultat pour cette recherche.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                                Edit
+                                            </button>
+                                            {% if app.user and app.user.id == user.id %}
+                                                <button class="btn btn-sm btn-outline-danger" type="button" disabled>Delete</button>
+                                            {% else %}
+                                                <form method="post" action="{{ path('admin_backoffice_user_delete', {id: user.id}) }}" class="d-inline" onsubmit="return confirm('Delete this user?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('backoffice_delete_user_' ~ user.id) }}">
+                                                    <input type="hidden" name="q" value="{{ search|default('') }}">
+                                                    <input type="hidden" name="sort" value="{{ sort|default('created_at') }}">
+                                                    <input type="hidden" name="direction" value="{{ direction|default('desc') }}">
+                                                    <input type="hidden" name="pf_q" value="{{ portefeuilleFilters.q|default('') }}">
+                                                    <input type="hidden" name="pf_sort" value="{{ portefeuilleFilters.sort|default('created_at') }}">
+                                                    <input type="hidden" name="pf_direction" value="{{ portefeuilleFilters.direction|default('desc') }}">
+                                                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        {% for user in users|default([]) %}
+            {% set fallbackName = (user.prenom|default('') ~ ' ' ~ user.nom|default(''))|trim %}
+            {% set fullName = user.full_name|default(fallbackName) %}
+            <div class="modal fade" id="editUserModal-{{ user.id }}" tabindex="-1" aria-labelledby="editUserModalLabel-{{ user.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editUserModalLabel-{{ user.id }}">Edit User #{{ user.id }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="post" action="{{ path('admin_backoffice_user_update', {id: user.id}) }}">
+                            <div class="modal-body">
+                                <input type="hidden" name="_token" value="{{ csrf_token('backoffice_edit_user_' ~ user.id) }}">
+                                <input type="hidden" name="q" value="{{ search|default('') }}">
+                                <input type="hidden" name="sort" value="{{ sort|default('created_at') }}">
+                                <input type="hidden" name="direction" value="{{ direction|default('desc') }}">
+                                <input type="hidden" name="pf_q" value="{{ portefeuilleFilters.q|default('') }}">
+                                <input type="hidden" name="pf_sort" value="{{ portefeuilleFilters.sort|default('created_at') }}">
+                                <input type="hidden" name="pf_direction" value="{{ portefeuilleFilters.direction|default('desc') }}">
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="full_name_{{ user.id }}">Full Name</label>
+                                    <input class="form-control" id="full_name_{{ user.id }}" name="full_name" type="text" value="{{ fullName }}">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="email_{{ user.id }}">Email</label>
+                                    <input class="form-control" id="email_{{ user.id }}" name="email" type="email" value="{{ user.email }}" required>
+                                </div>
+
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="is_active_{{ user.id }}" name="is_active" value="1" {{ user.is_active ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_active_{{ user.id }}">Active account</label>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <section class="card section-card">
+            <div class="section-header">
+                <h2 class="section-title">System snapshot</h2>
+                <p class="section-text">A quick visual check of the current data.</p>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <div class="card kpi-card h-100"><div class="card-body"><p class="kpi-label">Transactions</p><p class="kpi-value">{{ transactions_count }}</p><p class="card-text-muted">Recorded transactions</p></div></div>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="card kpi-card h-100">
+                            <div class="card-body">
+                                <p class="kpi-label">Card types</p>
+                                <div class="table-shell">
+                                    <table class="table clean-table mb-0">
+                                        <thead><tr><th>Type</th><th class="text-end">Count</th></tr></thead>
+                                        <tbody>
+                                            {% for type in card_types %}
+                                                <tr><td>{{ type.type }}</td><td class="text-end fw-bold">{{ type.count|default(type.total)|default(0) }}</td></tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <section class="card section-card" id="module-shortcuts">
+            <div class="section-header">
+                <h2 class="section-title">Module shortcuts</h2>
+            </div>
+            <div class="card-body">
+                <div class="module-grid">
+                    <div class="module-card"><div class="module-icon"><i class="fas fa-user-gear"></i></div><div class="module-title">gestion_compte</div><p class="module-text">Administrator profile and account settings.</p></div>
+                    <div class="module-card"><div class="module-icon"><i class="fas fa-wallet"></i></div><div class="module-title">gestion_depense</div><p class="module-text">Expense operations and spending flows.</p></div>
+                    <div class="module-card"><div class="module-icon"><i class="fas fa-file-lines"></i></div><div class="module-title">gestion_document</div><p class="module-text">Documents, uploads and admin files.</p></div>
+                    <div class="module-card"><div class="module-icon"><i class="fas fa-box-open"></i></div><div class="module-title">gestion_service_et_produit</div><p class="module-text">Services and products catalog management.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card section-card" id="portefeuille-management">
+            <div class="section-header">
+                <h2 class="section-title">Gestion Portefeuille</h2>
+                <p class="section-text">Search, sort and export wallet data without leaving the dashboard.</p>
+            </div>
+            <div class="card-body">
+                <div class="wallet-kpi-grid">
+                    <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Portefeuilles</p><p class="kpi-value">{{ total_portefeuilles }}</p><p class="card-text-muted">Nombre total</p></div></div>
+                    <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Solde cumulé</p><p class="kpi-value">{{ total_solde_portefeuilles|number_format(2, '.', ',') }}</p><p class="card-text-muted">Somme des soldes</p></div></div>
+                    <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Propriétaires</p><p class="kpi-value">{{ proprietaires_count }}</p><p class="card-text-muted">Clients distincts</p></div></div>
+                    <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Cartes</p><p class="kpi-value">{{ cartes_count }}</p><p class="card-text-muted">Total cartes</p></div></div>
+                    <div class="card kpi-card"><div class="card-body"><p class="kpi-label">Cartes actives</p><p class="kpi-value">{{ cartes_actives_count }}</p><p class="card-text-muted">{{ devises_utilisees_count }} devises utilisées</p></div></div>
+                </div>
+
+                <div class="wallet-chart-grid">
+                    <div class="chart-box">
+                        <p class="chart-title">Types de cartes</p>
+                        <p class="chart-subtitle">Distribution of wallet card types.</p>
+                        <div class="table-shell">
+                            <table class="table clean-table mb-0">
+                                <thead><tr><th>Type</th><th class="text-end">Nombre</th></tr></thead>
+                                <tbody>
+                                    {% for type in card_types %}
+                                        <tr><td>{{ type.type }}</td><td class="text-end fw-bold">{{ type.count|default(type.total)|default(0) }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="chart-box">
+                        <p class="chart-title">Statistiques par type</p>
+                        <p class="chart-subtitle">Quick breakdown of the cards already in the database.</p>
+                        <div class="table-shell">
+                            <table class="table clean-table mb-0">
+                                <thead><tr><th>Type</th><th class="text-end">Count</th></tr></thead>
+                                <tbody>
+                                    {% for type in card_types %}
+                                        <tr><td>{{ type.type }}</td><td class="text-end fw-bold">{{ type.count|default(type.total)|default(0) }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <form class="toolbar-card mb-3" method="get" action="{{ path('admin_dashboard') }}#portefeuille-management">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-lg-5">
+                            <label class="form-label mb-1">Recherche dynamique</label>
+                            <input type="search" name="pf_q" class="form-control" value="{{ portefeuilleFilters.q|default('') }}" placeholder="Nom portefeuille, devise, email propriétaire...">
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label mb-1">Tri</label>
+                            <select class="form-select" name="pf_sort">
+                                <option value="id" {{ portefeuilleFilters.sort|default('created_at') == 'id' ? 'selected' : '' }}>ID</option>
+                                <option value="nom" {{ portefeuilleFilters.sort|default('created_at') == 'nom' ? 'selected' : '' }}>Nom</option>
+                                <option value="solde_total" {{ portefeuilleFilters.sort|default('created_at') == 'solde_total' ? 'selected' : '' }}>Solde</option>
+                                <option value="devise" {{ portefeuilleFilters.sort|default('created_at') == 'devise' ? 'selected' : '' }}>Devise</option>
+                                <option value="owner" {{ portefeuilleFilters.sort|default('created_at') == 'owner' ? 'selected' : '' }}>Propriétaire</option>
+                                <option value="created_at" {{ portefeuilleFilters.sort|default('created_at') == 'created_at' ? 'selected' : '' }}>Date création</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-6">
+                            <label class="form-label mb-1">Ordre</label>
+                            <select class="form-select" name="pf_direction">
+                                <option value="desc" {{ portefeuilleFilters.direction|default('desc') == 'desc' ? 'selected' : '' }}>DESC</option>
+                                <option value="asc" {{ portefeuilleFilters.direction|default('desc') == 'asc' ? 'selected' : '' }}>ASC</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-12 d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Apply</button>
+                            <a class="btn btn-outline-secondary" href="{{ path('admin_dashboard') }}#portefeuille-management">Reset</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-shell">
+                    <table class="table clean-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Propriétaire</th>
+                                <th>Solde</th>
+                                <th>Devise</th>
+                                <th>Créé le</th>
+                                <th>Mis à jour</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for portefeuille in portefeuilles|default([]) %}
+                                {% set fallbackOwnerName = (portefeuille.owner_prenom|default('') ~ ' ' ~ portefeuille.owner_nom|default(''))|trim %}
+                                {% set ownerName = portefeuille.owner_full_name|default(fallbackOwnerName) %}
+                                <tr>
+                                    <td><span class="pill pill-soft">{{ portefeuille.id }}</span></td>
+                                    <td class="user-name-main">{{ portefeuille.nom }}</td>
+                                    <td>
+                                        <div class="user-name-main">{{ ownerName ?: 'Unknown owner' }}</div>
+                                        <div class="wallet-owner">{{ portefeuille.owner_email|default('') }}</div>
+                                    </td>
+                                    <td class="table-muted">{{ portefeuille.solde_total|number_format(2, '.', ',') }}</td>
+                                    <td><span class="pill pill-client">{{ portefeuille.devise_principale }}</span></td>
+                                    <td class="table-muted">
+                                        {% if portefeuille.created_at %}
+                                            {{ portefeuille.created_at|date('Y-m-d H:i') }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="table-muted">
+                                        {% if portefeuille.updated_at %}
+                                            {{ portefeuille.updated_at|date('Y-m-d H:i') }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer-note">© 2026 FinTrack Admin. Tous droits réservés.</footer>
     </div>
-</div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        (function () {
-            const stats = {
-                totalUsers: {{ stats.totalUsers }},
-                activeUsers: {{ stats.activeUsers }},
-                activeClients: {{ stats.activeClients }},
-                administrators: {{ stats.administrators }}
-            };
-
-            const activateTabFromHash = function () {
-                if (!window.location.hash) {
-                    return;
-                }
-
-                const trigger = document.querySelector('[data-bs-target="' + window.location.hash + '"]');
-                if (!trigger) {
-                    return;
-                }
-
-                const tab = new bootstrap.Tab(trigger);
-                tab.show();
-            };
-
-            activateTabFromHash();
-
-            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (tabBtn) {
-                tabBtn.addEventListener('shown.bs.tab', function (event) {
-                    const target = event.target.getAttribute('data-bs-target');
-                    if (target) {
-                        window.history.replaceState(null, '', target);
-                    }
-                });
-            });
-
-            const inactiveUsers = Math.max(stats.totalUsers - stats.activeUsers, 0);
-            const clients = Math.max(stats.totalUsers - stats.administrators, 0);
-
-            const barCanvas = document.getElementById('usersBarChart');
-            if (barCanvas) {
-                new Chart(barCanvas, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Active Users', 'Inactive Users', 'Active Clients', 'Administrators'],
-                        datasets: [{
-                            label: 'Users',
-                            data: [stats.activeUsers, inactiveUsers, stats.activeClients, stats.administrators],
-                            backgroundColor: ['#2f6fed', '#f36a6a', '#18a979', '#f0ad4e'],
-                            borderRadius: 8,
-                            maxBarThickness: 54
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    precision: 0
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            }
-
-            const doughnutCanvas = document.getElementById('usersDoughnutChart');
-            if (doughnutCanvas) {
-                new Chart(doughnutCanvas, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Clients', 'Administrators'],
-                        datasets: [{
-                            data: [clients, stats.administrators],
-                            backgroundColor: ['#2383e2', '#f0ad4e'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '62%',
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
-                });
-            }
-
-            const portefeuilleForm = document.getElementById('portefeuilleFilterForm');
-            const portefeuilleSearchInput = document.getElementById('portefeuilleSearchInput');
-
-            const walletTypeChartCanvas = document.getElementById('walletTypeChart');
-            if (walletTypeChartCanvas) {
-                const walletTypeLabels = [{% for item in portefeuilleStats.cardTypes %}'{{ item.type|e('js') }}'{% if not loop.last %}, {% endif %}{% endfor %}];
-                const walletTypeData = [{% for item in portefeuilleStats.cardTypes %}{{ item.total }}{% if not loop.last %}, {% endif %}{% endfor %}];
-
-                if (walletTypeLabels.length > 0) {
-                    new Chart(walletTypeChartCanvas, {
-                        type: 'doughnut',
-                        data: {
-                            labels: walletTypeLabels,
-                            datasets: [{
-                                data: walletTypeData,
-                                backgroundColor: ['#1f77b4', '#2ca02c', '#ff7f0e', '#9467bd', '#d62728', '#17becf'],
-                                borderWidth: 0
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            cutout: '58%',
-                            plugins: {
-                                legend: {
-                                    position: 'bottom'
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-
-            if (portefeuilleForm && portefeuilleSearchInput) {
-                const portefeuilleSortSelect = portefeuilleForm.querySelector('select[name="pf_sort"]');
-                const portefeuilleDirectionSelect = portefeuilleForm.querySelector('select[name="pf_direction"]');
-                const portefeuilleTableBody = document.getElementById('portefeuilleTableBody');
-                const portefeuilleNoResultsRow = document.getElementById('portefeuilleNoResultsRow');
-                const portefeuilleServerEmptyRow = document.getElementById('portefeuilleServerEmptyRow');
-                const portefeuilleCountBadge = document.getElementById('portefeuilleCountBadge');
-                const portefeuilleExportPdfLink = document.getElementById('portefeuilleExportPdfLink');
-                const portefeuilleRows = portefeuilleTableBody
-                    ? Array.from(portefeuilleTableBody.querySelectorAll('tr[data-search]'))
-                    : [];
-
-                const normalize = function (value) {
-                    return String(value || '').toLowerCase().trim();
-                };
-
-                const buildPdfExportUrl = function () {
-                    if (!portefeuilleExportPdfLink || !portefeuilleSortSelect || !portefeuilleDirectionSelect) {
-                        return;
-                    }
-
-                    const params = new URLSearchParams({
-                        pf_q: portefeuilleSearchInput.value.trim(),
-                        pf_sort: portefeuilleSortSelect.value,
-                        pf_direction: portefeuilleDirectionSelect.value
-                    });
-
-                    portefeuilleExportPdfLink.href = "{{ path('admin_portefeuille_export_pdf') }}" + '?' + params.toString();
-                };
-
-                const compareValues = function (a, b, sortKey, direction) {
-                    const dir = direction === 'asc' ? 1 : -1;
-
-                    if (sortKey === 'id' || sortKey === 'solde_total' || sortKey === 'created_at') {
-                        const numA = Number(a) || 0;
-                        const numB = Number(b) || 0;
-                        return (numA - numB) * dir;
-                    }
-
-                    return String(a).localeCompare(String(b)) * dir;
-                };
-
-                const applyPortefeuilleView = function () {
-                    const query = normalize(portefeuilleSearchInput.value);
-                    const sortKey = portefeuilleSortSelect ? portefeuilleSortSelect.value : 'created_at';
-                    const direction = portefeuilleDirectionSelect ? portefeuilleDirectionSelect.value : 'desc';
-
-                    let visibleRows = portefeuilleRows.filter(function (row) {
-                        return normalize(row.dataset.search).includes(query);
-                    });
-
-                    visibleRows = visibleRows.sort(function (rowA, rowB) {
-                        const map = {
-                            id: 'id',
-                            nom: 'nom',
-                            owner: 'owner',
-                            solde_total: 'solde',
-                            devise: 'devise',
-                            created_at: 'created'
-                        };
-
-                        const dataKey = map[sortKey] || 'created';
-                        return compareValues(rowA.dataset[dataKey], rowB.dataset[dataKey], sortKey, direction);
-                    });
-
-                    portefeuilleRows.forEach(function (row) {
-                        row.style.display = 'none';
-                    });
-
-                    visibleRows.forEach(function (row) {
-                        row.style.display = '';
-                        if (portefeuilleTableBody) {
-                            portefeuilleTableBody.appendChild(row);
-                        }
-                    });
-
-                    if (portefeuilleNoResultsRow) {
-                        portefeuilleNoResultsRow.style.display = visibleRows.length === 0 && portefeuilleRows.length > 0 ? '' : 'none';
-                    }
-
-                    if (portefeuilleServerEmptyRow && portefeuilleRows.length > 0) {
-                        portefeuilleServerEmptyRow.style.display = 'none';
-                    }
-
-                    if (portefeuilleCountBadge) {
-                        portefeuilleCountBadge.textContent = visibleRows.length + ' portefeuilles';
-                    }
-
-                    buildPdfExportUrl();
-                };
-
-                portefeuilleForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
-                });
-
-                let portefeuilleDebounce;
-                portefeuilleSearchInput.addEventListener('input', function () {
-                    window.clearTimeout(portefeuilleDebounce);
-                    portefeuilleDebounce = window.setTimeout(function () {
-                        applyPortefeuilleView();
-                    }, 150);
-                });
-
-                if (portefeuilleSortSelect) {
-                    portefeuilleSortSelect.addEventListener('change', applyPortefeuilleView);
-                }
-
-                if (portefeuilleDirectionSelect) {
-                    portefeuilleDirectionSelect.addEventListener('change', applyPortefeuilleView);
-                }
-
-                applyPortefeuilleView();
-            }
-        })();
-    </script>
+    <script src="{{ asset('js/admin.js') }}"></script>
 {% endblock %}

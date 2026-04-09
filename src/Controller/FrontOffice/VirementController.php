@@ -2,7 +2,7 @@
 
 namespace App\Controller\FrontOffice;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -14,23 +14,23 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/virement')]
+#[Route('/dashboard/virement')]
 final class VirementController extends AbstractController
 {
     #[Route('/', name: 'front_virement_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $virements = $entityManager->getConnection()->fetchAllAssociative(
             'SELECT id, destinataire, montant, devise, frequence, prochaine_execution, actif, description
              FROM virement_programme
-             WHERE utilisateur_id = :uid
+             WHERE user_id = :uid
              ORDER BY created_at DESC',
             ['uid' => $user->getId()]
         );
@@ -43,10 +43,10 @@ final class VirementController extends AbstractController
     #[Route('/{id}', name: 'front_virement_show', methods: ['GET'])]
     public function show(int $id, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -58,7 +58,7 @@ final class VirementController extends AbstractController
              FROM virement_programme v
              LEFT JOIN carte_virtuelle cs ON cs.id = v.carte_source_id
              LEFT JOIN carte_virtuelle cd ON cd.id = v.carte_dest_id
-             WHERE v.id = :id AND v.utilisateur_id = :uid',
+             WHERE v.id = :id AND v.user_id = :uid',
             ['id' => $id, 'uid' => $user->getId()]
         );
 
@@ -74,10 +74,10 @@ final class VirementController extends AbstractController
     #[Route('/new', name: 'front_virement_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -104,7 +104,7 @@ final class VirementController extends AbstractController
             }
 
             $entityManager->getConnection()->insert('virement_programme', [
-                'utilisateur_id' => $user->getId(),
+                'user_id' => $user->getId(),
                 'carte_source_id' => $data['carte_source'],
                 'carte_dest_id' => $data['carte_dest'] ?: null,
                 'montant' => $data['montant'],
@@ -133,17 +133,17 @@ final class VirementController extends AbstractController
     #[Route('/{id}/edit', name: 'front_virement_edit', methods: ['GET', 'POST'])]
     public function edit(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $virement = $entityManager->getConnection()->fetchAssociative(
             'SELECT id, destinataire, montant, devise, carte_source_id, carte_dest_id, frequence, prochaine_execution, description
              FROM virement_programme
-             WHERE id = :id AND utilisateur_id = :uid',
+             WHERE id = :id AND user_id = :uid',
             ['id' => $id, 'uid' => $user->getId()]
         );
 
@@ -187,7 +187,7 @@ final class VirementController extends AbstractController
                 'updated_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             ], [
                 'id' => $id,
-                'utilisateur_id' => $user->getId(),
+                'user_id' => $user->getId(),
             ]);
 
             $this->addFlash('success', 'Virement mis à jour avec succès.');
@@ -203,15 +203,15 @@ final class VirementController extends AbstractController
     #[Route('/{id}/toggle', name: 'front_virement_toggle', methods: ['POST'])]
     public function toggle(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         if ($this->isCsrfTokenValid('toggle' . $id, $request->getPayload()->getString('_token'))) {
             $virement = $entityManager->getConnection()->fetchAssociative(
-                'SELECT id, actif FROM virement_programme WHERE id = :id AND utilisateur_id = :uid',
+                'SELECT id, actif FROM virement_programme WHERE id = :id AND user_id = :uid',
                 ['id' => $id, 'uid' => $user->getId()]
             );
 
@@ -229,15 +229,15 @@ final class VirementController extends AbstractController
     #[Route('/{id}', name: 'front_virement_delete', methods: ['POST'])]
     public function delete(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         if ($this->isCsrfTokenValid('delete' . $id, $request->getPayload()->getString('_token'))) {
             $entityManager->getConnection()->executeStatement(
-                'DELETE FROM virement_programme WHERE id = :id AND utilisateur_id = :uid',
+                'DELETE FROM virement_programme WHERE id = :id AND user_id = :uid',
                 ['id' => $id, 'uid' => $user->getId()]
             );
         }
@@ -245,13 +245,13 @@ final class VirementController extends AbstractController
         return $this->redirectToRoute('front_virement_index');
     }
 
-    private function getOwnedCardRows(EntityManagerInterface $entityManager, Utilisateur $user): array
+    private function getOwnedCardRows(EntityManagerInterface $entityManager, User $user): array
     {
         return $entityManager->getConnection()->fetchAllAssociative(
             'SELECT c.id, c.numero_carte, p.nom AS portefeuille_nom
              FROM carte_virtuelle c
              INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-             WHERE p.utilisateur_id = :uid
+             WHERE p.user_id = :uid
              ORDER BY c.id DESC',
             ['uid' => $user->getId()]
         );

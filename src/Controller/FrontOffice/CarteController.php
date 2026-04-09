@@ -2,7 +2,7 @@
 
 namespace App\Controller\FrontOffice;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -12,16 +12,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/carte')]
+#[Route('/dashboard/carte')]
 final class CarteController extends AbstractController
 {
     #[Route('/', name: 'front_carte_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -29,7 +29,7 @@ final class CarteController extends AbstractController
             'SELECT c.id, c.numero_carte, c.type, c.devise, c.solde, c.plafond, c.is_active
              FROM carte_virtuelle c
              INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-             WHERE p.utilisateur_id = :uid
+             WHERE p.user_id = :uid
              ORDER BY c.id DESC',
             ['uid' => $user->getId()]
         );
@@ -42,15 +42,15 @@ final class CarteController extends AbstractController
     #[Route('/new', name: 'front_carte_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $portefeuilleRows = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id, nom FROM portefeuille WHERE utilisateur_id = :uid ORDER BY nom ASC',
+            'SELECT id, nom FROM portefeuille WHERE user_id = :uid ORDER BY nom ASC',
             ['uid' => $user->getId()]
         );
 
@@ -125,10 +125,10 @@ final class CarteController extends AbstractController
     #[Route('/{id}/edit', name: 'front_carte_edit', methods: ['GET', 'POST'])]
     public function edit(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -136,7 +136,7 @@ final class CarteController extends AbstractController
             'SELECT c.id, c.type, c.devise, c.plafond, c.is_active, c.portefeuille_id
              FROM carte_virtuelle c
              INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-             WHERE c.id = :id AND p.utilisateur_id = :uid',
+             WHERE c.id = :id AND p.user_id = :uid',
             ['id' => $id, 'uid' => $user->getId()]
         );
 
@@ -145,7 +145,7 @@ final class CarteController extends AbstractController
         }
 
         $portefeuilleRows = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id, nom FROM portefeuille WHERE utilisateur_id = :uid ORDER BY nom ASC',
+            'SELECT id, nom FROM portefeuille WHERE user_id = :uid ORDER BY nom ASC',
             ['uid' => $user->getId()]
         );
 
@@ -215,10 +215,10 @@ final class CarteController extends AbstractController
     #[Route('/{id}', name: 'front_carte_show', methods: ['GET'])]
     public function show(int $id, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -227,7 +227,7 @@ final class CarteController extends AbstractController
                     p.id AS portefeuille_id, p.nom AS portefeuille_nom
              FROM carte_virtuelle c
              INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-             WHERE c.id = :id AND p.utilisateur_id = :uid',
+             WHERE c.id = :id AND p.user_id = :uid',
             ['id' => $id, 'uid' => $user->getId()]
         );
 
@@ -253,10 +253,10 @@ final class CarteController extends AbstractController
     #[Route('/{id}/toggle', name: 'front_carte_toggle', methods: ['POST'])]
     public function toggle(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -265,7 +265,7 @@ final class CarteController extends AbstractController
                 'SELECT c.id, c.is_active
                  FROM carte_virtuelle c
                  INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-                 WHERE c.id = :id AND p.utilisateur_id = :uid',
+                 WHERE c.id = :id AND p.user_id = :uid',
                 ['id' => $id, 'uid' => $user->getId()]
             );
 
@@ -283,10 +283,10 @@ final class CarteController extends AbstractController
     #[Route('/{id}', name: 'front_carte_delete', methods: ['POST'])]
     public function delete(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -294,7 +294,7 @@ final class CarteController extends AbstractController
             $entityManager->getConnection()->executeStatement(
                 'DELETE c FROM carte_virtuelle c
                  INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-                 WHERE c.id = :id AND p.utilisateur_id = :uid',
+                 WHERE c.id = :id AND p.user_id = :uid',
                 ['id' => $id, 'uid' => $user->getId()]
             );
         }

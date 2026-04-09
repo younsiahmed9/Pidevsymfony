@@ -29,7 +29,18 @@ class AuthController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function home(): Response
     {
-        return $this->render('home/index.html.twig');
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        if ($user instanceof User) {
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                return $this->redirectToRoute('admin_index');
+            }
+
+            return $this->redirectToRoute('front_dashboard_index');
+        }
+
+        return $this->render('frontoffice/home/index.html.twig');
     }
 
     #[Route('/login', name: 'app_login', methods: ['GET', 'POST'])]
@@ -232,7 +243,7 @@ class AuthController extends AbstractController
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-    #[Route('/admin/dashboard', name: 'app_admin_dashboard')]
+    #[Route('/admin/users-management', name: 'app_admin_dashboard')]
     public function adminDashboard(Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -447,6 +458,63 @@ class AuthController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash('success', 'Your profile has been updated successfully.');
+        return $this->redirectToRoute('app_home');
+    }
+
+    #[Route('/face-id/enroll', name: 'app_face_id_enroll', methods: ['POST'])]
+    public function enrollFaceId(Request $request): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        if (!$this->isCsrfTokenValid('face_id_enroll', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid Face ID form token. Please try again.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            $this->addFlash('error', 'User session is invalid. Please sign in again.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $rawDescriptor = trim((string) $request->request->get('face_descriptor', ''));
+        if ($rawDescriptor === '') {
+            $this->addFlash('error', 'No Face ID descriptor was provided.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $decoded = json_decode($rawDescriptor, true);
+        if (!is_array($decoded) || $decoded === []) {
+            $this->addFlash('error', 'Face ID descriptor format is invalid.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $normalized = [];
+        foreach ($decoded as $value) {
+            if (!is_numeric($value)) {
+                $this->addFlash('error', 'Face ID descriptor contains invalid values.');
+                return $this->redirectToRoute('app_home');
+            }
+
+            $floatValue = (float) $value;
+            if (is_nan($floatValue) || is_infinite($floatValue)) {
+                $this->addFlash('error', 'Face ID descriptor contains non-finite values.');
+                return $this->redirectToRoute('app_home');
+            }
+
+            $normalized[] = $floatValue;
+        }
+
+        if (count($normalized) < 32) {
+            $this->addFlash('error', 'Face ID descriptor is too short. Please try again.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $user->setFaceTemplate(json_encode($normalized, JSON_THROW_ON_ERROR));
+        $user->setUpdatedAt(new \DateTime());
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Face ID has been saved successfully.');
         return $this->redirectToRoute('app_home');
     }
 

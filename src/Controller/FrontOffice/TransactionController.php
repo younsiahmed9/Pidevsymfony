@@ -4,7 +4,7 @@ namespace App\Controller\FrontOffice;
 
 use App\Entity\CarteVirtuelle;
 use App\Entity\Transaction;
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,16 +18,16 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/transaction')]
+#[Route('/dashboard/transaction')]
 final class TransactionController extends AbstractController
 {
     #[Route('/', name: 'front_transaction_index', methods: ['GET'])]
     public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -43,10 +43,10 @@ final class TransactionController extends AbstractController
     #[Route('/export/excel', name: 'front_transaction_export_excel', methods: ['GET'])]
     public function exportExcel(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -88,10 +88,10 @@ final class TransactionController extends AbstractController
     #[Route('/export/pdf', name: 'front_transaction_export_pdf', methods: ['GET'])]
     public function exportPdf(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -148,10 +148,10 @@ final class TransactionController extends AbstractController
 
     private function handleTransactionForm(Request $request, EntityManagerInterface $entityManager, string $defaultType): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -159,7 +159,7 @@ final class TransactionController extends AbstractController
             'SELECT c.id, c.numero_carte, p.nom AS portefeuille_nom
              FROM carte_virtuelle c
              INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-             WHERE p.utilisateur_id = :uid
+             WHERE p.user_id = :uid
              ORDER BY c.id DESC',
             ['uid' => $user->getId()]
         );
@@ -354,7 +354,7 @@ final class TransactionController extends AbstractController
      *
      * @return array<int, array<string, mixed>>
      */
-    private function fetchFilteredTransactions(EntityManagerInterface $entityManager, Utilisateur $user, array $filters): array
+    private function fetchFilteredTransactions(EntityManagerInterface $entityManager, User $user, array $filters): array
     {
         $sql = 'SELECT t.id, t.date, t.type, t.statut, t.montant, t.devise, t.description,
                        cs.numero_carte AS source_numero,
@@ -363,8 +363,8 @@ final class TransactionController extends AbstractController
                 LEFT JOIN carte_virtuelle cs ON cs.id = t.carte_source_id
                 LEFT JOIN carte_virtuelle cd ON cd.id = t.carte_dest_id
                 WHERE (
-                    (cs.id IS NOT NULL AND cs.portefeuille_id IN (SELECT id FROM portefeuille WHERE utilisateur_id = :uid))
-                    OR (cd.id IS NOT NULL AND cd.portefeuille_id IN (SELECT id FROM portefeuille WHERE utilisateur_id = :uid))
+                    (cs.id IS NOT NULL AND cs.portefeuille_id IN (SELECT id FROM portefeuille WHERE user_id = :uid))
+                    OR (cd.id IS NOT NULL AND cd.portefeuille_id IN (SELECT id FROM portefeuille WHERE user_id = :uid))
                 )';
 
         $params = ['uid' => $user->getId()];

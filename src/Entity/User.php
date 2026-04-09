@@ -43,6 +43,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::BOOLEAN)]
     private ?bool $isActive = true;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2, options: ['default' => 0])]
+    private ?string $solde = '0.00';
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, columnDefinition: 'TIMESTAMP NOT NULL')]
     private ?\DateTimeInterface $createdAt = null;
 
@@ -139,6 +142,46 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getFaceTemplateAsString(): ?string
+    {
+        $faceTemplate = $this->faceTemplate;
+
+        if ($faceTemplate === null) {
+            return null;
+        }
+
+        if (is_resource($faceTemplate)) {
+            @rewind($faceTemplate);
+            $contents = stream_get_contents($faceTemplate);
+
+            return $contents !== false && $contents !== '' ? $contents : null;
+        }
+
+        $faceTemplateString = trim((string) $faceTemplate);
+
+        return $faceTemplateString !== '' ? $faceTemplateString : null;
+    }
+
+    public function getFaceDescriptor(): array
+    {
+        $faceTemplateString = $this->getFaceTemplateAsString();
+        if ($faceTemplateString === null) {
+            return [];
+        }
+
+        $decoded = json_decode($faceTemplateString, true);
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        return array_values(array_map(static fn ($value) => (float) $value, $decoded));
+    }
+
+    public function hasFaceTemplate(): bool
+    {
+        return $this->getFaceTemplateAsString() !== null;
+    }
+
     public function getRole(): ?string
     {
         return $this->role;
@@ -146,7 +189,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setRole(string $role): static
     {
-        $this->role = $role;
+        $this->role = strtoupper(trim($role));
 
         return $this;
     }
@@ -159,6 +202,64 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    public function getSolde(): ?string
+    {
+        return $this->solde;
+    }
+
+    public function setSolde(string $solde): static
+    {
+        $this->solde = $solde;
+
+        return $this;
+    }
+
+    // Compatibility methods to preserve existing templates/forms.
+    public function getPrenom(): ?string
+    {
+        $fullName = trim((string) $this->fullName);
+        if ($fullName === '') {
+            return null;
+        }
+
+        $parts = preg_split('/\s+/', $fullName) ?: [];
+
+        return $parts[0] ?? null;
+    }
+
+    public function getNom(): ?string
+    {
+        $fullName = trim((string) $this->fullName);
+        if ($fullName === '') {
+            return null;
+        }
+
+        $parts = preg_split('/\s+/', $fullName) ?: [];
+        if (count($parts) <= 1) {
+            return $parts[0] ?? null;
+        }
+
+        array_shift($parts);
+
+        return trim(implode(' ', $parts));
+    }
+
+    public function setPrenom(?string $prenom): static
+    {
+        $nom = trim((string) ($this->getNom() ?? ''));
+        $this->fullName = trim(trim((string) $prenom) . ' ' . $nom);
+
+        return $this;
+    }
+
+    public function setNom(?string $nom): static
+    {
+        $prenom = trim((string) ($this->getPrenom() ?? ''));
+        $this->fullName = trim($prenom . ' ' . trim((string) $nom));
 
         return $this;
     }
@@ -246,7 +347,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return (string)$this->email;
+        return (string) $this->email;
     }
 
     public function getPassword(): string

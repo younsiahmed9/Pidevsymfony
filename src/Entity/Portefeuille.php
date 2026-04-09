@@ -24,9 +24,9 @@ class Portefeuille
     #[ORM\Column(name: "devise_principale", type: "string", length: 10, options: ["default" => "TND"])]
     private ?string $devise_principale = "TND";
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: "portefeuilles")]
-    #[ORM\JoinColumn(name: "utilisateur_id", nullable: false)]
-    private ?Utilisateur $utilisateur = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false)]
+    private ?User $user = null;
 
     #[ORM\OneToMany(mappedBy: "portefeuille", targetEntity: CarteVirtuelle::class, cascade: ["persist", "remove"])]
     private Collection $cartes;
@@ -49,7 +49,8 @@ class Portefeuille
     public function getNom(): ?string { return $this->nom; }
     public function getSoldeTotal(): ?string { return $this->solde_total; }
     public function getDevisePrincipale(): ?string { return $this->devise_principale; }
-    public function getUtilisateur(): ?Utilisateur { return $this->utilisateur; }
+    public function getUser(): ?User { return $this->user; }
+    public function getUtilisateur(): ?User { return $this->user; }
     public function getCreatedAt(): ?\DateTimeInterface { return $this->created_at; }
     public function getUpdatedAt(): ?\DateTimeInterface { return $this->updated_at; }
 
@@ -57,7 +58,8 @@ class Portefeuille
     public function setNom(string $nom): self { $this->nom = $nom; return $this; }
     public function setSoldeTotal(string $solde_total): self { $this->solde_total = $solde_total; return $this; }
     public function setDevisePrincipale(string $devise_principale): self { $this->devise_principale = $devise_principale; return $this; }
-    public function setUtilisateur(?Utilisateur $utilisateur): self { $this->utilisateur = $utilisateur; return $this; }
+    public function setUser(?User $user): self { $this->user = $user; return $this; }
+    public function setUtilisateur(?User $utilisateur): self { return $this->setUser($utilisateur); }
     public function setCreatedAt(\DateTimeInterface $created_at): self { $this->created_at = $created_at; return $this; }
     public function setUpdatedAt(\DateTimeInterface $updated_at): self { $this->updated_at = $updated_at; return $this; }
 

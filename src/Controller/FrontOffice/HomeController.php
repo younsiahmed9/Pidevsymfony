@@ -2,21 +2,21 @@
 
 namespace App\Controller\FrontOffice;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
-    #[Route('/', name: 'front_home_index', methods: ['GET'])]
+    #[Route('/front-home', name: 'front_home_index', methods: ['GET'])]
     public function index(): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if ($user instanceof Utilisateur) {
-            if (strtolower(trim((string) $user->getUserIdentifier())) === 'admin@fintrack.com') {
+        if ($user instanceof User) {
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
                 return $this->redirectToRoute('admin_index');
             }
 
@@ -26,17 +26,17 @@ final class HomeController extends AbstractController
         return $this->render('frontoffice/home/index.html.twig');
     }
 
-    #[Route('/dashboard', name: 'app_dashboard_entry', methods: ['GET'])]
+    #[Route('/dashboard/entry', name: 'app_dashboard_entry', methods: ['GET'])]
     public function dashboardEntry(): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
-        if (strtolower(trim((string) $user->getUserIdentifier())) === 'admin@fintrack.com') {
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return $this->redirectToRoute('admin_index');
         }
 

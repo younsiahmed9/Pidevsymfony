@@ -16,6 +16,70 @@
     
     <!-- Main Style Sheet (Asset Symfony) -->
     <link rel="stylesheet" href="{{ asset('frontoffice/css/style.css') }}">
+    <style>
+        .btn-success,
+        .btn-primary,
+        .btn-outline-success,
+        .btn-outline-primary,
+        .bg-success,
+        .bg-success-subtle,
+        .text-success {
+            --bs-success-rgb: 13, 110, 253;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active,
+        .btn-primary.active {
+            background-color: #0b5ed7 !important;
+            border-color: #0a58ca !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-primary {
+            color: #0d6efd !important;
+            border-color: #0d6efd !important;
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus,
+        .btn-outline-primary:active,
+        .btn-outline-primary.active {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+
+        .btn-success {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+
+        .btn-outline-success {
+            color: #0d6efd !important;
+            border-color: #0d6efd !important;
+        }
+
+        .btn-outline-success:hover,
+        .btn-outline-success:focus,
+        .btn-outline-success:active,
+        .btn-outline-success.active {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+
+        .bg-success { background-color: #0d6efd !important; }
+        .bg-success-subtle { background-color: rgba(13, 110, 253, 0.15) !important; }
+        .text-success { color: #0d6efd !important; }
+    </style>
 
     {% block stylesheets %}{% endblock %}
 </head>

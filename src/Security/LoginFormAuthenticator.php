@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,9 +39,9 @@ final class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, $token, string $firewallName): ?Response
     {
-        $email = strtolower(trim((string) $request->request->get('email', '')));
+        $user = $token->getUser();
 
-        if ($email === 'admin@fintrack.com') {
+        if ($user instanceof User && in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return new RedirectResponse($this->urlGenerator->generate('admin_index'));
         }
 

@@ -2,24 +2,24 @@
 
 namespace App\Controller\FrontOffice;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class DashboardController extends AbstractController
 {
-    #[Route('/user/dashboard', name: 'front_dashboard_index', methods: ['GET'])]
+    #[Route('/dashboard', name: 'front_dashboard_index', methods: ['GET'])]
     public function index(): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
-        if (strtolower(trim((string) $user->getUserIdentifier())) === 'admin@fintrack.com') {
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return $this->redirectToRoute('admin_index');
         }
 

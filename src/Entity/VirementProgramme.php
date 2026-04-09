@@ -14,9 +14,9 @@ class VirementProgramme
     #[ORM\Column(type: "bigint")]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(name: "utilisateur_id", nullable: false)]
-    private ?Utilisateur $utilisateur = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false)]
+    private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: CarteVirtuelle::class)]
     #[ORM\JoinColumn(name: "carte_source_id", referencedColumnName: "id", nullable: true)]
@@ -73,7 +73,8 @@ class VirementProgramme
 
     // Getters
     public function getId(): ?int { return $this->id; }
-    public function getUtilisateur(): ?Utilisateur { return $this->utilisateur; }
+    public function getUser(): ?User { return $this->user; }
+    public function getUtilisateur(): ?User { return $this->user; }
     public function getCarteSource(): ?CarteVirtuelle { return $this->carte_source; }
     public function getCarteDest(): ?CarteVirtuelle { return $this->carte_dest; }
     public function getMontant(): ?string { return $this->montant; }
@@ -91,7 +92,8 @@ class VirementProgramme
     public function getLastExecuted(): ?\DateTimeInterface { return $this->last_executed; }
 
     // Setters
-    public function setUtilisateur(?Utilisateur $utilisateur): self { $this->utilisateur = $utilisateur; return $this; }
+    public function setUser(?User $user): self { $this->user = $user; return $this; }
+    public function setUtilisateur(?User $utilisateur): self { return $this->setUser($utilisateur); }
     public function setCarteSource(?CarteVirtuelle $carte_source): self { $this->carte_source = $carte_source; return $this; }
     public function setCarteDest(?CarteVirtuelle $carte_dest): self { $this->carte_dest = $carte_dest; return $this; }
     public function setMontant(string $montant): self { $this->montant = $montant; return $this; }

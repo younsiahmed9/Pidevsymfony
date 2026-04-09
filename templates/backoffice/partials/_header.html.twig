@@ -1,12 +1,32 @@
+{% set displayName = app.user ? (app.user.fullName|default('Admin User')) : 'Admin User' %}
+{% set roleLabel = app.user ? (app.user.roles|first|default('ROLE_ADMIN')|replace({'ROLE_': ''})|lower|title) : 'Manager' %}
+
 <header class="topbar">
-    <input class="search" type="text" placeholder="What are you looking for?">
+    <div class="topbar-brand-group">
+        <a class="topbar-brand" href="{{ path('admin_index') }}" aria-label="FinTrack Home">
+            <img src="{{ asset('images/logo.png') }}" alt="FinTrack logo" class="topbar-logo">
+        </a>
+        <div class="topbar-copy">
+            <span class="topbar-eyebrow">Backoffice</span>
+            <strong class="topbar-title">Admin dashboard</strong>
+            <span class="topbar-subtitle">Manage users, wallets and system modules</span>
+        </div>
+    </div>
+
+    <form class="topbar-search" action="{{ path('admin_dashboard') }}" method="get" role="search">
+        <i class="fas fa-search topbar-search-icon" aria-hidden="true"></i>
+        <input class="search" type="search" name="q" placeholder="Search users, wallets, email..." value="{{ app.request.query.get('q', '') }}">
+    </form>
+
     <div class="topbar-actions">
-        <button class="notif-btn" type="button" aria-label="Notifications">🔔</button>
+        <button class="notif-btn" type="button" aria-label="Notifications">
+            <i class="fas fa-bell"></i>
+        </button>
         <div class="user-info">
-            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="avatar">
+            <div class="avatar">{{ displayName|slice(0, 1)|upper }}</div>
             <div>
-                <div class="user-name">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Admin User' }}</div>
-                <div class="user-role">{{ app.user ? (app.user.roles|join(', ')) : 'Manager' }}</div>
+                <div class="user-name">{{ displayName }}</div>
+                <div class="user-role">{{ roleLabel }}</div>
             </div>
         </div>
     </div>

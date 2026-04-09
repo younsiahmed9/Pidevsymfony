@@ -1,39 +1,41 @@
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set displayName = app.user ? (app.user.fullName|default('Admin User')) : 'Admin User' %}
+{% set roleLabel = app.user ? (app.user.roles|first|default('ROLE_ADMIN')|replace({'ROLE_': ''})|lower|title) : 'Admin' %}
+
 <aside class="sidebar">
-    <div class="logo">FinTrack</div>
-    <nav class="main-menu">
-        {% set currentRoute = app.request.attributes.get('_route') %}
-        <ul>
+    <div class="sidebar-brand">
+        <a class="sidebar-brand-link" href="{{ path('admin_dashboard') }}" aria-label="FinTrack admin home">
+            <img src="{{ asset('images/logo.png') }}" alt="FinTrack logo" class="sidebar-logo">
+            <div>
+                <span class="sidebar-brand-name">FinTrack</span>
+                <span class="sidebar-brand-caption">Admin System</span>
+            </div>
+        </a>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Backoffice navigation">
+        <p class="sidebar-section-label">Navigation</p>
+        <ul class="sidebar-list">
             <li class="{{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
-                <a href="{{ path('admin_dashboard') }}" class="text-decoration-none text-reset"><span>Overview</span></a>
+                <a href="{{ path('admin_dashboard') }}">Overview</a>
             </li>
-            <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Wallet</span></a>
-            </li>
-            <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Debit Card</span></a>
-            </li>
-            <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Analytics</span></a>
-            </li>
-            <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Log Activity</span></a>
-            </li>
+            <li><a href="{{ path('admin_dashboard') }}#users-management">Users</a></li>
+            <li><a href="{{ path('admin_dashboard') }}#portefeuille-management">Portefeuille</a></li>
+            <li><a href="{{ path('admin_dashboard') }}#module-shortcuts">Modules</a></li>
         </ul>
     </nav>
-    <div class="preference">
-        <ul>
-            <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Help Center</span></a>
-            </li>
-            <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Settings</span></a>
-            </li>
-            <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Report</span></a>
-            </li>
-            <li>
-                <a href="{{ path('app_logout') }}" class="text-decoration-none text-reset"><span>Logout</span></a>
-            </li>
-        </ul>
+
+    <div class="sidebar-footer">
+        <p class="sidebar-section-label">Account</p>
+        <div class="sidebar-user-card">
+            <div class="sidebar-user-avatar">{{ displayName|slice(0, 1)|upper }}</div>
+            <div>
+                <div class="sidebar-user-name">{{ displayName }}</div>
+                <div class="sidebar-user-role">{{ roleLabel }}</div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="{{ path('app_logout') }}" class="btn btn-outline-light btn-sm w-100">Logout</a>
+        </div>
     </div>
 </aside>

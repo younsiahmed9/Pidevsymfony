@@ -2,7 +2,7 @@
 
 namespace App\Controller\FrontOffice;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -11,21 +11,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/portefeuille')]
+#[Route('/dashboard/portefeuille')]
 final class PortefeuilleController extends AbstractController
 {
     #[Route('/', name: 'front_portefeuille_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $portefeuilles = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id, nom, devise_principale, solde_total FROM portefeuille WHERE utilisateur_id = :uid ORDER BY id DESC',
+            'SELECT id, nom, devise_principale, solde_total FROM portefeuille WHERE user_id = :uid ORDER BY id DESC',
             ['uid' => $user->getId()]
         );
 
@@ -37,10 +37,10 @@ final class PortefeuilleController extends AbstractController
     #[Route('/new', name: 'front_portefeuille_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -66,7 +66,7 @@ final class PortefeuilleController extends AbstractController
                 'nom' => $data['nom'],
                 'solde_total' => '0.00',
                 'devise_principale' => $data['devise_principale'],
-                'utilisateur_id' => $user->getId(),
+                'user_id' => $user->getId(),
                 'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
                 'updated_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             ]);
@@ -82,15 +82,15 @@ final class PortefeuilleController extends AbstractController
     #[Route('/{id}/edit', name: 'front_portefeuille_edit', methods: ['GET', 'POST'])]
     public function edit(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $portefeuille = $entityManager->getConnection()->fetchAssociative(
-            'SELECT id, nom, devise_principale FROM portefeuille WHERE id = :id AND utilisateur_id = :uid',
+            'SELECT id, nom, devise_principale FROM portefeuille WHERE id = :id AND user_id = :uid',
             ['id' => $id, 'uid' => $user->getId()]
         );
 
@@ -122,7 +122,7 @@ final class PortefeuilleController extends AbstractController
                 'updated_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             ], [
                 'id' => $id,
-                'utilisateur_id' => $user->getId(),
+                'user_id' => $user->getId(),
             ]);
 
             return $this->redirectToRoute('front_portefeuille_index');
@@ -136,15 +136,15 @@ final class PortefeuilleController extends AbstractController
     #[Route('/{id}', name: 'front_portefeuille_show', methods: ['GET'])]
     public function show(int $id, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $portefeuille = $entityManager->getConnection()->fetchAssociative(
-            'SELECT id, nom, devise_principale, solde_total FROM portefeuille WHERE id = :id AND utilisateur_id = :uid',
+            'SELECT id, nom, devise_principale, solde_total FROM portefeuille WHERE id = :id AND user_id = :uid',
             ['id' => $id, 'uid' => $user->getId()]
         );
 
@@ -180,16 +180,16 @@ final class PortefeuilleController extends AbstractController
     #[Route('/{id}', name: 'front_portefeuille_delete', methods: ['POST'])]
     public function delete(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         if ($this->isCsrfTokenValid('delete' . $id, $request->getPayload()->getString('_token'))) {
             $entityManager->getConnection()->executeStatement(
-                'DELETE FROM portefeuille WHERE id = :id AND utilisateur_id = :uid',
+                'DELETE FROM portefeuille WHERE id = :id AND user_id = :uid',
                 ['id' => $id, 'uid' => $user->getId()]
             );
         }
