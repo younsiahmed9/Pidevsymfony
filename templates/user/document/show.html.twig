@@ -1,0 +1,24 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Document: {{ document.titre }} - FinTrack{% endblock %}
+{% block page_title %}Détail du Document{% endblock %}
+{% block page_subtitle %}{{ document.titre }}{% endblock %}
+{% block content %}
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ path('user_document_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+    <a href="{{ path('user_document_edit', {id: document.id}) }}" class="btn-primary-custom"><i class="fas fa-edit"></i> Modifier</a>
+</div>
+<div class="form-card" style="max-width:700px;">
+    <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations du document</h6>
+    <div class="row g-3">
+        <div class="col-md-6"><label class="text-muted small">Titre</label><div class="fw-semibold">{{ document.titre }}</div></div>
+        <div class="col-md-6"><label class="text-muted small">Type</label><div class="fw-semibold text-capitalize">{{ document.typeDocument }}</div></div>
+        <div class="col-md-6"><label class="text-muted small">Catégorie</label><div class="fw-semibold">{{ document.categorie is not null ? document.categorie.nomCategorie : '-' }}</div></div>
+        <div class="col-md-6"><label class="text-muted small">Dossier</label><div class="fw-semibold">{{ document.dossier is not null ? document.dossier.nomDossier : '-' }}</div></div>
+        <div class="col-md-6"><label class="text-muted small">Statut</label><div><span class="badge-status badge-{{ document.statut }}">{{ document.statut }}</span></div></div>
+        <div class="col-md-6"><label class="text-muted small">Date doc.</label><div class="fw-semibold">{{ document.dateDocument ? document.dateDocument|date('d/m/Y') : '-' }}</div></div>
+        <div class="col-md-6"><label class="text-muted small">Date échéance</label><div class="fw-semibold">{{ document.dateEcheance ? document.dateEcheance|date('d/m/Y') : '-' }}</div></div>
+        <div class="col-md-6"><label class="text-muted small">Fichier</label><div><code>{{ document.cheminFichier }}</code></div></div>
+        {% if document.description %}<div class="col-12"><label class="text-muted small">Description</label><div>{{ document.description }}</div></div>{% endif %}
+    </div>
+</div>
+{% endblock %}

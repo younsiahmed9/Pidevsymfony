@@ -1,0 +1,180 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Simulateur de Crédit - FinTrack{% endblock %}
+{% block page_title %}Nouvelle demande de crédit{% endblock %}
+{% block page_subtitle %}Simulez votre mensualité avant de soumettre{% endblock %}
+
+{% block content %}
+<div class="mb-4 d-flex align-items-center gap-3">
+    <a href="{{ path('user_credit_index') }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+</div>
+
+{{ form_start(form, {'attr': {'id': 'creditForm'}}) }}
+<div class="row g-4">
+
+    {# LEFT COLUMN : Form #}
+    <div class="col-lg-7">
+        <div class="form-card">
+            <div class="d-flex align-items-center gap-2 mb-4 pb-3 border-bottom">
+                <div style="width:36px;height:36px;border-radius:10px;background:#f0fdfa;display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-file-invoice-dollar" style="color:#0d9488;"></i>
+                </div>
+                <div><h6 class="mb-0 fw-semibold">Informations de la demande</h6><small class="text-muted">Remplissez les champs ci-dessous</small></div>
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.compte, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-university" style="color:#0d9488;"></i></span>
+                    {{ form_widget(form.compte) }}
+                </div>
+                {{ form_errors(form.compte) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.montant, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                <div class="input-group">
+                    <span class="input-group-text fw-medium">DT</span>
+                    {{ form_widget(form.montant, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Ex : 15 000'}}) }}
+                </div>
+                <div class="mt-2">
+                    <input type="range" class="form-range" id="montantSlider" min="500" max="200000" step="500" value="1000">
+                    <div class="d-flex justify-content-between" style="font-size:.72rem;color:#94a3b8;">
+                        <span>500 DT</span><span id="sliderMLabel">1 000 DT</span><span>200 000 DT</span>
+                    </div>
+                </div>
+                {{ form_errors(form.montant) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.dureeMois, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt" style="color:#0d9488;"></i></span>
+                    {{ form_widget(form.dureeMois, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Ex : 36'}}) }}
+                    <span class="input-group-text">mois</span>
+                </div>
+                <div class="mt-2">
+                    <input type="range" class="form-range" id="dureeSlider" min="6" max="360" step="6" value="24">
+                    <div class="d-flex justify-content-between" style="font-size:.72rem;color:#94a3b8;">
+                        <span>6 mois</span><span id="sliderDLabel">24 mois</span><span>360 mois</span>
+                    </div>
+                </div>
+                {{ form_errors(form.dureeMois) }}
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.tauxInteret, null, {'label_attr': {'class': 'form-label fw-semibold'}}) }}
+                <div class="input-group">
+                    {{ form_widget(form.tauxInteret, {'attr': {'class': 'form-control', 'placeholder': 'Ex : 8.00'}}) }}
+                    <span class="input-group-text">% / an</span>
+                </div>
+                {{ form_errors(form.tauxInteret) }}
+            </div>
+
+            <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                <button type="submit" class="btn flex-grow-1 fw-bold py-3" style="background:linear-gradient(90deg,#0d9488,#0891b2);color:#fff;border-radius:12px;border:none;">
+                    <i class="fas fa-paper-plane me-2"></i>Soumettre la demande
+                </button>
+                <a href="{{ path('user_credit_index') }}" class="btn btn-outline-secondary" style="border-radius:12px;">Annuler</a>
+            </div>
+        </div>
+    </div>
+
+    {# RIGHT COLUMN : Simulator #}
+    <div class="col-lg-5">
+        <div class="table-card mb-4" style="border-top:3px solid #0d9488;">
+            <div class="table-header">
+                <h6 class="mb-0 fw-semibold"><i class="fas fa-calculator me-2" style="color:#0d9488;"></i>Simulateur en temps réel</h6>
+                <span class="badge" style="background:#f0fdfa;color:#0d9488;font-size:.7rem;">LIVE</span>
+            </div>
+            <div style="padding:1.5rem;">
+                <div class="text-center mb-4">
+                    <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:.4rem;">Mensualité estimée</div>
+                    <div id="mensualiteDisplay" style="font-size:3rem;font-weight:800;color:#0d9488;line-height:1;">—</div>
+                    <div style="font-size:.8rem;color:#64748b;margin-top:.3rem;">DT / mois</div>
+                </div>
+                <div style="background:#f8fafc;border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+                    <div class="d-flex justify-content-between py-1 border-bottom"><span class="small text-muted">Montant</span><span class="small fw-semibold" id="sumMontant">—</span></div>
+                    <div class="d-flex justify-content-between py-1 border-bottom"><span class="small text-muted">Taux annuel</span><span class="small fw-semibold" id="sumTaux">—</span></div>
+                    <div class="d-flex justify-content-between py-1 border-bottom"><span class="small text-muted">Durée</span><span class="small fw-semibold" id="sumDuree">—</span></div>
+                    <div class="d-flex justify-content-between py-1 border-bottom"><span class="small text-muted">Coût total</span><span class="small fw-semibold text-danger" id="sumCout">—</span></div>
+                    <div class="d-flex justify-content-between py-1"><span class="small text-muted">Total remboursé</span><span class="small fw-bold" id="sumTotal">—</span></div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span style="font-size:.78rem;font-weight:600;">Score de solvabilité</span>
+                        <span id="scoreLabel" style="font-size:.78rem;font-weight:700;color:#94a3b8;">—</span>
+                    </div>
+                    <div style="background:#e2e8f0;border-radius:100px;height:10px;overflow:hidden;">
+                        <div id="scoreBar" style="height:100%;border-radius:100px;width:0%;transition:width .4s,background .4s;"></div>
+                    </div>
+                    <div id="scoreMsg" class="mt-2" style="font-size:.75rem;color:#64748b;min-height:1.2rem;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ form_end(form) }}
+
+<style>
+.form-range::-webkit-slider-thumb { background:#0d9488; }
+.form-range::-moz-range-thumb { background:#0d9488; }
+</style>
+
+<script>
+const comptesData = {{ comptesJson|raw }};
+const elCompte  = document.getElementById('credit_compte');
+const elMontant = document.getElementById('{{ form.montant.vars.id }}');
+const elDuree   = document.getElementById('{{ form.dureeMois.vars.id }}');
+const elTaux    = document.getElementById('{{ form.tauxInteret.vars.id }}');
+const sliderM   = document.getElementById('montantSlider');
+const sliderD   = document.getElementById('dureeSlider');
+
+// Sync sliders
+sliderM.addEventListener('input', () => { elMontant.value = sliderM.value; document.getElementById('sliderMLabel').textContent = fmt(sliderM.value,0)+' DT'; simuler(); });
+elMontant.addEventListener('input', () => { sliderM.value = Math.min(Math.max(parseFloat(elMontant.value)||0,500),200000); simuler(); });
+sliderD.addEventListener('input', () => { elDuree.value = sliderD.value; document.getElementById('sliderDLabel').textContent = sliderD.value+' mois'; simuler(); });
+elDuree.addEventListener('input', () => { sliderD.value = Math.min(Math.max(parseInt(elDuree.value)||0,6),360); simuler(); });
+elTaux.addEventListener('input', simuler);
+if(elCompte) elCompte.addEventListener('change', simuler);
+
+function simuler() {
+    const M = parseFloat(elMontant?.value)||0;
+    const N = parseInt(elDuree?.value)||0;
+    const T = parseFloat(elTaux?.value)||0;
+    document.getElementById('sumMontant').textContent = M>0 ? fmt(M,2)+' DT' : '—';
+    document.getElementById('sumTaux').textContent    = T>0 ? T.toFixed(2)+'%' : '—';
+    document.getElementById('sumDuree').textContent   = N>0 ? N+' mois' : '—';
+    if (!M||!N||!T) { document.getElementById('mensualiteDisplay').textContent='—'; document.getElementById('sumCout').textContent='—'; document.getElementById('sumTotal').textContent='—'; resetScore(); return; }
+    const r  = T/100/12;
+    const ms = M*r/(1-Math.pow(1+r,-N));
+    const tr = ms*N;
+    document.getElementById('mensualiteDisplay').textContent = fmt(ms,2);
+    document.getElementById('sumCout').textContent  = '+'+fmt(tr-M,2)+' DT';
+    document.getElementById('sumTotal').textContent = fmt(tr,2)+' DT';
+    score(M);
+}
+function score(M) {
+    const cId = elCompte?.value;
+    const c   = comptesData[cId];
+    if (!c) { resetScore(); return; }
+    if (c.etat==='clos') { showScore(-1,'Compte clôturé'); return; }
+    let s=50;
+    if (c.solde>=M*.25) s+=25; else if (c.solde<0) s-=20;
+    if (M>c.solde*4) s-=15;
+    s=Math.min(100,Math.max(0,s));
+    showScore(s,null);
+}
+function showScore(s,msg) {
+    const bar=document.getElementById('scoreBar'), lbl=document.getElementById('scoreLabel'), m=document.getElementById('scoreMsg');
+    if(s===-1){bar.style.cssText='width:100%;background:#ef4444;height:100%;border-radius:100px;'; lbl.textContent=msg; lbl.style.color='#ef4444'; m.textContent='Ce compte ne peut pas supporter un crédit.'; m.style.color='#ef4444'; return;}
+    bar.style.cssText='width:'+s+'%;height:100%;border-radius:100px;transition:width .4s,background .4s;background:'+(s<40?'#ef4444':s<70?'#f59e0b':'#0d9488')+';';
+    lbl.textContent=(s<40?'Risqué':s<70?'Moyen':'Excellent')+' ('+s+'%)';
+    lbl.style.color=(s<40?'#ef4444':s<70?'#f59e0b':'#0d9488');
+    m.textContent=(s<40?'Solde insuffisant.':s<70?'Risque modéré.':'Bonne solvabilité.');
+    m.style.color=(s<40?'#ef4444':s<70?'#92400e':'#0f766e');
+}
+function resetScore() { document.getElementById('scoreBar').style.cssText='width:0%;height:100%;border-radius:100px;'; document.getElementById('scoreLabel').textContent='Remplissez les champs…'; document.getElementById('scoreLabel').style.color='#94a3b8'; document.getElementById('scoreMsg').textContent=''; }
+function fmt(n,d) { return parseFloat(n).toLocaleString('fr-FR',{minimumFractionDigits:d??2,maximumFractionDigits:d??2}); }
+simuler();
+</script>
+{% endblock %}

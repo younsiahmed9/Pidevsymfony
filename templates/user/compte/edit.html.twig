@@ -1,0 +1,64 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Modifier Compte - FinTrack{% endblock %}
+{% block page_title %}Modifier le Compte{% endblock %}
+{% block page_subtitle %}{{ compte.numeroCompte }}{% endblock %}
+
+{% block content %}
+<div class="mb-4"><a href="{{ path('user_compte_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a></div>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="form-card" style="border-radius:20px;">
+            <h5 class="fw-bold mb-1 text-center" style="color:#1e293b;">Modifier le Compte</h5>
+            <p class="text-muted text-center small mb-3">Mettez à jour les informations du compte.</p>
+            <hr>
+            {{ form_start(form) }}
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Numéro de compte</label>
+                {{ form_widget(form.numeroCompte, {'attr': {'class': 'form-control', 'style': 'border-radius:12px;'}}) }}
+                {{ form_errors(form.numeroCompte) }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Solde (DT)</label>
+                {{ form_widget(form.solde, {'attr': {'class': 'form-control', 'style': 'border-radius:12px;'}}) }}
+                {{ form_errors(form.solde) }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Type de compte</label>
+                {{ form_widget(form.typeCompte, {'attr': {'class': 'form-select', 'style': 'border-radius:12px;', 'onchange': 'toggleChamps(this.value)'}}) }}
+                {{ form_errors(form.typeCompte) }}
+            </div>
+            <div id="row_taux" class="mb-3" style="{{ compte.typeCompte == 'epargne' ? '' : 'display:none;' }}">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Taux d'intérêt (%)</label>
+                {{ form_widget(form.tauxInteret, {'attr': {'class': 'form-control', 'style': 'border-radius:12px;'}}) }}
+                {{ form_errors(form.tauxInteret) }}
+            </div>
+            <div id="row_plafond" class="mb-3" style="{{ compte.typeCompte == 'courant' ? '' : 'display:none;' }}">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Plafond de découvert (DT)</label>
+                {{ form_widget(form.plafondDecouvert, {'attr': {'class': 'form-control', 'style': 'border-radius:12px;'}}) }}
+                {{ form_errors(form.plafondDecouvert) }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">État</label>
+                {{ form_widget(form.etat, {'attr': {'class': 'form-select', 'style': 'border-radius:12px;'}}) }}
+                {{ form_errors(form.etat) }}
+            </div>
+            <div style="display:none;">
+                {{ form_widget(form.dateCreation) }}
+            </div>
+            <div class="d-flex gap-3 mt-4">
+                <a href="{{ path('user_compte_index') }}" class="btn btn-outline-secondary flex-fill" style="border-radius:12px;padding:.65rem;font-weight:600;">Annuler</a>
+                <button type="submit" class="btn flex-fill fw-bold" style="background:linear-gradient(90deg,#f97316,#fb923c);color:#fff;border-radius:12px;padding:.65rem;border:none;">
+                    Enregistrer
+                </button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+<script>
+function toggleChamps(type) {
+    document.getElementById('row_taux').style.display    = (type === 'epargne') ? 'block' : 'none';
+    document.getElementById('row_plafond').style.display = (type === 'courant') ? 'block' : 'none';
+}
+</script>
+{% endblock %}

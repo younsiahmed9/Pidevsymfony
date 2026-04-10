@@ -1,0 +1,35 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Catégorie: {{ categorie.nomCategorie }} - Admin{% endblock %}
+{% block page_title %}Détail de la Catégorie{% endblock %}
+{% block page_subtitle %}{{ categorie.nomCategorie }}{% endblock %}
+{% block content %}
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ path('admin_categorie_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+    <a href="{{ path('admin_categorie_edit', {id: categorie.id}) }}" class="btn-primary-custom"><i class="fas fa-edit me-1"></i> Modifier</a>
+    <form action="{{ path('admin_categorie_delete', {id: categorie.id}) }}" method="post" onsubmit="return confirm('Supprimer cette catégorie ?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ categorie.id) }}">
+        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i> Supprimer</button>
+    </form>
+</div>
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="form-card">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:56px;height:56px;border-radius:12px;background:{{ categorie.couleur ?? '#f97316' }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;">
+                    <i class="{{ categorie.icon ?? 'fas fa-tag' }}"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ categorie.nomCategorie }}</h5>
+                    <div class="small text-muted">{{ categorie.documents|length }} document(s)</div>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="text-muted small">Icône</label><div class="fw-semibold"><code>{{ categorie.icon ?? '-' }}</code></div></div>
+                <div class="col-md-6"><label class="text-muted small">Couleur</label><div class="d-flex align-items-center gap-2"><div style="width:20px;height:20px;border-radius:4px;background:{{ categorie.couleur ?? '#ccc' }};border:1px solid #e2e8f0;"></div><code>{{ categorie.couleur ?? '-' }}</code></div></div>
+                {% if categorie.description %}<div class="col-12"><label class="text-muted small">Description</label><div>{{ categorie.description }}</div></div>{% endif %}
+                <div class="col-md-6"><label class="text-muted small">Créé le</label><div class="small">{{ categorie.createdAt|date('d/m/Y H:i') }}</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

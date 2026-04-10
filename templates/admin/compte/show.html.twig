@@ -1,0 +1,53 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Compte {{ compte.numeroCompte }} - Admin FinTrack{% endblock %}
+{% block page_title %}Détail du Compte{% endblock %}
+{% block page_subtitle %}{{ compte.numeroCompte }}{% endblock %}
+
+{% block content %}
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ path('admin_compte_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+    <a href="{{ path('admin_compte_edit', {id: compte.id}) }}" class="btn-primary-custom"><i class="fas fa-edit"></i> Modifier</a>
+    <form action="{{ path('admin_compte_delete', {id: compte.id}) }}" method="post" onsubmit="return confirm('Supprimer ce compte ?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ compte.id) }}">
+        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i>Supprimer</button>
+    </form>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="form-card">
+            <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations du compte</h6>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="text-muted small">Numéro de compte</label><div class="fw-semibold">{{ compte.numeroCompte }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Type</label><div class="fw-semibold text-capitalize">{{ compte.typeCompte == 'epargne' ? 'Épargne' : 'Courant' }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Utilisateur</label><div class="fw-semibold">{{ compte.utilisateur }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">État</label><div><span class="badge {{ compte.etat == 'actif' ? 'bg-success' : (compte.etat == 'bloque' ? 'bg-danger' : 'bg-secondary') }}">{{ compte.etat|upper }}</span></div></div>
+                <div class="col-md-6"><label class="text-muted small">Solde actuel</label><div class="fw-bold fs-5" style="color:#f97316;">{{ compte.solde|number_format(2, ',', ' ') }} DT</div></div>
+                <div class="col-md-6"><label class="text-muted small">Date de création</label><div class="fw-semibold">{{ compte.dateCreation|date('d/m/Y') }}</div></div>
+                {% if compte.typeCompte == 'epargne' and compte.tauxInteret %}
+                <div class="col-md-6"><label class="text-muted small">Taux d'intérêt</label><div class="fw-semibold text-success">{{ compte.tauxInteret }}%</div></div>
+                {% endif %}
+                {% if compte.typeCompte == 'courant' and compte.plafondDecouvert %}
+                <div class="col-md-6"><label class="text-muted small">Plafond de découvert</label><div class="fw-semibold text-warning">{{ compte.plafondDecouvert|number_format(2, ',', ' ') }} DT</div></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        {% if compte.credits|length > 0 %}
+        <div class="form-card">
+            <h6 class="fw-semibold mb-3">Crédits liés ({{ compte.credits|length }})</h6>
+            {% for credit in compte.credits %}
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <div>
+                    <div class="small fw-medium">{{ credit.montant|number_format(2, ',', ' ') }} DT</div>
+                    <div class="small text-muted">{{ credit.dureeMois }} mois · {{ credit.tauxInteret }}%</div>
+                </div>
+                <span class="badge {{ credit.status == 'approuve' ? 'bg-success' : (credit.status == 'refuse' ? 'bg-danger' : 'bg-warning text-dark') }}">{{ credit.status }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

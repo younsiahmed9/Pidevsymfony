@@ -1,0 +1,22 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Nouvelle Échéance - FinTrack{% endblock %}
+{% block page_title %}Nouvelle Échéance{% endblock %}
+{% block page_subtitle %}Créer une échéance{% endblock %}
+{% block content %}
+<div class="mb-4"><a href="{{ path('user_echeance_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a></div>
+<div class="row"><div class="col-md-7"><div class="form-card">
+    <h6 class="fw-semibold mb-4 pb-2 border-bottom">Nouvelle échéance</h6>
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="row g-3">
+        <div class="col-md-6"><div class="mb-3">{{ form_label(form.document, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.document, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.document) }}</div></div>
+        <div class="col-12"><div class="mb-3">{{ form_label(form.titre, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.titre) }}</div></div>
+        <div class="col-md-6"><div class="mb-3">{{ form_label(form.dateEcheance, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.dateEcheance, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.dateEcheance) }}</div></div>
+        <div class="col-md-6"><div class="mb-3">{{ form_label(form.dateRappel, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.dateRappel, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.dateRappel) }}</div></div>
+        <div class="col-md-6"><div class="mb-3">{{ form_label(form.montant, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.montant, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.montant) }}</div></div>
+        <div class="col-md-6"><div class="mb-3">{{ form_label(form.statut, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.statut) }}</div></div>
+        <div class="col-12"><div class="mb-3">{{ form_label(form.description, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}{{ form_errors(form.description) }}</div></div>
+    </div>
+    <div class="d-flex gap-2 mt-3"><button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Créer</button><a href="{{ path('user_echeance_index') }}" class="btn btn-outline-secondary">Annuler</a></div>
+    {{ form_end(form) }}
+</div></div></div>
+{% endblock %}
