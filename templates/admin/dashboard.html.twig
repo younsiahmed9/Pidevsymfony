@@ -1,0 +1,308 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard Admin - FinTrack{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+{% block page_subtitle %}Vue d'ensemble de toute l'application{% endblock %}
+
+{% block content %}
+
+{# ── Row 1 : 6 KPI cards ── #}
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="stat-card kpi-highlight">
+            <div class="stat-label">Comptes actifs</div>
+            <div class="stat-value mt-1">{{ comptes_actifs ?? total_comptes }}</div>
+            <div class="stat-icon mt-2" style="background:#fff7ed;width:36px;height:36px;border-radius:8px;font-size:1rem;">
+                <i class="fas fa-university" style="color:#f97316;"></i>
+            </div>
+            <div class="mt-2"><a href="{{ path('admin_compte_index') }}" class="stat-link">Voir →</a></div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="stat-card kpi-blue">
+            <div class="stat-label">Crédits en attente</div>
+            <div class="stat-value mt-1" style="color:#3b82f6;">{{ credits_pending ?? 0 }}</div>
+            <div class="stat-icon mt-2" style="background:#eff6ff;width:36px;height:36px;border-radius:8px;font-size:1rem;">
+                <i class="fas fa-clock" style="color:#3b82f6;"></i>
+            </div>
+            <div class="mt-2"><a href="{{ path('admin_credit_index') }}" class="stat-link" style="color:#3b82f6;">Voir →</a></div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="stat-card kpi-green">
+            <div class="stat-label">Crédits approuvés</div>
+            <div class="stat-value mt-1" style="color:#22c55e;">{{ credits_approuves ?? 0 }}</div>
+            <div class="stat-icon mt-2" style="background:#f0fdf4;width:36px;height:36px;border-radius:8px;font-size:1rem;">
+                <i class="fas fa-check-circle" style="color:#22c55e;"></i>
+            </div>
+            <div class="mt-2"><a href="{{ path('admin_credit_index') }}" class="stat-link" style="color:#22c55e;">Voir →</a></div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="stat-card kpi-red">
+            <div class="stat-label">Docs expirés</div>
+            <div class="stat-value mt-1" style="color:#ef4444;">{{ docs_expires ?? 0 }}</div>
+            <div class="stat-icon mt-2" style="background:#fee2e2;width:36px;height:36px;border-radius:8px;font-size:1rem;">
+                <i class="fas fa-file-times" style="color:#ef4444;"></i>
+            </div>
+            <div class="mt-2"><a href="{{ path('admin_document_index') }}" class="stat-link" style="color:#ef4444;">Voir →</a></div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="stat-card kpi-yellow">
+            <div class="stat-label">Échéances en retard</div>
+            <div class="stat-value mt-1" style="color:#eab308;">{{ echeances_overdue ?? 0 }}</div>
+            <div class="stat-icon mt-2" style="background:#fef9c3;width:36px;height:36px;border-radius:8px;font-size:1rem;">
+                <i class="fas fa-exclamation-triangle" style="color:#eab308;"></i>
+            </div>
+            <div class="mt-2"><a href="{{ path('admin_echeance_index') }}" class="stat-link" style="color:#eab308;">Voir →</a></div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="stat-card kpi-purple">
+            <div class="stat-label">Total documents</div>
+            <div class="stat-value mt-1" style="color:#a855f7;">{{ total_documents }}</div>
+            <div class="stat-icon mt-2" style="background:#fdf4ff;width:36px;height:36px;border-radius:8px;font-size:1rem;">
+                <i class="fas fa-file-alt" style="color:#a855f7;"></i>
+            </div>
+            <div class="mt-2"><a href="{{ path('admin_document_index') }}" class="stat-link" style="color:#a855f7;">Voir →</a></div>
+        </div>
+    </div>
+</div>
+
+{# ── Row 2 : Total soldes banner + quick stats ── #}
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div style="background:linear-gradient(135deg,#f97316,#ea580c);border-radius:14px;padding:1.5rem 2rem;color:#fff;box-shadow:0 4px 20px rgba(249,115,22,0.3);">
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;opacity:0.85;">Soldes cumulés (tous comptes)</div>
+            <div style="font-size:2.4rem;font-weight:800;margin:0.25rem 0;">
+                {{ total_soldes is defined ? total_soldes|number_format(2, '.', ' ') ~ ' TND' : '—' }}
+            </div>
+            <div style="font-size:0.8rem;opacity:0.8;"><i class="fas fa-university me-1"></i>{{ total_comptes }} compte(s) enregistré(s)</div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div style="background:linear-gradient(135deg,#1e3a5f,#0f3460);border-radius:14px;padding:1.5rem 2rem;color:#fff;box-shadow:0 4px 20px rgba(15,52,96,0.25);">
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;opacity:0.85;">Montant total des crédits</div>
+            <div style="font-size:2.4rem;font-weight:800;margin:0.25rem 0;">
+                {{ total_credits_montant is defined ? total_credits_montant|number_format(2, '.', ' ') ~ ' TND' : '—' }}
+            </div>
+            <div style="font-size:0.8rem;opacity:0.8;"><i class="fas fa-credit-card me-1"></i>{{ total_credits }} crédit(s) au total</div>
+        </div>
+    </div>
+</div>
+
+{# ── Row 3 : Recent comptes + recent credits ── #}
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="table-card">
+            <div class="table-header">
+                <h6 class="mb-0 fw-semibold"><i class="fas fa-university me-2" style="color:#f97316;"></i>Comptes récents</h6>
+                <a href="{{ path('admin_compte_new') }}" class="btn-primary-custom" style="font-size:0.78rem;padding:0.35rem 0.9rem;">
+                    <i class="fas fa-plus"></i> Nouveau
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="px-3">Numéro</th>
+                            <th>Type</th>
+                            <th>Solde</th>
+                            <th>État</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for compte in recent_comptes %}
+                        <tr>
+                            <td class="px-3">
+                                <a href="{{ path('admin_compte_show', {id: compte.id}) }}" class="text-decoration-none fw-medium" style="color:#0d0d1a;">
+                                    {{ compte.numeroCompte }}
+                                </a>
+                            </td>
+                            <td class="text-capitalize small">{{ compte.typeCompte }}</td>
+                            <td class="fw-medium {{ compte.solde < 0 ? 'text-danger' : '' }}">
+                                {{ compte.solde|number_format(2) }} DT
+                            </td>
+                            <td><span class="badge {{ compte.etat == 'actif' ? 'bg-success' : (compte.etat == 'bloque' ? 'bg-danger' : 'bg-secondary') }}">{{ compte.etat|upper }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center py-4 text-muted small">Aucun compte enregistré</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding:0.75rem 1.5rem;border-top:1px solid #f1f5f9;background:#fafafa;">
+                <a href="{{ path('admin_compte_index') }}" class="small text-muted text-decoration-none">
+                    Voir tous les comptes <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="table-card">
+            <div class="table-header">
+                <h6 class="mb-0 fw-semibold"><i class="fas fa-credit-card me-2" style="color:#3b82f6;"></i>Crédits récents</h6>
+                <a href="{{ path('admin_credit_new') }}" class="btn-primary-custom" style="font-size:0.78rem;padding:0.35rem 0.9rem;">
+                    <i class="fas fa-plus"></i> Nouveau
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="px-3">Compte</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for credit in recent_credits %}
+                        <tr>
+                            <td class="px-3">
+                                <a href="{{ path('admin_credit_show', {id: credit.id}) }}" class="text-decoration-none fw-medium small" style="color:#0d0d1a;">
+                                    {{ credit.compte }}
+                                </a>
+                            </td>
+                            <td class="small fw-medium">{{ credit.montant|number_format(0) }} DT</td>
+                            <td><span class="badge {{ credit.status == 'approuve' ? 'bg-success' : (credit.status == 'refuse' ? 'bg-danger' : (credit.status == 'rembourse' ? 'bg-info' : 'bg-warning text-dark')) }}">{{ credit.status|replace({'_': ' '}) }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center py-4 text-muted small">Aucun crédit</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding:0.75rem 1.5rem;border-top:1px solid #f1f5f9;background:#fafafa;">
+                <a href="{{ path('admin_credit_index') }}" class="small text-muted text-decoration-none">
+                    Voir tous les crédits <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Row 4 : Recent documents + upcoming écheances ── #}
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="table-card">
+            <div class="table-header">
+                <h6 class="mb-0 fw-semibold"><i class="fas fa-file-alt me-2" style="color:#a855f7;"></i>Documents récents</h6>
+                <a href="{{ path('admin_document_new') }}" class="btn-primary-custom" style="font-size:0.78rem;padding:0.35rem 0.9rem;">
+                    <i class="fas fa-plus"></i> Nouveau
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="px-3">Titre</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in recent_documents %}
+                        <tr>
+                            <td class="px-3">
+                                <a href="{{ path('admin_document_show', {id: document.id}) }}" class="text-decoration-none fw-medium small" style="color:#0d0d1a;">
+                                    {{ document.titre|length > 28 ? document.titre|slice(0,28) ~ '…' : document.titre }}
+                                </a>
+                            </td>
+                            <td class="small text-muted">{{ document.typeDocument }}</td>
+                            <td><span class="badge-status badge-{{ document.statut }}">{{ document.statut }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center py-4 text-muted small">Aucun document</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding:0.75rem 1.5rem;border-top:1px solid #f1f5f9;background:#fafafa;">
+                <a href="{{ path('admin_document_index') }}" class="small text-muted text-decoration-none">
+                    Voir tous les documents <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="table-card">
+            <div class="table-header">
+                <h6 class="mb-0 fw-semibold"><i class="fas fa-calendar-check me-2" style="color:#eab308;"></i>Prochaines échéances <small class="text-muted fw-normal">(30j)</small></h6>
+                <a href="{{ path('admin_echeance_new') }}" class="btn-primary-custom" style="font-size:0.78rem;padding:0.35rem 0.9rem;">
+                    <i class="fas fa-plus"></i> Nouvelle
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="px-3">Titre</th>
+                            <th>Date</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for echeance in upcoming_echeances %}
+                        <tr>
+                            <td class="px-3 small fw-medium" style="color:#0d0d1a;">
+                                <a href="{{ path('admin_echeance_show', {id: echeance.id}) }}" class="text-decoration-none" style="color:inherit;">
+                                    {{ echeance.titre|length > 22 ? echeance.titre|slice(0,22) ~ '…' : echeance.titre }}
+                                </a>
+                            </td>
+                            <td class="small">{{ echeance.dateEcheance|date('d/m/Y') }}</td>
+                            <td class="small">{{ echeance.montant ? echeance.montant|number_format(0) ~ ' TND' : '—' }}</td>
+                            <td><span class="badge-status badge-{{ echeance.statut }}">{{ echeance.statut }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center py-4 text-muted small">Aucune échéance prochaine</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding:0.75rem 1.5rem;border-top:1px solid #f1f5f9;background:#fafafa;">
+                <a href="{{ path('admin_echeance_index') }}" class="small text-muted text-decoration-none">
+                    Voir toutes les échéances <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Row 5 : Quick access ── #}
+<div class="row g-3">
+    <div class="col-12">
+        <div class="form-card">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-semibold mb-0" style="color:#0d0d1a;">
+                    <i class="fas fa-bolt me-2" style="color:#f97316;"></i>Actions rapides
+                </h6>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ path('admin_compte_new') }}" class="btn btn-sm" style="background:#fff7ed;color:#f97316;border:1px solid #fed7aa;border-radius:8px;">
+                    <i class="fas fa-university me-1"></i>Nouveau compte
+                </a>
+                <a href="{{ path('admin_credit_new') }}" class="btn btn-sm" style="background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe;border-radius:8px;">
+                    <i class="fas fa-credit-card me-1"></i>Nouveau crédit
+                </a>
+                <a href="{{ path('admin_document_new') }}" class="btn btn-sm" style="background:#fdf4ff;color:#a855f7;border:1px solid #e9d5ff;border-radius:8px;">
+                    <i class="fas fa-file-alt me-1"></i>Nouveau document
+                </a>
+                <a href="{{ path('admin_dossier_new') }}" class="btn btn-sm" style="background:#f0fdf4;color:#22c55e;border:1px solid #bbf7d0;border-radius:8px;">
+                    <i class="fas fa-folder me-1"></i>Nouveau dossier
+                </a>
+                <a href="{{ path('admin_echeance_new') }}" class="btn btn-sm" style="background:#fef9c3;color:#ca8a04;border:1px solid #fde68a;border-radius:8px;">
+                    <i class="fas fa-calendar-check me-1"></i>Nouvelle échéance
+                </a>
+                <a href="{{ path('admin_categorie_new') }}" class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;">
+                    <i class="fas fa-tags me-1"></i>Nouvelle catégorie
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

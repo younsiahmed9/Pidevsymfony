@@ -1,0 +1,47 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Dossier: {{ dossier.nomDossier }} - Admin{% endblock %}
+{% block page_title %}Détail du Dossier{% endblock %}
+{% block page_subtitle %}{{ dossier.nomDossier }}{% endblock %}
+{% block content %}
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ path('admin_dossier_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+    <a href="{{ path('admin_dossier_edit', {id: dossier.id}) }}" class="btn-primary-custom"><i class="fas fa-edit me-1"></i> Modifier</a>
+    <form action="{{ path('admin_dossier_delete', {id: dossier.id}) }}" method="post" onsubmit="return confirm('Supprimer ce dossier ?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ dossier.id) }}">
+        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i> Supprimer</button>
+    </form>
+</div>
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="form-card">
+            <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations</h6>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="text-muted small">Nom</label><div class="fw-semibold"><i class="fas fa-folder text-warning me-2"></i>{{ dossier.nomDossier }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Utilisateur</label><div class="fw-semibold">{{ dossier.utilisateur }}</div></div>
+                {% if dossier.description %}<div class="col-12"><label class="text-muted small">Description</label><div>{{ dossier.description }}</div></div>{% endif %}
+                <div class="col-md-6"><label class="text-muted small">Créé le</label><div class="small">{{ dossier.createdAt|date('d/m/Y H:i') }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Modifié le</label><div class="small">{{ dossier.updatedAt|date('d/m/Y H:i') }}</div></div>
+            </div>
+        </div>
+        {% if dossier.documents|length > 0 %}
+        <div class="form-card mt-4">
+            <h6 class="fw-semibold mb-3">Documents dans ce dossier ({{ dossier.documents|length }})</h6>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Titre</th><th>Type</th><th>Statut</th></tr></thead>
+                    <tbody>
+                        {% for doc in dossier.documents %}
+                        <tr>
+                            <td><a href="{{ path('admin_document_show', {id: doc.id}) }}" class="text-decoration-none">{{ doc.titre }}</a></td>
+                            <td>{{ doc.typeDocument }}</td>
+                            <td><span class="badge-status badge-{{ doc.statut }}">{{ doc.statut }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

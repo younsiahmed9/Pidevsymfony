@@ -1,0 +1,34 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Nouveau Compte - Admin FinTrack{% endblock %}
+{% block page_title %}Nouveau Compte{% endblock %}
+{% block page_subtitle %}Créer un nouveau compte bancaire{% endblock %}
+
+{% block content %}
+<div class="mb-4"><a href="{{ path('admin_compte_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a></div>
+<div class="row"><div class="col-md-8">
+    <div class="form-card">
+        <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations du compte</h6>
+        {{ form_start(form) }}
+        <div class="row g-3">
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.numeroCompte, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.numeroCompte) }}{{ form_errors(form.numeroCompte) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.typeCompte, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.typeCompte, {'attr': {'onchange': 'toggleChamps(this.value)'}}) }}{{ form_errors(form.typeCompte) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.solde, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.solde) }}{{ form_errors(form.solde) }}</div></div>
+            <div class="col-md-6" id="row_taux" style="display:none;"><div class="mb-3">{{ form_label(form.tauxInteret, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.tauxInteret) }}{{ form_errors(form.tauxInteret) }}</div></div>
+            <div class="col-md-6" id="row_plafond" style="display:none;"><div class="mb-3">{{ form_label(form.plafondDecouvert, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.plafondDecouvert) }}{{ form_errors(form.plafondDecouvert) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.dateCreation, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.dateCreation) }}{{ form_errors(form.dateCreation) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.etat, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.etat) }}{{ form_errors(form.etat) }}</div></div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Créer le compte</button>
+            <a href="{{ path('admin_compte_index') }}" class="btn btn-outline-secondary">Annuler</a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div></div>
+<script>
+function toggleChamps(type) {
+    document.getElementById('row_taux').style.display    = (type==='epargne') ? 'block':'none';
+    document.getElementById('row_plafond').style.display = (type==='courant') ? 'block':'none';
+}
+</script>
+{% endblock %}

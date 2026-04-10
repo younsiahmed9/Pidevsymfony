@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+{% block title %}Connexion - FinTrack{% endblock %}
+
+{% block body %}
+<div class="min-vh-100 d-flex align-items-center" style="background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <!-- Logo -->
+                <div class="text-center mb-4">
+                    <a href="{{ path('home') }}">
+                        <img src="{{ asset('assets/images/logo.png') }}" alt="FinTrack" height="45">
+                    </a>
+                    <h4 class="text-white mt-3 fw-bold">Connexion</h4>
+                    <p class="text-white-50 small">Accedez a votre espace FinTrack</p>
+                </div>
+
+                <!-- Login Card -->
+                <div class="card border-0 shadow-lg" style="border-radius:20px;overflow:hidden;">
+                    <div class="card-body p-5">
+                        <form method="post" action="#">
+                            <div class="mb-4">
+                                <label class="form-label fw-medium small">Adresse email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-envelope text-muted"></i>
+                                    </span>
+                                    <input type="email" class="form-control border-start-0 bg-light" placeholder="votre@email.com" style="border-radius:0 8px 8px 0;">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-medium small">Mot de passe</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-lock text-muted"></i>
+                                    </span>
+                                    <input type="password" class="form-control border-start-0 bg-light" placeholder="••••••••" style="border-radius:0 8px 8px 0;">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn w-100 py-3 fw-semibold mb-3" style="background:#f97316;color:#fff;border:none;border-radius:12px;">
+                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                            </button>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <div class="text-center">
+                            <p class="small text-muted mb-3">Ou acceder directement a :</p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('admin_dashboard') }}" class="btn flex-fill btn-sm py-2 fw-medium" style="background:#1a1a2e;color:#fff;border-radius:10px;">
+                                    <i class="fas fa-shield-alt me-1"></i>Admin
+                                </a>
+                                <a href="{{ path('user_dashboard') }}" class="btn flex-fill btn-sm py-2 fw-medium" style="background:#0369a1;color:#fff;border-radius:10px;">
+                                    <i class="fas fa-user me-1"></i>Utilisateur
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ path('home') }}" class="text-white-50 small text-decoration-none">
+                        <i class="fas fa-arrow-left me-1"></i>Retour a l'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Échéance: {{ echeance.titre }} - Admin{% endblock %}
+{% block page_title %}Détail de l'Échéance{% endblock %}
+{% block page_subtitle %}{{ echeance.titre }}{% endblock %}
+{% block content %}
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ path('admin_echeance_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+    <a href="{{ path('admin_echeance_edit', {id: echeance.id}) }}" class="btn-primary-custom"><i class="fas fa-edit me-1"></i> Modifier</a>
+    <form action="{{ path('admin_echeance_delete', {id: echeance.id}) }}" method="post" onsubmit="return confirm('Supprimer cette échéance ?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ echeance.id) }}">
+        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i> Supprimer</button>
+    </form>
+</div>
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="form-card">
+            <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations</h6>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="text-muted small">Titre</label><div class="fw-semibold">{{ echeance.titre }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Statut</label><div><span class="badge-status badge-{{ echeance.statut }}">{{ echeance.statut }}</span></div></div>
+                <div class="col-md-6"><label class="text-muted small">Document</label><div class="fw-semibold">{{ echeance.document }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Utilisateur</label><div class="fw-semibold">{{ echeance.utilisateur }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Date d'échéance</label><div class="fw-bold" style="color:#f97316;">{{ echeance.dateEcheance|date('d/m/Y') }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Date de rappel</label><div class="fw-semibold">{{ echeance.dateRappel ? echeance.dateRappel|date('d/m/Y') : '-' }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Montant</label><div class="fw-semibold">{{ echeance.montant ? echeance.montant|number_format(2) ~ ' TND' : '-' }}</div></div>
+                {% if echeance.description %}<div class="col-12"><label class="text-muted small">Description</label><div>{{ echeance.description }}</div></div>{% endif %}
+                <div class="col-md-6"><label class="text-muted small">Créé le</label><div class="small">{{ echeance.createdAt|date('d/m/Y H:i') }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Modifié le</label><div class="small">{{ echeance.updatedAt|date('d/m/Y H:i') }}</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

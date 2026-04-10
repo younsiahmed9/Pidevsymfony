@@ -1,0 +1,197 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Mes Comptes - FinTrack{% endblock %}
+{% block page_title %}Mes Comptes{% endblock %}
+{% block page_subtitle %}Gérez vos avoirs et visualisez vos soldes en temps réel.{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.compte-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #e8edf3;
+    transition: box-shadow .2s, transform .2s;
+    height: 100%;
+}
+.compte-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.10); transform: translateY(-2px); }
+.compte-card .type-label { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.compte-card .numero { font-size: 1rem; font-weight: 700; color: #1e293b; margin: .4rem 0; }
+.compte-card .solde { font-size: 1.4rem; font-weight: 800; color: #1e40af; }
+.etat-actif  { background: #dcfce7; color: #166534; border-radius: 20px; font-size: .72rem; font-weight: 700; padding: .25rem .75rem; display: inline-block; }
+.etat-bloque { background: #fee2e2; color: #991b1b; border-radius: 20px; font-size: .72rem; font-weight: 700; padding: .25rem .75rem; display: inline-block; }
+.etat-clos   { background: #f3f4f6; color: #6b7280; border-radius: 20px; font-size: .72rem; font-weight: 700; padding: .25rem .75rem; display: inline-block; }
+.btn-details { background: linear-gradient(90deg,#f97316,#fb923c); color: #fff; border: none; border-radius: 10px; padding: .45rem 1.2rem; font-size: .82rem; font-weight: 600; width: 100%; margin-top: 1rem; }
+.btn-details:hover { background: linear-gradient(90deg,#ea6c00,#f97316); color: #fff; }
+.tab-filter { display: flex; gap: .5rem; background: #f1f5f9; border-radius: 10px; padding: .25rem; margin-bottom: 1.5rem; }
+.tab-filter a { border-radius: 8px; padding: .35rem 1rem; font-size: .82rem; font-weight: 600; color: #64748b; text-decoration: none; }
+.tab-filter a.active { background: #fff; color: #1e293b; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+/* Modal overlay */
+.modal-backdrop-custom { background: rgba(15,23,42,.45); backdrop-filter: blur(2px); }
+/* Form errors */
+.invalid-feedback { display: block !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# Flash messages #}
+{% for msg in app.flashes('success') %}
+<div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+    <i class="fas fa-check-circle me-2"></i>{{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% for msg in app.flashes('error') %}
+<div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">{{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+{% endfor %}
+
+{# Top bar: tabs + search + add button #}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+    <div class="tab-filter">
+        <a href="{{ path('user_compte_index') }}" class="{{ not type ? 'active' : '' }}">Tous</a>
+        <a href="{{ path('user_compte_index', {type: 'courant'}) }}" class="{{ type == 'courant' ? 'active' : '' }}">Courant</a>
+        <a href="{{ path('user_compte_index', {type: 'epargne'}) }}" class="{{ type == 'epargne' ? 'active' : '' }}">Épargne</a>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        <form method="GET" action="{{ path('user_compte_index') }}" class="d-flex gap-2">
+            {% if type %}<input type="hidden" name="type" value="{{ type }}">{% endif %}
+            <div class="input-group input-group-sm" style="width:200px;">
+                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted" style="font-size:.75rem;"></i></span>
+                <input type="text" name="q" value="{{ q }}" class="form-control border-start-0 ps-0" placeholder="Rechercher un numéro..." style="font-size:.82rem;">
+            </div>
+        </form>
+        <div class="d-flex gap-1">
+            <button type="button" class="btn btn-sm" style="background:#0d9488;color:#fff;border-radius:50%;width:36px;height:36px;padding:0;" title="Profil">
+                <i class="fas fa-user" style="font-size:.75rem;"></i>
+            </button>
+            <button type="button" class="btn btn-sm" style="background:#f97316;color:#fff;border-radius:50%;width:36px;height:36px;padding:0;" data-bs-toggle="modal" data-bs-target="#modalNouveauCompte" title="Nouveau compte">
+                <i class="fas fa-plus" style="font-size:.75rem;"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+{# Card grid #}
+{% if comptes|length == 0 %}
+<div class="text-center py-5">
+    <i class="fas fa-university fa-3x mb-3 text-muted opacity-25 d-block"></i>
+    <p class="text-muted">Aucun compte trouvé</p>
+    <button data-bs-toggle="modal" data-bs-target="#modalNouveauCompte" class="btn btn-sm" style="background:#0d9488;color:#fff;border-radius:8px;">
+        <i class="fas fa-plus me-1"></i> Créer mon premier compte
+    </button>
+</div>
+{% else %}
+<div class="row g-3">
+    {% for compte in comptes %}
+    <div class="col-lg-4 col-md-6">
+        <div class="compte-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="type-label {{ compte.typeCompte == 'epargne' ? 'text-success' : 'text-primary' }}">
+                    {{ compte.typeCompte == 'epargne' ? 'Épargne' : 'Courant' }}
+                </span>
+                <span class="etat-{{ compte.etat }}">{{ compte.etat|upper }}</span>
+            </div>
+            <div class="numero">N° {{ compte.numeroCompte }}</div>
+            <div class="solde">{{ compte.solde|number_format(2, ',', ' ') }} DT</div>
+            {% if compte.typeCompte == 'epargne' and compte.tauxInteret %}
+            <div class="text-muted small mt-1"><i class="fas fa-percent me-1"></i>Taux : {{ compte.tauxInteret }}%</div>
+            {% endif %}
+            {% if compte.typeCompte == 'courant' and compte.plafondDecouvert %}
+            <div class="text-muted small mt-1"><i class="fas fa-arrow-down me-1"></i>Découvert : {{ compte.plafondDecouvert|number_format(2, ',', ' ') }} DT</div>
+            {% endif %}
+            <div class="d-flex gap-2 mt-3">
+                <a href="{{ path('user_compte_show', {id: compte.id}) }}" class="btn-details text-center text-decoration-none flex-grow-1">
+                    Détails <i class="fas fa-chevron-right ms-1" style="font-size:.75rem;"></i>
+                </a>
+                <a href="{{ path('user_compte_edit', {id: compte.id}) }}" class="btn btn-sm btn-outline-secondary" style="border-radius:10px;padding:.45rem .75rem;" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form action="{{ path('user_compte_delete', {id: compte.id}) }}" method="post" onsubmit="return confirm('Supprimer ce compte ?')" style="margin:0;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ compte.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:10px;padding:.45rem .75rem;" title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ── Modal Nouveau Compte ── #}
+<div class="modal fade" id="modalNouveauCompte" tabindex="-1" aria-labelledby="modalNouveauCompteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:20px;border:none;padding:1.5rem;">
+            <div class="modal-header border-0 pb-0">
+                <div class="text-center w-100">
+                    <h4 class="fw-bold" style="color:#1e293b;">Nouveau Compte</h4>
+                    <p class="text-muted small mb-0">Remplissez les informations pour créer un nouveau compte bancaire dans votre système.</p>
+                </div>
+            </div>
+            <hr>
+            <div class="modal-body pt-2">
+                {{ form_start(form) }}
+                {% if form_errors(form)|length %}
+                <div class="alert alert-danger small py-2">{{ form_errors(form) }}</div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Numéro de compte</label>
+                    {{ form_widget(form.numeroCompte, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 2088 4577 1254', 'style': 'border-radius:12px;padding:.6rem 1rem;'}}) }}
+                    <div class="invalid-feedback">{{ form_errors(form.numeroCompte) }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Solde initial (DT)</label>
+                    {{ form_widget(form.solde, {'attr': {'class': 'form-control', 'style': 'border-radius:12px;padding:.6rem 1rem;'}}) }}
+                    <div class="invalid-feedback">{{ form_errors(form.solde) }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Type de compte</label>
+                    {{ form_widget(form.typeCompte, {'attr': {'class': 'form-select', 'style': 'border-radius:12px;padding:.6rem 1rem;', 'id': 'modal_typeCompte', 'onchange': 'toggleChamps(this.value)'}}) }}
+                    <div class="invalid-feedback">{{ form_errors(form.typeCompte) }}</div>
+                </div>
+                <div id="row_taux" class="mb-3" style="display:none;">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Taux d'intérêt (%)</label>
+                    {{ form_widget(form.tauxInteret, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 3.5', 'style': 'border-radius:12px;padding:.6rem 1rem;'}}) }}
+                    <div class="invalid-feedback">{{ form_errors(form.tauxInteret) }}</div>
+                </div>
+                <div id="row_plafond" class="mb-3" style="display:none;">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing:.06em;font-size:.7rem;">Plafond de découvert (DT)</label>
+                    {{ form_widget(form.plafondDecouvert, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 500.00', 'style': 'border-radius:12px;padding:.6rem 1rem;'}}) }}
+                    <div class="invalid-feedback">{{ form_errors(form.plafondDecouvert) }}</div>
+                </div>
+                {# Hidden fields for dateCreation, etat - utilisateur is set by controller #}
+                <div style="display:none;">
+                    {{ form_widget(form.dateCreation) }}
+                    {{ form_widget(form.etat) }}
+                </div>
+                <div class="d-flex gap-3 mt-4">
+                    <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal" style="border-radius:12px;padding:.65rem;font-weight:600;">Annuler</button>
+                    <button type="submit" class="btn flex-fill fw-bold" style="background:linear-gradient(90deg,#f97316,#fb923c);color:#fff;border-radius:12px;padding:.65rem;border:none;">
+                        Créer le compte
+                    </button>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleChamps(type) {
+    document.getElementById('row_taux').style.display    = (type === 'epargne') ? 'block' : 'none';
+    document.getElementById('row_plafond').style.display = (type === 'courant') ? 'block' : 'none';
+}
+// Re-open modal if form submitted with errors
+{% if form.vars.submitted and not form.vars.valid %}
+document.addEventListener('DOMContentLoaded', () => {
+    new bootstrap.Modal(document.getElementById('modalNouveauCompte')).show();
+    const type = document.getElementById('modal_typeCompte').value;
+    if (type) toggleChamps(type);
+});
+{% endif %}
+document.getElementById('modal_typeCompte').addEventListener('change', function(){ toggleChamps(this.value); });
+</script>
+{% endblock %}

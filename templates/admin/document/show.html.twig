@@ -1,0 +1,60 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Document: {{ document.titre }} - Admin FinTrack{% endblock %}
+{% block page_title %}Détail du Document{% endblock %}
+{% block page_subtitle %}{{ document.titre }}{% endblock %}
+
+{% block content %}
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ path('admin_document_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+    <a href="{{ path('admin_document_edit', {id: document.id}) }}" class="btn-primary-custom"><i class="fas fa-edit me-1"></i> Modifier</a>
+    <form action="{{ path('admin_document_delete', {id: document.id}) }}" method="post" onsubmit="return confirm('Supprimer ce document définitivement ?')">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i> Supprimer</button>
+    </form>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="form-card">
+            <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations du document</h6>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="text-muted small">Titre</label><div class="fw-semibold">{{ document.titre }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Utilisateur</label><div class="fw-semibold">{{ document.utilisateur }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Type de document</label><div class="fw-semibold text-capitalize">{{ document.typeDocument }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Statut</label><div><span class="badge-status badge-{{ document.statut }}">{{ document.statut }}</span></div></div>
+                <div class="col-md-6"><label class="text-muted small">Catégorie</label><div class="fw-semibold">{{ document.categorie ? document.categorie : '-' }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Dossier</label><div class="fw-semibold">{{ document.dossier ? document.dossier : '-' }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Date du document</label><div class="fw-semibold">{{ document.dateDocument ? document.dateDocument|date('d/m/Y') : '-' }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Date d'échéance</label><div class="fw-semibold">{{ document.dateEcheance ? document.dateEcheance|date('d/m/Y') : '-' }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Fichier</label><div class="fw-semibold"><i class="fas fa-file me-1 text-muted"></i>{{ document.cheminFichier }}</div></div>
+                <div class="col-md-6"><label class="text-muted small">Taille</label><div class="fw-semibold">{{ document.tailleFichier ? (document.tailleFichier / 1024)|round(1) ~ ' KB' : '-' }}</div></div>
+                {% if document.tags %}
+                <div class="col-12"><label class="text-muted small">Tags</label><div>{% for tag in document.tags|split(',') %}<span class="badge bg-light text-dark border me-1">{{ tag|trim }}</span>{% endfor %}</div></div>
+                {% endif %}
+                {% if document.description %}
+                <div class="col-12"><label class="text-muted small">Description</label><div>{{ document.description }}</div></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-card">
+            <h6 class="fw-semibold mb-3 pb-2 border-bottom">Métadonnées</h6>
+            <div class="mb-2"><label class="text-muted small">Créé le</label><div class="small">{{ document.createdAt|date('d/m/Y H:i') }}</div></div>
+            <div class="mb-3"><label class="text-muted small">Modifié le</label><div class="small">{{ document.updatedAt|date('d/m/Y H:i') }}</div></div>
+        </div>
+        {% if document.echeances|length > 0 %}
+        <div class="form-card mt-4">
+            <h6 class="fw-semibold mb-3">Échéances liées ({{ document.echeances|length }})</h6>
+            {% for echeance in document.echeances %}
+            <div class="d-flex justify-content-between py-2 border-bottom">
+                <div><div class="small fw-medium">{{ echeance.titre }}</div><div class="small text-muted">{{ echeance.dateEcheance|date('d/m/Y') }}</div></div>
+                <span class="badge-status badge-{{ echeance.statut }}">{{ echeance.statut }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

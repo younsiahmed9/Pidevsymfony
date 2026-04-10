@@ -1,0 +1,254 @@
+{% extends 'base.html.twig' %}
+{% block title %}FinTrack - Gestion Financiere Intelligente{% endblock %}
+
+{% block body %}
+<!-- Navigation -->
+<header style="background:#1a1a2e;">
+    <nav class="navbar navbar-expand-xl navbar-dark py-3">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('home') }}">
+                <img src="{{ asset('assets/images/logo.png') }}" alt="FinTrack" height="40">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMain">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ path('home') }}">Accueil</a></li>
+                </ul>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('login') }}" class="btn btn-outline-light btn-sm px-4">Connexion</a>
+                    <a href="{{ path('admin_dashboard') }}" class="btn btn-sm px-4" style="background:#f97316;color:#fff;border:none;">Admin</a>
+                    <a href="{{ path('user_dashboard') }}" class="btn btn-outline-light btn-sm px-4">Utilisateur</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Hero Section -->
+<section style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:6rem 0 4rem;">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold text-white mb-4">
+                    Gestion Financiere
+                    <span style="color:#f97316;">Intelligente</span>
+                </h1>
+                <p class="lead text-white-50 mb-5">
+                    Gerez vos comptes, credits et documents en un seul endroit.
+                    Suivi des echeances, organisation des dossiers et alertes automatiques.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ path('admin_dashboard') }}" class="btn btn-lg px-5 py-3 fw-semibold" style="background:#f97316;color:#fff;border:none;border-radius:50px;">
+                        <i class="fas fa-shield-alt me-2"></i>Espace Admin
+                    </a>
+                    <a href="{{ path('user_dashboard') }}" class="btn btn-outline-light btn-lg px-5 py-3 fw-semibold" style="border-radius:50px;">
+                        <i class="fas fa-user me-2"></i>Espace Utilisateur
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{{ asset('assets/images/banner/banner.png') }}" alt="FinTrack Dashboard" class="img-fluid" style="border-radius:20px;max-height:380px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<section style="background:#f97316;padding:2.5rem 0;">
+    <div class="container">
+        <div class="row text-center text-white g-4">
+            <div class="col-md-3">
+                <div class="fs-2 fw-bold">2</div>
+                <div class="small opacity-75">Interfaces distinctes</div>
+            </div>
+            <div class="col-md-3">
+                <div class="fs-2 fw-bold">6</div>
+                <div class="small opacity-75">Modules de gestion</div>
+            </div>
+            <div class="col-md-3">
+                <div class="fs-2 fw-bold">CRUD</div>
+                <div class="small opacity-75">Complet sur chaque module</div>
+            </div>
+            <div class="col-md-3">
+                <div class="fs-2 fw-bold">100%</div>
+                <div class="small opacity-75">Recherche et filtres</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section style="padding:5rem 0;background:#f8fafc;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3" style="color:#1a1a2e;">Fonctionnalites principales</h2>
+            <p class="text-muted lead">Tout ce dont vous avez besoin pour gerer vos finances</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 h-100 shadow-sm" style="border-radius:16px;overflow:hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width:60px;height:60px;background:#fff7ed;border-radius:14px;">
+                            <i class="fas fa-university fa-lg" style="color:#f97316;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Module Compte</h5>
+                        <p class="text-muted small mb-3">Gestion des comptes bancaires courants, epargne et titre avec suivi des soldes.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ path('admin_compte_index') }}" class="badge text-decoration-none" style="background:#fff7ed;color:#f97316;">Admin</a>
+                            <a href="{{ path('user_compte_index') }}" class="badge text-decoration-none" style="background:#e0f2fe;color:#0369a1;">Utilisateur</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 h-100 shadow-sm" style="border-radius:16px;overflow:hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width:60px;height:60px;background:#eff6ff;border-radius:14px;">
+                            <i class="fas fa-credit-card fa-lg" style="color:#3b82f6;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Module Credit</h5>
+                        <p class="text-muted small mb-3">Demandes et suivi des credits : personnel, immobilier, auto, education.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ path('admin_credit_index') }}" class="badge text-decoration-none" style="background:#fff7ed;color:#f97316;">Admin</a>
+                            <a href="{{ path('user_credit_index') }}" class="badge text-decoration-none" style="background:#e0f2fe;color:#0369a1;">Utilisateur</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 h-100 shadow-sm" style="border-radius:16px;overflow:hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width:60px;height:60px;background:#f0fdf4;border-radius:14px;">
+                            <i class="fas fa-file-alt fa-lg" style="color:#22c55e;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Module Document</h5>
+                        <p class="text-muted small mb-3">Stockage et organisation de vos documents avec alertes d'expiration automatiques.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ path('admin_document_index') }}" class="badge text-decoration-none" style="background:#fff7ed;color:#f97316;">Admin</a>
+                            <a href="{{ path('user_document_index') }}" class="badge text-decoration-none" style="background:#e0f2fe;color:#0369a1;">Utilisateur</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 h-100 shadow-sm" style="border-radius:16px;overflow:hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width:60px;height:60px;background:#fdf4ff;border-radius:14px;">
+                            <i class="fas fa-folder fa-lg" style="color:#a855f7;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Module Dossier</h5>
+                        <p class="text-muted small mb-3">Organisation des documents en dossiers structures pour un acces rapide et efficace.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ path('admin_dossier_index') }}" class="badge text-decoration-none" style="background:#fff7ed;color:#f97316;">Admin</a>
+                            <a href="{{ path('user_dossier_index') }}" class="badge text-decoration-none" style="background:#e0f2fe;color:#0369a1;">Utilisateur</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 h-100 shadow-sm" style="border-radius:16px;overflow:hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width:60px;height:60px;background:#fef9c3;border-radius:14px;">
+                            <i class="fas fa-calendar-check fa-lg" style="color:#ca8a04;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Module Echeance</h5>
+                        <p class="text-muted small mb-3">Suivi des echeances avec filtres par date et statut. Alertes pour les retards.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ path('admin_echeance_index') }}" class="badge text-decoration-none" style="background:#fff7ed;color:#f97316;">Admin</a>
+                            <a href="{{ path('user_echeance_index') }}" class="badge text-decoration-none" style="background:#e0f2fe;color:#0369a1;">Utilisateur</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 h-100 shadow-sm" style="border-radius:16px;overflow:hidden;">
+                    <div class="card-body p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width:60px;height:60px;background:#fee2e2;border-radius:14px;">
+                            <i class="fas fa-tags fa-lg" style="color:#dc2626;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Module Categorie</h5>
+                        <p class="text-muted small mb-3">Categorisation des documents avec icones Font Awesome et couleurs personnalisees.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ path('admin_categorie_index') }}" class="badge text-decoration-none" style="background:#fff7ed;color:#f97316;">Admin uniquement</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Roles Section -->
+<section style="padding:5rem 0;">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-md-6">
+                <div class="p-5 h-100" style="background:#1a1a2e;border-radius:20px;">
+                    <div class="d-flex align-items-center mb-4">
+                        <div style="width:56px;height:56px;background:#f97316;border-radius:14px;display:flex;align-items:center;justify-content:center;" class="me-3">
+                            <i class="fas fa-shield-alt fa-lg text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white mb-0 fw-bold">Espace Administrateur</h4>
+                            <small style="color:#f97316;">Acces complet</small>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled text-white-50 mb-4">
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#f97316;"></i>Gestion de tous les comptes et credits</li>
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#f97316;"></i>Administration des documents et dossiers</li>
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#f97316;"></i>Gestion des categories et echeances</li>
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#f97316;"></i>Tableau de bord avec statistiques globales</li>
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#f97316;"></i>Recherche et filtres avances sur tous modules</li>
+                    </ul>
+                    <a href="{{ path('admin_dashboard') }}" class="btn w-100 fw-semibold py-3" style="background:#f97316;color:#fff;border:none;border-radius:12px;">
+                        Acceder au tableau de bord Admin <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-5 h-100" style="background:#f0f9ff;border-radius:20px;border:2px solid #bae6fd;">
+                    <div class="d-flex align-items-center mb-4">
+                        <div style="width:56px;height:56px;background:#0369a1;border-radius:14px;display:flex;align-items:center;justify-content:center;" class="me-3">
+                            <i class="fas fa-user fa-lg text-white"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0 fw-bold" style="color:#1a1a2e;">Espace Utilisateur</h4>
+                            <small style="color:#0369a1;">Acces personnel</small>
+                        </div>
+                    </div>
+                    <ul class="list-unstyled text-muted mb-4">
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#0369a1;"></i>Consultation de ses propres comptes</li>
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#0369a1;"></i>Suivi de ses credits en cours</li>
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#0369a1;"></i>Gestion de ses documents personnels</li>
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#0369a1;"></i>Organisation en dossiers prives</li>
+                        <li class="mb-2"><i class="fas fa-check me-2" style="color:#0369a1;"></i>Alertes pour ses propres echeances</li>
+                    </ul>
+                    <a href="{{ path('user_dashboard') }}" class="btn w-100 fw-semibold py-3" style="background:#0369a1;color:#fff;border:none;border-radius:12px;">
+                        Acceder a mon espace <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer style="background:#111827;padding:3rem 0;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <img src="{{ asset('assets/images/logo.png') }}" alt="FinTrack" height="35">
+            </div>
+            <div class="col-md-4 text-center">
+                <p class="text-white-50 mb-0 small">&copy; 2026 FinTrack. Tous droits reserves.</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('admin_dashboard') }}" class="text-white-50 small me-3 text-decoration-none">Admin</a>
+                <a href="{{ path('user_dashboard') }}" class="text-white-50 small text-decoration-none">Utilisateur</a>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
