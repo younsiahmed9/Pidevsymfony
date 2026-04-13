@@ -1,0 +1,110 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Admin - Cartes du portefeuille{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-3 py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+            <h1 class="h4 mb-1">Cartes de {{ wallet.nom }}</h1>
+            <p class="text-light mb-0">
+                Proprio: {{ wallet.owner_name ?: wallet.owner_email }}
+                ({{ wallet.owner_email }})
+            </p>
+        </div>
+        <a href="{{ path('admin_wallet_user_wallets', {id: wallet.owner_id}) }}" class="btn btn-outline-light">Retour portefeuilles</a>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3 col-6"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Cartes</div><div class="h4 mb-0">{{ stats.totalCards }}</div></div></div></div>
+        <div class="col-md-3 col-6"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Actives</div><div class="h4 mb-0">{{ stats.activeCards }}</div></div></div></div>
+        <div class="col-md-3 col-6"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Solde cumule cartes</div><div class="h4 mb-0">{{ stats.totalSolde|number_format(2, ',', ' ') }}</div></div></div></div>
+        <div class="col-md-3 col-6"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">Derniere MAJ</div><div class="h6 mb-0">{{ stats.lastUpdate ? stats.lastUpdate|date('Y-m-d H:i') : '-' }}</div></div></div></div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body border-bottom">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-lg-6">
+                    <label class="form-label mb-1">Recherche</label>
+                    <input type="search" name="q" class="form-control" value="{{ search }}" placeholder="Numero carte, type, devise...">
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <label class="form-label mb-1">Trier par</label>
+                    <select name="sort" class="form-select">
+                        <option value="id" {{ sort == 'id' ? 'selected' : '' }}>ID</option>
+                        <option value="number" {{ sort == 'number' ? 'selected' : '' }}>Numero</option>
+                        <option value="type" {{ sort == 'type' ? 'selected' : '' }}>Type</option>
+                        <option value="currency" {{ sort == 'currency' ? 'selected' : '' }}>Devise</option>
+                        <option value="balance" {{ sort == 'balance' ? 'selected' : '' }}>Solde</option>
+                        <option value="limit" {{ sort == 'limit' ? 'selected' : '' }}>Plafond</option>
+                        <option value="status" {{ sort == 'status' ? 'selected' : '' }}>Statut</option>
+                        <option value="updated_at" {{ sort == 'updated_at' ? 'selected' : '' }}>Maj</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <label class="form-label mb-1">Ordre</label>
+                    <select name="direction" class="form-select">
+                        <option value="desc" {{ direction == 'desc' ? 'selected' : '' }}>DESC</option>
+                        <option value="asc" {{ direction == 'asc' ? 'selected' : '' }}>ASC</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-4 d-grid">
+                    <button class="btn btn-primary" type="submit">Filtrer</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Numero</th>
+                        <th>Type</th>
+                        <th>Devise</th>
+                        <th>Solde</th>
+                        <th>Plafond</th>
+                        <th>Expiration</th>
+                        <th>Statut</th>
+                        <th>Actions admin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for card in cards %}
+                    <tr>
+                        <td>{{ card.id }}</td>
+                        <td class="text-monospace">**** **** **** {{ card.numero_carte|slice(-4) }}</td>
+                        <td>{{ card.type }}</td>
+                        <td>{{ card.devise }}</td>
+                        <td>{{ card.solde|number_format(2, ',', ' ') }}</td>
+                        <td>{{ card.plafond|number_format(2, ',', ' ') }}</td>
+                        <td>{{ card.date_expiration ? card.date_expiration|date('Y-m-d') : '-' }}</td>
+                        <td>
+                            {% if card.is_active %}
+                                <span class="badge text-bg-success">Active</span>
+                            {% else %}
+                                <span class="badge text-bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <a class="btn btn-sm btn-outline-primary" href="{{ path('admin_wallet_card_edit', {id: card.id}) }}">Modifier</a>
+                                <form method="post" action="{{ path('admin_wallet_card_toggle', {id: card.id}) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('admin_toggle_card_' ~ card.id) }}">
+                                    <button type="submit" class="btn btn-sm {{ card.is_active ? 'btn-outline-warning' : 'btn-outline-success' }}">
+                                        {{ card.is_active ? 'Desactiver' : 'Activer' }}
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="9" class="text-center py-4">Aucune carte pour ce portefeuille.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

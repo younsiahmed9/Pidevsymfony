@@ -1,0 +1,30 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Nouveau Document - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4 px-4">
+    <div class="mb-4">
+        <a href="{{ path('admin_document_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm bg-white">
+            <i class="fas fa-arrow-left me-2 text-primary"></i> Retour à la liste
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
+                <div class="card-header bg-primary py-4 text-center">
+                    <div class="bg-white bg-opacity-25 d-inline-block p-4 rounded-circle mb-3 shadow-sm">
+                        <i class="fas fa-file-upload fa-3x text-white"></i>
+                    </div>
+                    <h2 class="h4 fw-bold text-white mb-0">Importer un nouveau Document</h2>
+                    <p class="text-white text-opacity-75 small mb-0 mt-2">Remplissez les informations et téléchargez le fichier.</p>
+                </div>
+                <div class="card-body p-4 p-md-5 bg-white shadow-sm">
+                    {{ include('backoffice/document/_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

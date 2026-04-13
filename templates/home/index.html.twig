@@ -12,7 +12,7 @@
 					<p class="mb-4">FinTrack combines the Wallet Bootstrap design with a manual Symfony authentication flow for clients and administrators.</p>
 					<div class="d-flex gap-3 justify-content-center justify-content-lg-start flex-wrap">
 						{% if app.user %}
-							<a class="btn btn-primary" href="{{ is_granted('ROLE_ADMIN') ? path('app_admin_dashboard') : path('app_home') }}">Go to dashboard <span style="font-size: 14px;" class="ms-2 fas fa-arrow-right"></span></a>
+                            <a class="btn btn-primary" href="{{ is_granted('ROLE_ADMIN') ? path('admin_dashboard') : path('front_dashboard_index') }}">Go to dashboard <span style="font-size: 14px;" class="ms-2 fas fa-arrow-right"></span></a>
 						{% else %}
 							<a class="btn btn-primary" href="{{ path('app_register') }}">Create account <span style="font-size: 14px;" class="ms-2 fas fa-arrow-right"></span></a>
 							<a class="btn btn-outline-primary" href="{{ path('app_login') }}">Log In</a>

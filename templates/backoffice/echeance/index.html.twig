@@ -1,0 +1,131 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Gestion des Échéances - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800"><i class="fas fa-calendar-alt me-2 text-primary"></i>Gestion des Échéances</h1>
+            <p class="text-muted small mb-0">Suivez et gérez les rappels de paiement et échéances de tous les utilisateurs.</p>
+        </div>
+        <a href="{{ path('admin_echeance_new') }}" class="btn btn-primary shadow-sm rounded-pill px-4">
+            <i class="fas fa-plus fa-sm text-white-50 me-1"></i> Nouvelle Échéance
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+            <form method="GET" action="{{ path('admin_echeance_index') }}" class="row g-3 align-items-end">
+                <div class="col-md-7">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Rechercher</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="q" value="{{ q }}" class="form-control bg-light border-0 shadow-none" placeholder="Titre, document, utilisateur...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-uppercase text-muted">Statut</label>
+                    <select name="statut" class="form-select bg-light border-0 shadow-none">
+                        <option value="">Tous les statuts</option>
+                        {% for s in ['pending', 'notified', 'completed', 'overdue'] %}
+                            <option value="{{ s }}" {{ statut == s ? 'selected' : '' }}>{{ s|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">Filtrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card shadow-sm mb-4 border-0 rounded-4">
+        <div class="card-header py-3 bg-white border-bottom-0 rounded-top-4">
+            <h6 class="m-0 font-weight-bold text-primary">📋 Liste des Échéances</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4" style="width: 80px;">ID</th>
+                            <th>Échéance / Titre</th>
+                            <th>Document lié</th>
+                            <th>Montant</th>
+                            <th class="text-center">Date Échéance</th>
+                            <th class="text-center">Statut</th>
+                            <th class="text-center pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for echeance in echeances %}
+                            <tr>
+                                <td class="ps-4 text-muted small">#{{ echeance.id }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                                            <i class="fas fa-clock text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <span class="fw-bold text-dark d-block">{{ echeance.titre }}</span>
+                                            <span class="text-muted small">{{ echeance.utilisateur.fullName ?: echeance.utilisateur.email }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted small"><i class="fas fa-file-invoice me-1"></i>{{ echeance.document.titre }}</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark">{{ echeance.montant|default('0.00')|number_format(2, ',', ' ') }} TND</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="small {{ echeance.dateEcheance < date() and echeance.statut != 'completed' ? 'text-danger fw-bold' : 'text-muted' }}">
+                                        {{ echeance.dateEcheance|date('d/m/Y') }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {% set status_colors = {
+                                        'pending': 'warning',
+                                        'notified': 'info',
+                                        'completed': 'success',
+                                        'overdue': 'danger'
+                                    } %}
+                                    {% set color = status_colors[echeance.statut]|default('secondary') %}
+                                    <span class="badge bg-{{ color }} bg-opacity-10 text-{{ color }} px-3 py-2 rounded-pill text-capitalize small">
+                                        {{ echeance.statut }}
+                                    </span>
+                                </td>
+                                <td class="text-center pe-4">
+                                    <div class="btn-group shadow-sm rounded-pill overflow-hidden">
+                                        <a href="{{ path('admin_echeance_show', {id: echeance.id}) }}" class="btn btn-sm btn-white border-end" title="Voir"><i class="fas fa-eye text-primary"></i></a>
+                                        <a href="{{ path('admin_echeance_edit', {id: echeance.id}) }}" class="btn btn-sm btn-white border-end" title="Modifier"><i class="fas fa-edit text-warning"></i></a>
+                                        <form method="post" action="{{ path('admin_echeance_delete', {id: echeance.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer cette échéance ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ echeance.id) }}">
+                                            <button class="btn btn-sm btn-white" title="Supprimer"><i class="fas fa-trash text-danger"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="fas fa-calendar-times fa-3x mb-3 d-block opacity-25"></i>
+                                        Aucune échéance trouvée.
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-white border-top-0 py-3 rounded-bottom-4 text-muted small">
+            Total : <strong>{{ echeances|length }}</strong> échéance(s)
+        </div>
+    </div>
+</div>
+{% endblock %}

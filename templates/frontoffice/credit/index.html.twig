@@ -1,0 +1,151 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Crédits - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div>
+                <h1 class="h2 fw-bold text-dark mb-1">Mes Crédits & Prêts</h1>
+                <p class="text-muted mb-0">Suivez l'état de vos demandes et vos remboursements en cours.</p>
+                {% if selectedCompte is defined and selectedCompte %}
+                    <div class="active-scope mt-2">
+                        <span><i class="fas fa-link me-1"></i> Filtre actif: compte {{ selectedCompte.numeroCompte }}</span>
+                        <a href="{{ path('credit_index') }}" class="ms-2">Retirer le filtre</a>
+                    </div>
+                {% endif %}
+            </div>
+            <a href="{{ path('credit_new', selectedCompte is defined and selectedCompte ? {compte_id: selectedCompte.id} : {}) }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+                <i class="fas fa-plus me-2"></i> Nouvelle Demande
+            </a>
+        </div>
+
+        <form method="get" class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 filter-toolbar-credit">
+            {% if selectedCompte is defined and selectedCompte %}
+                <input type="hidden" name="compte_id" value="{{ selectedCompte.id }}">
+            {% endif %}
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="q" class="form-label small text-uppercase fw-bold text-muted">Recherche compte</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text border-0 bg-white"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" id="q" name="q" class="form-control border-0 bg-white" value="{{ filters.q|default('') }}" placeholder="Numéro de compte">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="status" class="form-label small text-uppercase fw-bold text-muted">Statut</label>
+                    <select id="status" name="status" class="form-select form-select-lg border-0 bg-white">
+                        <option value="">Tous</option>
+                        <option value="en_attente" {{ filters.status|default('') == 'en_attente' ? 'selected' : '' }}>En attente</option>
+                        <option value="approuve" {{ filters.status|default('') == 'approuve' ? 'selected' : '' }}>Approuvé</option>
+                        <option value="refuse" {{ filters.status|default('') == 'refuse' ? 'selected' : '' }}>Refusé</option>
+                        <option value="rembourse" {{ filters.status|default('') == 'rembourse' ? 'selected' : '' }}>Remboursé</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill">Filtrer</button>
+                    <a href="{{ path('credit_index', selectedCompte is defined and selectedCompte ? {compte_id: selectedCompte.id} : {}) }}" class="btn btn-outline-secondary w-100 rounded-pill">Reset</a>
+                </div>
+            </div>
+        </form>
+
+        <div class="row g-4">
+            {% for credit in credits %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                                    <i class="fas fa-hand-holding-usd text-primary fa-lg"></i>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                        <li><a class="dropdown-item" href="{{ path('credit_show', {id: credit.id}) }}"><i class="fas fa-eye me-2 text-primary"></i> Voir détails</a></li>
+                                        {% if credit.status == 'en_attente' %}
+                                            <li>
+                                                <form action="{{ path('credit_delete', {id: credit.id}) }}" method="post" onsubmit="return confirm('Annuler cette demande ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ credit.id) }}">
+                                                    <button type="submit" class="dropdown-item text-danger"><i class="fas fa-times me-2"></i> Annuler</button>
+                                                </form>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h5 class="card-title fw-bold mb-1">{{ credit.montant|number_format(2, ',', ' ') }} TND</h5>
+                            <p class="text-muted small mb-4">Compte: {{ credit.compte.numeroCompte }}</p>
+
+                            <div class="row g-0 py-3 border-top mb-3">
+                                <div class="col-6 border-end">
+                                    <div class="small text-muted mb-1 text-uppercase fw-bold" style="font-size: 0.65rem;">Mensualité</div>
+                                    <div class="fw-bold text-danger">{{ credit.mensualite|number_format(2, ',', ' ') }} TND</div>
+                                </div>
+                                <div class="col-6 ps-3">
+                                    <div class="small text-muted mb-1 text-uppercase fw-bold" style="font-size: 0.65rem;">Durée</div>
+                                    <div class="fw-bold text-dark">{{ credit.dureeMois }} mois</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="small text-muted">
+                                    <i class="fas fa-calendar-alt me-1"></i> {{ credit.dateDebut|date('d/m/Y') }}
+                                </div>
+                                {% set badge_class = credit.status == 'approuve' ? 'success' : (credit.status == 'refuse' ? 'danger' : (credit.status == 'en_attente' ? 'warning' : 'info')) %}
+                                <span class="badge rounded-pill bg-{{ badge_class }} px-3">
+                                    {{ credit.status|capitalize|replace({'_': ' '}) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <a href="{{ path('credit_show', {id: credit.id}) }}" class="btn btn-light w-100 rounded-pill fw-bold">Consulter le suivi</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block">
+                        <i class="fas fa-piggy-bank fa-4x text-light mb-4 d-block"></i>
+                        <h3 class="fw-bold">Aucun crédit en cours</h3>
+                        <p class="text-muted mb-4">Besoin d'un financement ? Simulez votre prêt dès maintenant.</p>
+                        <a href="{{ path('credit_new') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
+                            Faire une demande
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .filter-toolbar-credit {
+        background: linear-gradient(145deg, #f8fafc, #edf7ff);
+    }
+    .active-scope {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        color: #0369a1;
+        background: #e0f2fe;
+        border: 1px solid #bae6fd;
+    }
+    .active-scope a {
+        color: #075985;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .active-scope a:hover {
+        text-decoration: underline;
+    }
+    .transition-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .transition-hover:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important; }
+</style>
+{% endblock %}

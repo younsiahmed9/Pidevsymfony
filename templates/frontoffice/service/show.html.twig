@@ -1,0 +1,105 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Détails du Service - {{ service.nomService }}{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <!-- Header & Navigation -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div class="d-flex align-items-center">
+                <a href="{{ path('service_index') }}" class="btn btn-white shadow-sm rounded-circle p-3 me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="h3 fw-bold mb-0">{{ service.nomService }}</h1>
+                    <p class="text-muted mb-0">Réf: #{{ service.id }} - Type: {{ service.typeService }}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('service_edit', {id: service.id}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-edit me-2"></i> Modifier
+                </a>
+                {{ include('frontoffice/service/_delete_form.html.twig') }}
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <!-- Top Banner with Tarif -->
+                        <div class="bg-primary bg-opacity-10 py-5 text-center border-bottom">
+                            <h6 class="text-primary small text-uppercase fw-bold mb-2">Tarif de facturation</h6>
+                            <h2 class="display-4 fw-bold text-primary mb-0">{{ service.tarif|number_format(2, ',', ' ') }} TND</h2>
+                            <p class="text-muted mt-2 mb-0">Facturation {{ service.frequence|capitalize }}</p>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="p-5">
+                            <div class="row g-4 mb-5">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-tag text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Type de Service</label>
+                                            <span class="fw-bold text-dark fs-5">{{ service.typeService }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-toggle-on text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Statut Actuel</label>
+                                            {% set badge_class = service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'secondary') %}
+                                            <span class="badge rounded-pill bg-{{ badge_class }} px-3 fs-6">
+                                                {{ service.statut|capitalize }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-calendar-check text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Date de début</label>
+                                            <span class="fw-bold text-dark fs-5">{{ service.dateDebut|date('d/m/Y') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-calendar-times text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Date de fin</label>
+                                            <span class="fw-bold text-dark fs-5">{{ service.dateFin ? service.dateFin|date('d/m/Y') : 'Non définie' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Note Placeholder -->
+                            <div class="bg-light p-4 rounded-4 border-start border-primary border-4">
+                                <label class="small text-muted text-uppercase d-block mb-2">Note sur le service</label>
+                                <p class="mb-0 text-dark">Ce service est géré activement dans votre portefeuille FinTrack.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 text-center border-top">
+                        <p class="small text-muted mb-0">Gestion des services récurrents • FinTrack Financial Services</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -10,14 +10,14 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class SecurityController extends AbstractController
 {
-    #[Route(path: '/login', name: 'app_login')]
+    #[Route(path: '/legacy/login', name: 'legacy_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if ($user instanceof Utilisateur) {
-            if (strtolower(trim((string) $user->getUserIdentifier())) === 'admin@fintrack.com') {
+        if ($user instanceof User) {
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
                 return $this->redirectToRoute('admin_index');
             }
 
@@ -34,7 +34,7 @@ final class SecurityController extends AbstractController
         return $response;
     }
 
-    #[Route(path: '/logout', name: 'app_logout')]
+    #[Route(path: '/legacy/logout', name: 'legacy_logout')]
     public function logout(): void
     {
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');

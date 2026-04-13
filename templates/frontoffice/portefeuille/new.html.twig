@@ -2,6 +2,28 @@
 
 {% block title %}Nouveau Portefeuille - FinTrack{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .portefeuille-form-ui .form-select,
+        .portefeuille-form-ui .form-control {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+
+        .portefeuille-form-ui .form-select:focus,
+        .portefeuille-form-ui .form-control:focus {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+
+        .portefeuille-form-ui .form-select option {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 <section class="section py-5 bg-tertiary">
     <div class="container mt-4">
@@ -19,7 +41,7 @@
                     </div>
                     
                     <div class="card-body p-4">
-                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                        {{ form_start(form, {'attr': {'class': 'needs-validation portefeuille-form-ui', 'novalidate': 'novalidate'}}) }}
                             
                             <div class="mb-4 form-group">
                                 {{ form_label(form.nom, 'Nom du portefeuille', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}

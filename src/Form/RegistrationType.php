@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
@@ -51,18 +50,6 @@ class RegistrationType extends AbstractType
                 ],
                 'mapped' => false,
             ])
-            ->add('roleChoice', ChoiceType::class, [
-                'label' => 'Account Type',
-                'choices' => [
-                    'Client' => 'CLIENT',
-                    'Administrator' => 'ADMIN',
-                ],
-                'attr' => ['class' => 'form-control'],
-                'mapped' => false,
-                'constraints' => [
-                    new Assert\NotBlank(),
-                ],
-            ])
             ->add('cin', TextType::class, [
                 'label' => 'CIN (Optional - for Clients)',
                 'attr' => ['class' => 'form-control', 'placeholder' => 'National ID number'],
@@ -75,12 +62,7 @@ class RegistrationType extends AbstractType
                 'required' => false,
                 'mapped' => false,
             ])
-            ->add('adminCode', PasswordType::class, [
-                'label' => 'Admin Code (Required - if registering as Administrator)',
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Admin code'],
-                'required' => false,
-                'mapped' => false,
-            ]);
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

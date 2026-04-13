@@ -11,14 +11,11 @@
                 <p class="text-muted">Consultez tous vos mouvements financiers.</p>
             </div>
             <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                <a href="{{ path('front_transaction_depot') }}" class="btn btn-outline-primary me-2">
-                    <i class="fas fa-arrow-down me-1"></i>Dépôt
-                </a>
-                <a href="{{ path('front_transaction_retrait') }}" class="btn btn-outline-danger me-2">
-                    <i class="fas fa-arrow-up me-1"></i>Retrait
-                </a>
-                <a href="{{ path('front_transaction_transfert') }}" class="btn btn-primary">
+                <a href="{{ path('front_transfer_select_card') }}" class="btn btn-primary">
                     <i class="fas fa-exchange-alt me-2"></i>Transfert
+                </a>
+                <a href="{{ path('front_virement_new') }}" class="btn btn-outline-primary ms-2">
+                    <i class="fas fa-calendar me-2"></i>Transfert Programmé
                 </a>
             </div>
         </div>
@@ -53,8 +50,6 @@
                         <label class="form-label text-muted small fw-bold">Type</label>
                         <select name="type" class="form-select shadow-none">
                             <option value="">Tous les types</option>
-                            <option value="DEPOT" {% if filters.type|default('') == 'DEPOT' %}selected{% endif %}>Dépôt</option>
-                            <option value="RETRAIT" {% if filters.type|default('') == 'RETRAIT' %}selected{% endif %}>Retrait</option>
                             <option value="TRANSFERT" {% if filters.type|default('') == 'TRANSFERT' %}selected{% endif %}>Transfert</option>
                         </select>
                     </div>
@@ -131,21 +126,15 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {% if trx.type == 'DEPOT' %}
-                                                <span class="badge bg-success-subtle text-success">Dépôt</span>
-                                            {% elseif trx.type == 'RETRAIT' %}
-                                                <span class="badge bg-danger-subtle text-danger">Retrait</span>
-                                            {% else %}
-                                                <span class="badge bg-primary-subtle text-primary">Transfert</span>
-                                            {% endif %}
+                                            <span class="badge bg-primary-subtle text-primary">Transfert</span>
                                         </td>
                                         <td>
-                                            <span class="badge {{ trx.statut in ['COMPLETED', 'TERMINE'] ? 'bg-success' : (trx.statut in ['PENDING', 'EN_ATTENTE'] ? 'bg-warning' : 'bg-danger') }}">
+                                            <span class="badge {{ trx.statut in ['SUCCESS', 'COMPLETED', 'TERMINE'] ? 'bg-success' : (trx.statut in ['PENDING', 'EN_ATTENTE'] ? 'bg-warning' : 'bg-danger') }}">
                                                 {{ trx.statut }}
                                             </span>
                                         </td>
-                                        <td class="text-end pe-4 fw-bold {{ trx.type == 'DEPOT' ? 'text-success' : (trx.type == 'RETRAIT' ? 'text-danger' : '') }}">
-                                            {{ trx.type == 'RETRAIT' ? '-' : (trx.type == 'DEPOT' ? '+' : '') }}{{ trx.montant|number_format(2, ',', ' ') }} {{ trx.devise }}
+                                        <td class="text-end pe-4 fw-bold">
+                                            {{ trx.montant|number_format(2, ',', ' ') }} {{ trx.devise }}
                                         </td>
                                     </tr>
                                 {% endfor %}

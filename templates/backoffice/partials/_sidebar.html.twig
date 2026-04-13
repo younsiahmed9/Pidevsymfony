@@ -1,38 +1,177 @@
+{% set currentRoute = app.request.attributes.get('_route') %}
+
 <aside class="sidebar">
-    <div class="logo">FinTrack</div>
-    <nav class="main-menu">
-        {% set currentRoute = app.request.attributes.get('_route') %}
-        <ul>
-            <li class="{{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
-                <a href="{{ path('admin_dashboard') }}" class="text-decoration-none text-reset"><span>Overview</span></a>
+    <div class="logo-container">
+        <a href="{{ path('admin_dashboard') }}" class="sidebar-logo-link" aria-label="FinTrack dashboard">
+            <img src="{{ asset('images/logo.png') }}" alt="FinTrack" class="sidebar-logo-image" onerror="this.onerror=null;this.src='{{ asset('frontoffice/images/logo.png') }}';">
+        </a>
+    </div>
+
+    <nav class="sidebar-nav">
+        <!-- MENU PRINCIPAL -->
+        <div class="nav-category">Menu Principal</div>
+        <ul class="nav-list">
+            <li>
+                <a href="{{ path('admin_dashboard') }}" class="nav-link {{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- GESTION FINANCIÈRE -->
+        <div class="nav-category">Gestion Financière</div>
+        <ul class="nav-list">
+            <li>
+                <a href="{{ path('admin_wallet_users') }}" class="nav-link {{ currentRoute starts with 'admin_wallet_' ? 'active' : '' }}">
+                    <i class="fas fa-wallet"></i>
+                    <span>Portefeuilles</span>
+                </a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Wallet</span></a>
+                <a href="{{ path('admin_wallet_users') }}" class="nav-link {{ currentRoute starts with 'admin_wallet_' ? 'active' : '' }}">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Cartes Virtuelles</span>
+                </a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Debit Card</span></a>
+                <a href="{{ path('admin_dashboard') }}#gestion-portefeuille-pane" class="nav-link {{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                </a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Analytics</span></a>
+                <a href="{{ path('admin_dashboard') }}#gestion-portefeuille-pane" class="nav-link {{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Virements</span>
+                </a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Log Activity</span></a>
+                <a href="{{ path('admin_wallet_fees_list') }}" class="nav-link {{ currentRoute == 'admin_wallet_fees_list' ? 'active' : '' }}">
+                    <i class="fas fa-percent"></i>
+                    <span>Historique Frais</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- GESTION COMMERCIALE -->
+        <div class="nav-category">Gestion Commerciale</div>
+        <ul class="nav-list">
+            <li>
+                <a href="{{ path('admin_service_index') }}" class="nav-link {{ currentRoute starts with 'admin_service_' ? 'active' : '' }}">
+                    <i class="fas fa-concierge-bell"></i>
+                    <span>Services</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_produit_index') }}" class="nav-link {{ currentRoute starts with 'admin_produit_' ? 'active' : '' }}">
+                    <i class="fas fa-box"></i>
+                    <span>Produits</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_facture_index') }}" class="nav-link {{ currentRoute starts with 'admin_facture_' ? 'active' : '' }}">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Factures</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- GESTION BUDGET -->
+        <div class="nav-category">Gestion Budget</div>
+        <ul class="nav-list">
+            <li>
+                <a href="{{ path('admin_budget_index') }}" class="nav-link {{ currentRoute starts with 'admin_budget_' ? 'active' : '' }}">
+                    <i class="fas fa-piggy-bank"></i>
+                    <span>Budgets</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_depense_index') }}" class="nav-link {{ currentRoute starts with 'admin_depense_' ? 'active' : '' }}">
+                    <i class="fas fa-receipt"></i>
+                    <span>Dépenses</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- GESTION DOCUMENTS -->
+        <div class="nav-category">Gestion Documents</div>
+        <ul class="nav-list">
+            <li>
+                <a href="{{ path('admin_document_index') }}" class="nav-link {{ currentRoute starts with 'admin_document_' ? 'active' : '' }}">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Documents</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_categorie_index') }}" class="nav-link {{ currentRoute starts with 'admin_categorie_' ? 'active' : '' }}">
+                    <i class="fas fa-tags"></i>
+                    <span>Catégories</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_dossier_document_index') }}" class="nav-link {{ currentRoute starts with 'admin_dossier_document_' ? 'active' : '' }}">
+                    <i class="fas fa-folder-open"></i>
+                    <span>Dossiers</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_echeance_index') }}" class="nav-link {{ currentRoute starts with 'admin_echeance_' ? 'active' : '' }}">
+                    <i class="fas fa-clock"></i>
+                    <span>Échéances</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_compte_index') }}" class="nav-link {{ currentRoute starts with 'admin_compte_' ? 'active' : '' }}">
+                    <i class="fas fa-university"></i>
+                    <span>Comptes</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_credit_index') }}" class="nav-link {{ currentRoute starts with 'admin_credit_' ? 'active' : '' }}">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>Crédits</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- ADMINISTRATION -->
+        <div class="nav-category">Administration</div>
+        <ul class="nav-list">
+            <li>
+                <a href="{{ path('admin_dashboard') }}#users-management-pane" class="nav-link {{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>Utilisateurs</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_dashboard', {q: 'admin'}) }}#users-management-pane" class="nav-link {{ currentRoute in ['admin_dashboard', 'admin_index'] and app.request.query.get('q') == 'admin' ? 'active' : '' }}">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Admins</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ path('admin_dashboard', {q: 'client'}) }}#users-management-pane" class="nav-link {{ currentRoute in ['admin_dashboard', 'admin_index'] and app.request.query.get('q') == 'client' ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Clients</span>
+                </a>
             </li>
         </ul>
     </nav>
-    <div class="preference">
-        <ul>
+
+    <div class="sidebar-footer">
+        <ul class="nav-list">
             <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Help Center</span></a>
+                <a href="{{ path('app_home') }}" class="nav-link">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Retour Site</span>
+                </a>
             </li>
             <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Settings</span></a>
-            </li>
-            <li>
-                <a href="#" class="text-decoration-none text-reset"><span>Report</span></a>
-            </li>
-            <li>
-                <a href="{{ path('app_logout') }}" class="text-decoration-none text-reset"><span>Logout</span></a>
+                <a href="{{ path('app_logout') }}" class="nav-link text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
             </li>
         </ul>
     </div>

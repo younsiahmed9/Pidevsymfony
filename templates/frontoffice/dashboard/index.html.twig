@@ -7,11 +7,11 @@
     <div class="container mt-5">
         <div class="row mb-5 align-items-center">
             <div class="col-md-6">
-                <h2 class="mb-0">Bonjour, {{ app.user.prenom }} 👋</h2>
+                <h2 class="mb-0">Bonjour, {{ app.user.fullName ?: app.user.email }} 👋</h2>
                 <p class="text-muted">Bienvenue sur votre espace de gestion.</p>
             </div>
             <div class="col-md-6 text-md-end text-start mt-3 mt-md-0">
-                <a href="{{ path('front_transaction_new') }}" class="btn btn-primary"><i class="fas fa-plus-circle me-1"></i> Nouvelle Transaction</a>
+                <a href="{{ path('front_transfer_select_card') }}" class="btn btn-primary"><i class="fas fa-arrow-right me-1"></i> Effectuer un Transfert</a>
             </div>
         </div>
 
@@ -26,7 +26,7 @@
                                 <i class="fas fa-money-bill-wave"></i>
                             </div>
                         </div>
-                        <h2 class="mb-0 fw-bold">{{ app.user.solde|number_format(2, ',', ' ') }} EUR</h2>
+                        <h2 class="mb-0 fw-bold">{{ balanceTotal|default(0)|number_format(2, ',', ' ') }} EUR</h2>
                     </div>
                 </div>
             </div>

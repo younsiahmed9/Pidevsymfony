@@ -15,6 +15,11 @@
                 <span class="badge {{ virement.actif ? 'bg-success' : 'bg-secondary' }}">{{ virement.actif ? 'Actif' : 'Désactivé' }}</span>
             </div>
             <div class="card-body">
+                {% if virement.error_message %}
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Derniere erreur d'execution:</strong> {{ virement.error_message }}
+                    </div>
+                {% endif %}
                 <div class="row g-3">
                     <div class="col-md-6">
                         <p class="mb-1 text-muted">Montant</p>

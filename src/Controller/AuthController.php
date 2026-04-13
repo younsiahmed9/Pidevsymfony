@@ -7,29 +7,29 @@ use App\Entity\Client;
 use App\Entity\User;
 use App\Form\RegistrationType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use App\Security\LoginFormAuthenticator;
 
 class AuthController extends AbstractController
 {
-    private const REGISTRATION_VERIFICATION_SESSION_KEY = 'pending_registration_verification';
 
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $passwordHasher
     ) {}
 
-    #[Route('/', name: 'app_home')]
+    #[Route('/legacy-home', name: 'app_home_legacy')]
     public function home(): Response
     {
-        return $this->render('home/index.html.twig');
+        return $this->redirectToRoute('app_home');
     }
 
     #[Route('/login', name: 'app_login', methods: ['GET', 'POST'])]
@@ -53,7 +53,7 @@ class AuthController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register', methods: ['GET', 'POST'])]
-    public function register(Request $request, MailerInterface $mailer): Response
+    public function register(Request $request): Response
     {
         // If user is already authenticated, redirect to home
         if ($this->getUser()) {
@@ -63,66 +63,71 @@ class AuthController extends AbstractController
         $user = new User();
         $form = $this->createForm(RegistrationType::class, $user);
         $form->handleRequest($request);
+        $isAjax = $request->isXmlHttpRequest();
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            if ($isAjax) {
+                return $this->json([
+                    'valid' => false,
+                    'errors' => $this->normalizeRegistrationFormErrors($form),
+                ], 422);
+            }
+        }
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Check if email already exists
             $existingUser = $this->entityManager->getRepository(User::class)->findByEmail($user->getEmail());
             if ($existingUser) {
+                if ($isAjax) {
+                    return $this->json([
+                        'valid' => false,
+                        'errors' => [
+                            'email' => ['Email already registered.'],
+                        ],
+                    ], 422);
+                }
+
                 $this->addFlash('error', 'Email already registered.');
                 return $this->redirectToRoute('app_register');
             }
 
             // Get form data
             $plainPassword = $form->get('plainPassword')->getData();
-            $roleChoice = $form->get('roleChoice')->getData();
-            $adminCode = (string) $form->get('adminCode')->getData();
+            $normalizedEmail = strtolower(trim((string) $user->getEmail()));
+            $user->setEmail($normalizedEmail);
+            $user->setRole('CLIENT');
+            $user->setIsActive(true);
 
-            // Validate ADMIN signup
-            if ($roleChoice === 'ADMIN') {
-                $expectedAdminCode = (string) ($_ENV['ADMIN_CODE'] ?? $_SERVER['ADMIN_CODE'] ?? '');
-                if ($expectedAdminCode === '' || !hash_equals(trim($expectedAdminCode), trim($adminCode))) {
-                    $this->addFlash('error', 'Invalid admin code.');
-                    return $this->redirectToRoute('app_register');
-                }
-                $user->setRole('ADMIN');
-            } else {
-                $user->setRole('CLIENT');
+            $passwordHash = $this->passwordHasher->hashPassword($user, (string) $plainPassword);
+            $user->setPasswordHash($passwordHash);
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            $client = new Client();
+            $client->setUser($user);
+
+            $cin = trim((string) $form->get('cin')->getData());
+            $phone = trim((string) $form->get('phone')->getData());
+            if ($cin !== '') {
+                $client->setCin($cin);
+            }
+            if ($phone !== '') {
+                $client->setPhone($phone);
             }
 
-            $passwordHash = $this->passwordHasher->hashPassword($user, $plainPassword);
-            $verificationCode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            $expiresAt = (new \DateTimeImmutable('+10 minutes'))->getTimestamp();
+            $this->entityManager->persist($client);
+            $this->entityManager->flush();
 
-            $request->getSession()->set(self::REGISTRATION_VERIFICATION_SESSION_KEY, [
-                'email' => strtolower(trim((string) $user->getEmail())),
-                'fullName' => $user->getFullName(),
-                'passwordHash' => $passwordHash,
-                'roleChoice' => $roleChoice,
-                'adminCode' => $adminCode,
-                'cin' => (string) $form->get('cin')->getData(),
-                'phone' => (string) $form->get('phone')->getData(),
-                'verificationCode' => $verificationCode,
-                'expiresAt' => $expiresAt,
-            ]);
-
-            try {
-                $mailFrom = (string) ($_ENV['MAIL_FROM'] ?? $_SERVER['MAIL_FROM'] ?? 'no-reply@fintrack.local');
-                $emailMessage = (new Email())
-                    ->from($mailFrom)
-                    ->to((string) $user->getEmail())
-                    ->subject('FinTrack - Code de verification')
-                    ->text("Votre code de verification est: {$verificationCode}. Ce code expire dans 10 minutes.");
-
-                $mailer->send($emailMessage);
-            } catch (\Throwable $e) {
-                $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
-                $errorMsg = 'Impossible d envoyer le mail de verification. Erreur: ' . $e->getMessage();
-                $this->addFlash('error', $errorMsg);
-                return $this->redirectToRoute('app_register');
+            if ($isAjax) {
+                return $this->json([
+                    'valid' => true,
+                    'redirect' => $this->generateUrl('front_dashboard_index'),
+                ]);
             }
 
-            $this->addFlash('success', 'Un code de verification a ete envoye a votre email.');
-            return $this->redirectToRoute('app_register_verify_code');
+            $this->addFlash('success', 'Compte cree avec succes. Connectez-vous pour continuer.');
+            return $this->redirectToRoute('app_login');
         }
 
         return $this->render('auth/register.html.twig', [
@@ -130,99 +135,87 @@ class AuthController extends AbstractController
         ]);
     }
 
-    #[Route('/register/verify-code', name: 'app_register_verify_code', methods: ['GET', 'POST'])]
-    public function verifyRegisterCode(Request $request): Response
+    #[Route('/register/validate', name: 'app_register_validate', methods: ['POST'])]
+    public function registerValidate(Request $request): JsonResponse
     {
+        if (!$request->isXmlHttpRequest()) {
+            return $this->json([
+                'valid' => false,
+                'errors' => ['general' => ['Requete invalide.']],
+            ], 400);
+        }
+
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_home');
+            return $this->json([
+                'valid' => false,
+                'errors' => ['general' => ['Vous etes deja connecte.']],
+            ], 400);
         }
 
-        $pendingRegistration = $request->getSession()->get(self::REGISTRATION_VERIFICATION_SESSION_KEY);
-        if (!is_array($pendingRegistration)) {
-            $this->addFlash('error', 'Aucune inscription en attente.');
-            return $this->redirectToRoute('app_register');
+        $user = new User();
+        $form = $this->createForm(RegistrationType::class, $user);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted()) {
+            return $this->json([
+                'valid' => false,
+                'errors' => ['general' => ['Aucune donnee recue.']],
+            ], 400);
         }
 
-        if ($request->isMethod('POST')) {
-            $submittedCode = trim((string) $request->request->get('verification_code', ''));
-            $expectedCode = (string) ($pendingRegistration['verificationCode'] ?? '');
-            $expiresAt = (int) ($pendingRegistration['expiresAt'] ?? 0);
+        if (!$form->isValid()) {
+            return $this->json([
+                'valid' => false,
+                'errors' => $this->normalizeRegistrationFormErrors($form),
+            ], 422);
+        }
 
-            if ($submittedCode === '' || strlen($submittedCode) !== 6) {
-                $this->addFlash('error', 'Entrez un code valide a 6 chiffres.');
-                return $this->redirectToRoute('app_register_verify_code');
-            }
+        $existingUser = $this->entityManager->getRepository(User::class)->findByEmail($user->getEmail());
+        if ($existingUser) {
+            return $this->json([
+                'valid' => false,
+                'errors' => [
+                    'email' => ['Email already registered.'],
+                ],
+            ], 422);
+        }
 
-            if ($expiresAt < time()) {
-                $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
-                $this->addFlash('error', 'Le code a expire. Recommencez l inscription.');
-                return $this->redirectToRoute('app_register');
-            }
+        return $this->json(['valid' => true, 'errors' => []]);
+    }
 
-            if (!hash_equals($expectedCode, $submittedCode)) {
-                $this->addFlash('error', 'Code de verification incorrect.');
-                return $this->redirectToRoute('app_register_verify_code');
-            }
+    private function normalizeRegistrationFormErrors(FormInterface $form): array
+    {
+        $errors = [];
 
-            $email = strtolower(trim((string) ($pendingRegistration['email'] ?? '')));
-            if ($email === '') {
-                $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
-                $this->addFlash('error', 'Donnees d inscription invalides.');
-                return $this->redirectToRoute('app_register');
-            }
+        foreach ($form->getErrors(true, true) as $error) {
+            $origin = $error->getOrigin();
+            $field = 'general';
 
-            $existingUser = $this->entityManager->getRepository(User::class)->findByEmail($email);
-            if ($existingUser) {
-                $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
-                $this->addFlash('error', 'Cet email est deja utilise.');
-                return $this->redirectToRoute('app_register');
-            }
+            if ($origin instanceof FormInterface) {
+                $fieldName = $origin->getName();
+                $parentName = $origin->getParent() instanceof FormInterface ? $origin->getParent()->getName() : null;
 
-            $newUser = new User();
-            $newUser->setEmail($email);
-            $newUser->setFullName((string) ($pendingRegistration['fullName'] ?? ''));
-            $newUser->setPasswordHash((string) ($pendingRegistration['passwordHash'] ?? ''));
-            $newUser->setIsActive(true);
-
-            $roleChoice = (string) ($pendingRegistration['roleChoice'] ?? 'CLIENT');
-            $newUser->setRole($roleChoice === 'ADMIN' ? 'ADMIN' : 'CLIENT');
-
-            $this->entityManager->persist($newUser);
-            $this->entityManager->flush();
-
-            if ($roleChoice === 'ADMIN') {
-                $admin = new Admin();
-                $admin->setUser($newUser);
-                $admin->setAdminCode((string) ($pendingRegistration['adminCode'] ?? ''));
-                $this->entityManager->persist($admin);
-            } else {
-                $client = new Client();
-                $client->setUser($newUser);
-                $cin = trim((string) ($pendingRegistration['cin'] ?? ''));
-                $phone = trim((string) ($pendingRegistration['phone'] ?? ''));
-                if ($cin !== '') {
-                    $client->setCin($cin);
+                if ($parentName === 'plainPassword') {
+                    $field = 'plainPassword.' . $fieldName;
+                } elseif ($fieldName === 'plainPassword') {
+                    $field = 'plainPassword.second';
+                } elseif (in_array($fieldName, ['email', 'fullName', 'cin', 'phone'], true)) {
+                    $field = $fieldName;
                 }
-                if ($phone !== '') {
-                    $client->setPhone($phone);
-                }
-                $this->entityManager->persist($client);
             }
 
-            $this->entityManager->flush();
-            $request->getSession()->remove(self::REGISTRATION_VERIFICATION_SESSION_KEY);
-
-            $this->addFlash('success', 'Inscription validee. Connectez-vous maintenant.');
-            return $this->redirectToRoute('app_login');
+            $errors[$field][] = (string) $error->getMessage();
         }
 
-        $expiresAt = (int) ($pendingRegistration['expiresAt'] ?? 0);
-        $minutesLeft = max(0, (int) ceil(($expiresAt - time()) / 60));
+        return $errors;
+    }
 
-        return $this->render('auth/verify_email_code.html.twig', [
-            'pendingEmail' => (string) ($pendingRegistration['email'] ?? ''),
-            'minutesLeft' => $minutesLeft,
-        ]);
+    #[Route('/register/verify-code', name: 'app_register_verify_code', methods: ['GET', 'POST'])]
+    public function verifyRegisterCode(): Response
+    {
+        $this->addFlash('info', 'La verification par code email est desactivee. Connectez-vous directement.');
+
+        return $this->redirectToRoute('app_login');
     }
 
     #[Route('/logout', name: 'app_logout', methods: ['GET'])]
@@ -232,7 +225,8 @@ class AuthController extends AbstractController
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-    #[Route('/admin/dashboard', name: 'app_admin_dashboard')]
+    #[Route('/legacy/admin/dashboard', name: 'legacy_admin_dashboard')]
+    #[Route('/admin/users-management', name: 'app_admin_dashboard')]
     public function adminDashboard(Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -292,6 +286,7 @@ class AuthController extends AbstractController
         ]);
     }
 
+    #[Route('/legacy/admin/users/{id}/update', name: 'legacy_admin_user_update', methods: ['POST'])]
     #[Route('/admin/users/{id}/update', name: 'app_admin_user_update', methods: ['POST'])]
     public function updateUser(Request $request, int $id): Response
     {
@@ -335,6 +330,7 @@ class AuthController extends AbstractController
         return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
     }
 
+    #[Route('/legacy/admin/users/{id}/delete', name: 'legacy_admin_user_delete', methods: ['POST'])]
     #[Route('/admin/users/{id}/delete', name: 'app_admin_user_delete', methods: ['POST'])]
     public function deleteUser(Request $request, int $id): Response
     {
@@ -450,6 +446,7 @@ class AuthController extends AbstractController
         return $this->redirectToRoute('app_home');
     }
 
+    #[Route('/legacy/api/admin/users', name: 'legacy_api_admin_users', methods: ['GET'])]
     #[Route('/api/admin/users', name: 'api_admin_users', methods: ['GET'])]
     public function apiAdminUsers(Request $request): Response
     {

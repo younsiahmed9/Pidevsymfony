@@ -1,0 +1,102 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Détails de l'Échéance - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4 px-4">
+    <div class="mb-4">
+        <a href="{{ path('admin_echeance_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm bg-white">
+            <i class="fas fa-arrow-left me-2 text-primary"></i> Retour à la liste
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-primary py-4 text-center">
+                    <div class="bg-white bg-opacity-25 d-inline-block p-4 rounded-circle mb-3 shadow-sm">
+                        <i class="fas fa-calendar-check fa-3x text-white"></i>
+                    </div>
+                    <h2 class="h4 fw-bold text-white mb-0">{{ echeance.titre }}</h2>
+                    <span class="badge rounded-pill bg-white bg-opacity-25 text-white px-3 py-2 mt-2">
+                        ID: #{{ echeance.id }}
+                    </span>
+                </div>
+                <div class="card-body p-4 p-md-5 bg-white">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3 border-bottom pb-2">Informations de base</h6>
+                            <div class="mb-3">
+                                <label class="text-muted small d-block mb-1">Utilisateur</label>
+                                <span class="fw-bold text-dark">{{ echeance.utilisateur.fullName ?: echeance.utilisateur.email }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small d-block mb-1">Document lié</label>
+                                <a href="{{ path('admin_document_show', {id: echeance.document.id}) }}" class="fw-bold text-primary text-decoration-none">
+                                    <i class="fas fa-file-invoice me-1"></i> {{ echeance.document.titre }}
+                                </a>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small d-block mb-1">Montant</label>
+                                <span class="fw-bold text-primary h5 mb-0">{{ echeance.montant|default('0.00')|number_format(2, ',', ' ') }} TND</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3 border-bottom pb-2">Planification</h6>
+                            <div class="mb-3">
+                                <label class="text-muted small d-block mb-1">Date d'échéance</label>
+                                <span class="fw-bold {{ echeance.dateEcheance < date() and echeance.statut != 'completed' ? 'text-danger' : 'text-dark' }}">
+                                    <i class="far fa-calendar-alt me-2"></i>{{ echeance.dateEcheance|date('d/m/Y') }}
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small d-block mb-1">Date de rappel</label>
+                                <span class="text-dark">
+                                    <i class="far fa-bell me-2"></i>{{ echeance.dateRappel ? echeance.dateRappel|date('d/m/Y') : 'Aucun rappel' }}
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small d-block mb-1">Statut actuel</label>
+                                {% set status_colors = {
+                                    'pending': 'warning',
+                                    'notified': 'info',
+                                    'completed': 'success',
+                                    'overdue': 'danger'
+                                } %}
+                                {% set color = status_colors[echeance.statut]|default('secondary') %}
+                                <span class="badge bg-{{ color }} bg-opacity-10 text-{{ color }} px-3 py-2 rounded-pill text-capitalize">
+                                    {{ echeance.statut }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3 border-bottom pb-2">Description / Notes</h6>
+                            <p class="text-dark bg-light p-3 rounded-3 mb-0">{{ echeance.description|default('Aucune note particulière.') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light border-0 p-4 text-center">
+                    <div class="row g-2 justify-content-center">
+                        <div class="col-md-4">
+                            <a href="{{ path('admin_echeance_edit', {id: echeance.id}) }}" class="btn btn-warning w-100 rounded-pill fw-bold text-white shadow-sm">
+                                <i class="fas fa-edit me-2"></i> Modifier
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <form method="post" action="{{ path('admin_echeance_delete', {'id': echeance.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer cette échéance ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ echeance.id) }}">
+                                <button class="btn btn-danger w-100 rounded-pill fw-bold shadow-sm">
+                                    <i class="fas fa-trash-alt me-2"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="mt-4 small text-muted">
+                        <i class="fas fa-history me-1"></i> Créé le {{ echeance.createdAt|date('d/m/Y à H:i') }} | Dernière MAJ : {{ echeance.updatedAt|date('d/m/Y') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

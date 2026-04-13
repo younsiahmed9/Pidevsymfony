@@ -2,7 +2,7 @@
 
 namespace App\EventSubscriber;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -25,11 +25,11 @@ final class AdminFrontAccessSubscriber implements EventSubscriberInterface
         }
 
         $user = $this->security->getUser();
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return;
         }
 
-        if (strtolower(trim((string) $user->getUserIdentifier())) !== 'admin@fintrack.com') {
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true)) {
             return;
         }
 

@@ -1,0 +1,168 @@
+{% set echeanceFormData = echeanceFormData|default({
+    id_echeance: '',
+    id_document: '',
+    titre: '',
+    date_echeance: '',
+    date_rappel: '',
+    montant: '',
+    statut: 'pending',
+    description: ''
+}) %}
+
+<input type="hidden" name="echeance_id" value="{{ echeanceFormData.id_echeance }}">
+<div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Document</label>
+        <select name="id_document" class="form-select" required>
+            <option value="">-- Sélectionner --</option>
+            {% for document in documents %}
+                <option value="{{ document.id }}" {{ echeanceFormData.id_document == document.id ? 'selected' : '' }}>{{ document.titre }}</option>
+            {% endfor %}
+        </select>
+        <div class="text-danger small mt-1" data-error-for="id_document"></div>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Titre</label>
+        <input type="text" name="titre" class="form-control" value="{{ echeanceFormData.titre }}" required>
+        <div class="text-danger small mt-1" data-error-for="titre"></div>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Date d'échéance</label>
+        <input type="date" name="date_echeance" class="form-control" value="{{ echeanceFormData.date_echeance }}" required>
+        <div class="text-danger small mt-1" data-error-for="date_echeance"></div>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Date de rappel</label>
+        <input type="date" name="date_rappel" class="form-control" value="{{ echeanceFormData.date_rappel }}">
+        <div class="text-danger small mt-1" data-error-for="date_rappel"></div>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Montant</label>
+        <input type="number" step="0.01" name="montant" class="form-control" value="{{ echeanceFormData.montant }}">
+        <div class="text-danger small mt-1" data-error-for="montant"></div>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Statut</label>
+        <select name="statut" class="form-select" required>
+            {% for statut in ['pending', 'notified', 'completed', 'overdue'] %}
+                <option value="{{ statut }}" {{ echeanceFormData.statut == statut ? 'selected' : '' }}>{{ statut|capitalize }}</option>
+            {% endfor %}
+        </select>
+        <div class="text-danger small mt-1" data-error-for="statut"></div>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="4">{{ echeanceFormData.description }}</textarea>
+        <div class="text-danger small mt-1" data-error-for="description"></div>
+    </div>
+    <div class="col-12">
+        <div class="text-danger small mt-1" data-error-for="general"></div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var form = document.querySelector('.echeance-form');
+        if (!form) {
+            return;
+        }
+
+        var validateUrl = form.getAttribute('data-validate-url');
+        var pendingTimer = null;
+        var submitting = false;
+
+        var setFieldState = function (name, messages) {
+            var input = form.querySelector('[name="' + name + '"]');
+            var errorBox = form.querySelector('[data-error-for="' + name + '"]');
+            if (!input || !errorBox) {
+                return;
+            }
+
+            var hasError = messages && messages.length;
+            input.classList.toggle('is-invalid', hasError);
+            input.classList.toggle('is-valid', !hasError);
+            errorBox.innerHTML = hasError ? messages.map(function (message) {
+                return '<div>' + message + '</div>';
+            }).join('') : '';
+        };
+
+        var clearAllStates = function () {
+            ['echeance_id', 'id_document', 'titre', 'date_echeance', 'date_rappel', 'montant', 'statut', 'description'].forEach(function (name) {
+                setFieldState(name, []);
+            });
+
+            var generalBox = form.querySelector('[data-error-for="general"]');
+            if (generalBox) {
+                generalBox.innerHTML = '';
+            }
+        };
+
+        var runValidation = function () {
+            if (!validateUrl) {
+                return Promise.resolve({ valid: true });
+            }
+
+            var formData = new FormData(form);
+            var submitButton = form.querySelector('button[type="submit"]');
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            return fetch(validateUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            }).then(function (response) {
+                return response.json().then(function (payload) {
+                    return { ok: response.ok, payload: payload };
+                });
+            }).then(function (result) {
+                clearAllStates();
+                if (result.payload && result.payload.errors) {
+                    Object.keys(result.payload.errors).forEach(function (field) {
+                        setFieldState(field, result.payload.errors[field]);
+                    });
+                }
+
+                return {
+                    valid: !!(result.payload && result.payload.valid),
+                    payload: result.payload || {}
+                };
+            }).catch(function () {
+                return { valid: true };
+            }).finally(function () {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            });
+        };
+
+        form.addEventListener('input', function () {
+            window.clearTimeout(pendingTimer);
+            pendingTimer = window.setTimeout(runValidation, 250);
+        });
+
+        form.addEventListener('blur', function () {
+            runValidation();
+        }, true);
+
+        form.addEventListener('submit', function (event) {
+            if (submitting) {
+                return;
+            }
+
+            event.preventDefault();
+            runValidation().then(function (result) {
+                if (result.valid) {
+                    submitting = true;
+                    form.submit();
+                }
+            });
+        });
+
+        runValidation();
+    })();
+</script>

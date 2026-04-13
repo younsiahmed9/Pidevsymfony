@@ -6,43 +6,35 @@
 
 {% block stylesheets %}
 <style>
-    /* Lock viewport to prevent scrolling outside main areas */
     html, body {
-        height: 100%;
-        overflow: hidden;
+        height: auto;
+        overflow-x: hidden;
     }
 
-    /* Fix header at top */
     header {
-        position: fixed;
+        position: sticky;
         top: 0;
-        left: 0;
-        right: 0;
         z-index: 1030;
         width: 100%;
-        height: 130px;
     }
 
-    /* Main content area with fixed header and sidebar */
     main {
-        position: fixed;
-        top: 130px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: calc(100vh - 130px);
-        overflow: hidden;
-        padding: 0;
+        position: relative;
+        min-height: calc(100vh - 86px);
+        overflow: visible;
+        padding: 1rem 0 2rem;
         margin: 0;
     }
 
     .admin-page {
         display: flex;
         align-items: flex-start;
-        height: 100%;
-        overflow: hidden;
-        padding-bottom: 0;
+        min-height: calc(100vh - 110px);
+        overflow: visible;
+        padding-bottom: 1rem;
         gap: 1.5rem;
+        max-width: 1520px;
+        margin: 0 auto;
     }
 
     .admin-layout {
@@ -50,41 +42,37 @@
         width: 100%;
         display: flex;
         gap: 1.5rem;
-        height: 100%;
-        overflow: hidden;
+        min-height: 100%;
+        overflow: visible;
     }
 
-    /* Fixed sidebar on the left */
     .admin-sidebar {
         border: 0;
         border-radius: 16px;
         box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
         background: linear-gradient(180deg, #071a34 0%, #0b2347 100%);
-        position: fixed;
-        left: 1rem;
-        top: 145px;
+        position: sticky;
+        top: 1rem;
         width: 250px;
-        height: calc(100vh - 165px);
+        height: fit-content;
+        max-height: calc(100vh - 110px);
         flex-shrink: 0;
-        z-index: 100;
     }
 
     .admin-sidebar .card-body {
-        height: 100%;
+        max-height: calc(100vh - 145px);
         overflow-y: auto;
         padding: 1rem;
         scrollbar-width: thin;
         scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
     }
 
-    /* Scrollable content area */
     .admin-content-wrapper {
-        margin-left: 280px;
         flex: 1;
-        overflow-y: auto;
+        overflow: visible;
         overflow-x: hidden;
-        height: 100%;
-        padding-right: 1.5rem;
+        height: auto;
+        padding-right: 0;
         padding-bottom: 2rem;
     }
 
@@ -820,15 +808,15 @@
                                     <nav aria-label="Users pagination">
                                         <ul class="pagination pagination-sm mb-0">
                                             <li class="page-item {{ pagination.page <= 1 ? 'disabled' : '' }}">
-                                                <a class="page-link" href="{{ path('app_admin_dashboard', { page: pagination.page - 1, q: searchTerm }) }}">Previous</a>
+                                                <a class="page-link" href="{{ path('legacy_admin_dashboard', { page: pagination.page - 1, q: searchTerm }) }}">Previous</a>
                                             </li>
                                             {% for p in 1..pagination.totalPages %}
                                                 <li class="page-item {{ p == pagination.page ? 'active' : '' }}">
-                                                    <a class="page-link" href="{{ path('app_admin_dashboard', { page: p, q: searchTerm }) }}">{{ p }}</a>
+                                                    <a class="page-link" href="{{ path('legacy_admin_dashboard', { page: p, q: searchTerm }) }}">{{ p }}</a>
                                                 </li>
                                             {% endfor %}
                                             <li class="page-item {{ pagination.page >= pagination.totalPages ? 'disabled' : '' }}">
-                                                <a class="page-link" href="{{ path('app_admin_dashboard', { page: pagination.page + 1, q: searchTerm }) }}">Next</a>
+                                                <a class="page-link" href="{{ path('legacy_admin_dashboard', { page: pagination.page + 1, q: searchTerm }) }}">Next</a>
                                             </li>
                                         </ul>
                                     </nav>
@@ -845,7 +833,7 @@
                                         <h5 class="modal-title" id="editUserModalLabel-{{ user.id }}">Edit User #{{ user.id }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <form method="post" action="{{ path('app_admin_user_update', {id: user.id}) }}">
+                                    <form method="post" action="{{ path('legacy_admin_user_update', {id: user.id}) }}">
                                         <div class="modal-body">
                                             <input type="hidden" name="_token" value="{{ csrf_token('admin_edit_user_' ~ user.id) }}">
                                             <input type="hidden" name="_return_q" value="{{ searchTerm }}">
@@ -877,7 +865,7 @@
                                         </div>
                                     </form>
                                     {% if not (app.user and app.user.id == user.id) %}
-                                        <form method="post" action="{{ path('app_admin_user_delete', {id: user.id}) }}" class="d-none js-delete-form-{{ user.id }}">
+                                        <form method="post" action="{{ path('legacy_admin_user_delete', {id: user.id}) }}" class="d-none js-delete-form-{{ user.id }}">
                                             <input type="hidden" name="_token" value="{{ csrf_token('admin_delete_user_' ~ user.id) }}">
                                             <input type="hidden" name="_return_q" value="{{ searchTerm }}">
                                             <input type="hidden" name="_return_page" value="{{ pagination.page }}">
@@ -943,7 +931,7 @@
                         </div>
                         <div class="card-body">
                             <p>
-                                <strong>Administrator:</strong> {{ app.user.fullName ?: app.user.email }}<br>
+                                <strong>Administrator:</strong> {{ (app.user.fullName is defined and app.user.fullName) ? app.user.fullName : ((app.user.prenom|default('') ~ ' ' ~ app.user.nom|default(''))|trim ?: app.user.email) }}<br>
                                 <strong>Email:</strong> {{ app.user.email }}<br>
                                 <strong>Member Since:</strong> {{ app.user.createdAt | date('M d, Y') }}<br>
                                 <strong>Account Status:</strong>
@@ -1080,7 +1068,7 @@
                 searchTerm: '{{ searchTerm }}',
                 filterStatus: 'all',
                 filterRole: 'all',
-                apiUrl: '{{ path("api_admin_users") }}',
+                apiUrl: '{{ path("legacy_api_admin_users") }}',
 
                 async loadUsers() {
                     const params = new URLSearchParams();
@@ -1245,7 +1233,7 @@
                             return;
                         }
 
-                        const response = await fetch(`{{ path('app_admin_user_delete', {id: ':id'}) }}`.replace(':id', userId), {
+                        const response = await fetch(`{{ path('legacy_admin_user_delete', {id: ':id'}) }}`.replace(':id', userId), {
                             method: 'POST',
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',

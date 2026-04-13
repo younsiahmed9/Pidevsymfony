@@ -43,10 +43,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::BOOLEAN)]
     private ?bool $isActive = true;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, columnDefinition: 'TIMESTAMP NOT NULL')]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, columnDefinition: 'TIMESTAMP NOT NULL')]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'], targetEntity: Admin::class)]

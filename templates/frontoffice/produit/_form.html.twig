@@ -1,0 +1,75 @@
+<form method="POST" novalidate>
+    {% set produitData = produit|default({}) %}
+    {% set formErrors = formErrors|default({}) %}
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="nomProduit" class="form-label fw-bold text-muted small text-uppercase">Nom du Produit</label>
+                <input type="text" id="nomProduit" name="nomProduit" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ produitData.nomProduit|default('') }}" placeholder="Ex: Ordinateur portable, Bureau..." required>
+                <div class="form-text">Quel est le nom de cet actif ou produit ?</div>
+                {% for error in formErrors.nomProduit|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="montant" class="form-label fw-bold text-muted small text-uppercase">Prix / Valeur (TND)</label>
+                <div class="input-group">
+                    <span class="input-group-text border-0 bg-light"><i class="fas fa-coins text-primary"></i></span>
+                    <input type="number" id="montant" name="montant" class="form-control form-control-lg border-0 bg-light shadow-none" step="0.01" value="{{ produitData.montant|default('') }}" placeholder="0.00" required>
+                </div>
+                <div class="form-text">La valeur estimée ou le prix d'achat.</div>
+                {% for error in formErrors.montant|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="typeProduit" class="form-label fw-bold text-muted small text-uppercase">Type de produit</label>
+                <input type="text" id="typeProduit" name="typeProduit" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ produitData.typeProduit|default('') }}" placeholder="Ex: Électronique, Immobilier..." required>
+                {% for error in formErrors.typeProduit|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="codeUnique" class="form-label fw-bold text-muted small text-uppercase">Code d'identification (Optionnel)</label>
+                <input type="text" id="codeUnique" name="codeUnique" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ produitData.codeUnique|default('') }}" placeholder="Ex: SN-123456">
+                <div class="form-text">Laissez vide pour une génération automatique.</div>
+                {% for error in formErrors.codeUnique|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="statut" class="form-label fw-bold text-muted small text-uppercase">Statut actuel</label>
+                <select id="statut" name="statut" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="disponible" {{ produitData.statut|default('') == 'disponible' ? 'selected' : '' }}>Disponible</option>
+                    <option value="vendu" {{ produitData.statut|default('') == 'vendu' ? 'selected' : '' }}>Vendu</option>
+                    <option value="hors_service" {{ produitData.statut|default('') == 'hors_service' ? 'selected' : '' }}>Hors Service</option>
+                    <option value="en_reparation" {{ produitData.statut|default('') == 'en_reparation' ? 'selected' : '' }}>En Réparation</option>
+                </select>
+                {% for error in formErrors.statut|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-4 border-top d-flex gap-3">
+        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer le produit') }}
+        </button>
+        <a href="{{ path('produit_index') }}" class="btn btn-light btn-lg px-4 rounded-pill">
+            Annuler
+        </a>
+    </div>
+</form>

@@ -6,7 +6,7 @@ security:
     providers:
         app_user_provider:
             entity:
-                class: App\Entity\Utilisateur
+                class: App\Entity\User
                 property: email
     firewalls:
         dev:
@@ -31,13 +31,13 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/admin, allow_if: "user and user.getUserIdentifier() == 'admin@fintrack.com'" }
-        - { path: ^/user/dashboard, allow_if: "user and user.getUserIdentifier() != 'admin@fintrack.com'" }
-        - { path: ^/portefeuille, allow_if: "user and user.getUserIdentifier() != 'admin@fintrack.com'" }
-        - { path: ^/carte, allow_if: "user and user.getUserIdentifier() != 'admin@fintrack.com'" }
-        - { path: ^/transaction, allow_if: "user and user.getUserIdentifier() != 'admin@fintrack.com'" }
-        - { path: ^/virement, allow_if: "user and user.getUserIdentifier() != 'admin@fintrack.com'" }
-        - { path: ^/profile, allow_if: "user and user.getUserIdentifier() != 'admin@fintrack.com'" }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/dashboard, roles: ROLE_USER }
+        - { path: ^/portefeuille, roles: ROLE_USER }
+        - { path: ^/carte, roles: ROLE_USER }
+        - { path: ^/transaction, roles: ROLE_USER }
+        - { path: ^/virement, roles: ROLE_USER }
+        - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/login$, roles: PUBLIC_ACCESS }
         - { path: ^/register$, roles: PUBLIC_ACCESS }
         - { path: ^/$, roles: PUBLIC_ACCESS }

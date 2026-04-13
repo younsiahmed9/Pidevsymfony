@@ -1,0 +1,24 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Ouvrir un Nouveau Compte - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow border-0 rounded-3 overflow-hidden">
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="card-title mb-0"><i class="fas fa-university me-2"></i>Ouvrir un Nouveau Compte</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info border-0 shadow-sm mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Remplissez les informations ci-dessous pour créer un nouveau compte bancaire pour un client.
+                    </div>
+                    {{ include('backoffice/compte/_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

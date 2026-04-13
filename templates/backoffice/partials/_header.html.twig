@@ -1,13 +1,11 @@
 <header class="topbar">
-    <input class="search" type="text" placeholder="What are you looking for?">
-    <div class="topbar-actions">
-        <button class="notif-btn" type="button" aria-label="Notifications">🔔</button>
-        <div class="user-info">
-            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="avatar">
-            <div>
-                <div class="user-name">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Admin User' }}</div>
-                <div class="user-role">{{ app.user ? (app.user.roles|join(', ')) : 'Manager' }}</div>
-            </div>
-        </div>
+    {% set adminName = app.user ? ((app.user.fullName is defined and app.user.fullName) ? app.user.fullName : ((app.user.prenom|default('') ~ ' ' ~ app.user.nom|default(''))|trim ?: app.user.email)) : 'Admin User' %}
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-primary">BackOffice</span>
+        <span class="text-muted small">Gestion & supervision</span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="fw-semibold">{{ adminName }}</span>
+        <a href="{{ path('admin_dashboard') }}" class="btn btn-sm btn-outline-primary">Dashboard</a>
     </div>
 </header>

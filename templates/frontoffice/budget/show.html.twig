@@ -1,0 +1,140 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Détails du Budget - {{ budget.nom_budget }}{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <!-- Header & Navigation -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div class="d-flex align-items-center">
+                <a href="{{ path('budget_index') }}" class="btn btn-white shadow-sm rounded-circle p-3 me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="h3 fw-bold mb-0">{{ budget.nom_budget }}</h1>
+                    <p class="text-muted mb-0">Créé le {{ budget.date_creation|date('d/m/Y') }}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('budget_edit', {id: budget.id_budget}) }}" class="btn btn-warning rounded-pill px-4">
+                    <i class="fas fa-edit me-2"></i> Modifier
+                </a>
+                {{ include('frontoffice/budget/_delete_form.html.twig') }}
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Summary & Progress -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4 text-center">
+                        {% set progress = budget.montant_total > 0 ? (budget.total_depense / budget.montant_total * 100) : 0 %}
+                        {% set progress_capped = progress > 100 ? 100 : progress %}
+                        {% set progress_color = progress > 90 ? '#dc3545' : (progress > 70 ? '#ffc107' : '#198754') %}
+                        
+                        <div class="position-relative d-inline-block mb-4">
+                            <svg width="180" height="180" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#f1f5f9" stroke-width="8"></circle>
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="{{ progress_color }}" stroke-width="8" 
+                                    stroke-dasharray="{{ progress_capped * 2.827 }} 282.7" transform="rotate(-90 50 50)"></circle>
+                            </svg>
+                            <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                <div class="h3 fw-bold mb-0">{{ progress|number_format(0) }}%</div>
+                                <div class="small text-muted">Utilisé</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-0 py-3 border-top">
+                            <div class="col-6 border-end">
+                                <div class="small text-muted mb-1 text-uppercase">Total Budget</div>
+                                <div class="h5 fw-bold text-primary mb-0">{{ budget.montant_total|number_format(2, ',', ' ') }} TND</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted mb-1 text-uppercase">Période</div>
+                                <div class="h5 fw-bold text-dark mb-0">{{ budget.periode|capitalize }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-4">Statistiques Rapides</h6>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Dépenses totales</span>
+                            <span class="fw-bold text-danger">-{{ budget.total_depense|number_format(2, ',', ' ') }} TND</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Reste à dépenser</span>
+                            {% set rest = budget.montant_total - budget.total_depense %}
+                            <span class="fw-bold {{ rest < 0 ? 'text-danger' : 'text-success' }}">
+                                {{ rest|number_format(2, ',', ' ') }} TND
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Nombre de dépenses</span>
+                            <span class="fw-bold">{{ depenses|length }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Transactions List -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">Historique des dépenses</h5>
+                        <a href="{{ path('depense_new', {'id_budget': budget.id_budget}) }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                            <i class="fas fa-plus me-1"></i> Ajouter une dépense
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if depenses %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4 border-0">Date</th>
+                                            <th class="border-0">Catégorie</th>
+                                            <th class="border-0">Description</th>
+                                            <th class="border-0 text-end pe-4">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for depense in depenses %}
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <div class="fw-bold text-dark">{{ depense.date_depense|date('d M Y') }}</div>
+                                                    <div class="small text-muted">{{ depense.mode_paiement|capitalize }}</div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark border px-3 rounded-pill">{{ depense.categorie }}</span>
+                                                </td>
+                                                <td class="text-muted small">
+                                                    {{ depense.description|default('Aucune description') }}
+                                                </td>
+                                                <td class="text-end pe-4 fw-bold text-danger">
+                                                    -{{ depense.montant|number_format(2, ',', ' ') }} TND
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+                                    <i class="fas fa-receipt fa-2x text-muted"></i>
+                                </div>
+                                <h6 class="fw-bold">Aucune dépense pour ce budget</h6>
+                                <p class="text-muted small">Vos transactions apparaîtront ici une fois enregistrées.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

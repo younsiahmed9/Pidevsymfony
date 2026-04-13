@@ -1,0 +1,130 @@
+<form method="POST" novalidate>
+    {% set creditFormData = creditFormData|default({
+        compte: '',
+        montant: '',
+        duree_mois: '',
+        date_debut: 'now'|date('Y-m-d'),
+        taux_interet: '5.50'
+    }) %}
+    {% set creditErrors = creditErrors|default({
+        compte: [],
+        montant: [],
+        duree_mois: [],
+        date_debut: [],
+        taux_interet: []
+    }) %}
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="compte" class="form-label fw-bold text-muted small text-uppercase">Compte sur lequel verser les fonds</label>
+                {% if selectedCompte is defined and selectedCompte %}
+                    <input type="hidden" name="compte" value="{{ selectedCompte.id }}">
+                    <div class="linked-account-box">
+                        <div class="d-flex align-items-center justify-content-between gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="linked-account-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div>
+                                    <div class="small text-uppercase fw-bold text-secondary">Compte lié</div>
+                                    <div class="fw-bold text-dark">Compte n° {{ selectedCompte.numeroCompte }}</div>
+                                </div>
+                            </div>
+                            <span class="badge rounded-pill bg-info-subtle text-info-emphasis px-3 py-2">Préselectionné</span>
+                        </div>
+                    </div>
+                    <div class="form-text">Ce crédit sera automatiquement rattaché au compte depuis lequel vous avez lancé l'action.</div>
+                {% else %}
+                    <select id="compte" name="compte" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                        <option value="">-- Sélectionner un compte courant --</option>
+                        {% for compte in comptes %}
+                            <option value="{{ compte.id }}" {{ creditFormData.compte == compte.id ? 'selected' : '' }}>
+                                Compte courant n° {{ compte.numeroCompte }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Seuls vos comptes courants actifs sont affichés.</div>
+                {% endif %}
+                {% for error in creditErrors.compte %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="montant" class="form-label fw-bold text-muted small text-uppercase">Montant souhaité (TND)</label>
+                <div class="input-group">
+                    <span class="input-group-text border-0 bg-light"><i class="fas fa-hand-holding-usd text-primary"></i></span>
+                    <input type="number" id="montant" name="montant" class="form-control form-control-lg border-0 bg-light shadow-none" step="0.01" value="{{ creditFormData.montant }}" placeholder="0.00" required>
+                </div>
+                {% for error in creditErrors.montant %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="duree_mois" class="form-label fw-bold text-muted small text-uppercase">Durée de remboursement (Mois)</label>
+                <select id="duree_mois" name="duree_mois" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    {% for m in [6, 12, 24, 36, 48, 60] %}
+                        <option value="{{ m }}" {{ creditFormData.duree_mois == m ? 'selected' : '' }}>{{ m }} mois</option>
+                    {% endfor %}
+                </select>
+                {% for error in creditErrors.duree_mois %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="taux_interet" class="form-label fw-bold text-muted small text-uppercase">Taux d'intérêt indicatif (%)</label>
+                <input type="number" id="taux_interet" name="taux_interet" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ creditFormData.taux_interet }}" readonly>
+                <div class="form-text">Taux fixe appliqué pour cette simulation.</div>
+                {% for error in creditErrors.taux_interet %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="date_debut" class="form-label fw-bold text-muted small text-uppercase">Date de début souhaitée</label>
+                <input type="date" id="date_debut" name="date_debut" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ creditFormData.date_debut }}" required>
+                {% for error in creditErrors.date_debut %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-4 border-top d-flex gap-3">
+        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">
+            <i class="fas fa-paper-plane me-2"></i>{{ button_label|default('Envoyer ma demande') }}
+        </button>
+        <a href="{{ path('credit_index') }}" class="btn btn-light btn-lg px-4 rounded-pill">
+            Annuler
+        </a>
+    </div>
+</form>
+
+<style>
+    .linked-account-box {
+        padding: 0.9rem 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid #cfe8ff;
+        background: linear-gradient(145deg, #f0f9ff, #eff6ff);
+    }
+    .linked-account-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #dbeafe;
+        color: #1d4ed8;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

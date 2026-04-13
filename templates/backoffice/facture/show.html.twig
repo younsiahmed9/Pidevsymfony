@@ -1,0 +1,127 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Détails de la Facture - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <a href="{{ path('admin_facture_index') }}" class="text-decoration-none text-muted me-2">
+                <i class="fas fa-arrow-left fa-sm"></i>
+            </a>
+            Détails de la Facture #{{ facture.id }}
+        </h1>
+        <div class="btn-group shadow-sm">
+            <a href="{{ path('admin_facture_edit', {id: facture.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit me-1"></i> Modifier
+            </a>
+            {{ include('backoffice/facture/_delete_form.html.twig') }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations de Facturation</h6>
+                    <span class="h5 mb-0 fw-bold text-dark">{{ facture.numeroFacture }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-5">
+                        <div class="col-sm-6">
+                            <h6 class="text-muted small text-uppercase mb-3 font-weight-bold">Émetteur</h6>
+                            <div class="h4 font-weight-bold text-primary mb-1">FinTrack Inc.</div>
+                            <p class="text-muted small">Service financier numérique<br>Tunis, Tunisie</p>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <h6 class="text-muted small text-uppercase mb-3 font-weight-bold">Statut de paiement</h6>
+                            {% set badge_class = facture.statut == 'payee' ? 'success' : (facture.statut == 'non_payee' ? 'danger' : (facture.statut == 'en_retard' ? 'warning' : 'secondary')) %}
+                            <span class="badge rounded-pill bg-{{ badge_class }} fs-5 px-4 py-2">
+                                {{ facture.statut|capitalize|replace({'_': ' '}) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mb-5">
+                        <table class="table table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Description</th>
+                                    <th class="text-center" style="width: 200px;">Montant</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if facture.service %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">Service: {{ facture.service }}</div>
+                                            <div class="small text-muted">Prestation de service financier</div>
+                                        </td>
+                                        <td class="text-center">{{ facture.montant|number_format(2, ',', ' ') }} TND</td>
+                                    </tr>
+                                {% endif %}
+                                {% if facture.produit %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">Produit: {{ facture.produit }}</div>
+                                            <div class="small text-muted">Vente d'actif personnel</div>
+                                        </td>
+                                        <td class="text-center">{{ facture.montant|number_format(2, ',', ' ') }} TND</td>
+                                    </tr>
+                                {% endif %}
+                                {% if not facture.service and not facture.produit %}
+                                    <tr>
+                                        <td>Frais de gestion / Transaction diverse</td>
+                                        <td class="text-center">{{ facture.montant|number_format(2, ',', ' ') }} TND</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-light h5 font-weight-bold">
+                                    <td class="text-end">TOTAL</td>
+                                    <td class="text-center text-primary">{{ facture.montant|number_format(2, ',', ' ') }} TND</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Date de Facture</label>
+                            <span class="h6 font-weight-bold text-dark">{{ facture.dateFacture|date('d/m/Y') }}</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Date d'Échéance</label>
+                            <span class="h6 font-weight-bold text-danger">{{ facture.dateEcheance ? facture.dateEcheance|date('d/m/Y') : 'À réception' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations Client</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                            <i class="fas fa-user-tie fa-4x text-primary"></i>
+                        </div>
+                        <h4 class="font-weight-bold text-dark mb-1">{{ facture.user_prenom }} {{ facture.user_nom }}</h4>
+                        <p class="text-muted"><i class="fas fa-envelope me-2"></i>{{ facture.user_email }}</p>
+                    </div>
+                    <hr>
+                    <div class="mt-4">
+                        <label class="small font-weight-bold text-muted text-uppercase d-block mb-2">Détails techniques</label>
+                        <p class="small text-muted mb-1">ID Facture: <span class="text-dark fw-bold">#{{ facture.id }}</span></p>
+                        <p class="small text-muted mb-1">ID Utilisateur: <span class="text-dark fw-bold">#{{ facture.user_id }}</span></p>
+                        <p class="small text-muted">Généré le: <span class="text-dark fw-bold">{{ "now"|date('d/m/Y H:i') }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -14,7 +14,7 @@
                 <div class="d-inline-flex align-items-center p-3 bg-white rounded shadow-sm">
                     <div class="me-3">
                         <p class="text-muted small mb-0">Solde Total</p>
-                        <h4 class="mb-0 fw-bold text-primary">{{ app.user.solde|number_format(2, ',', ' ') }} <span class="fs-6 text-muted">EUR</span></h4>
+                        <h4 class="mb-0 fw-bold text-primary">{{ balanceTotal|default(0)|number_format(2, ',', ' ') }} <span class="fs-6 text-muted">EUR</span></h4>
                     </div>
                     <div class="bg-primary-subtle text-primary rounded-circle p-3">
                         <i class="fas fa-wallet fa-lg"></i>
@@ -30,18 +30,29 @@
                         <h4 class="h5 mb-0"><i class="fas fa-user-edit me-2 text-primary"></i>Informations Personnelles</h4>
                     </div>
                     <div class="card-body p-4">
+                        {% set profileInitial = (app.user.fullName ?: app.user.email)|slice(0, 1)|upper %}
                         {{ form_start(profileForm, {'attr': {'class': 'row g-3', 'novalidate': 'novalidate'}}) }}
-                            
-                            <div class="col-md-6">
-                                {{ form_label(profileForm.prenom, 'Prénom', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
-                                {{ form_widget(profileForm.prenom, {'attr': {'class': 'form-control shadow-none'}}) }}
-                                <div class="text-danger small mt-1">{{ form_errors(profileForm.prenom) }}</div>
+
+                            <div class="col-12 d-flex align-items-center gap-3 mb-3">
+                                {% if app.user.profilePhoto %}
+                                    <img src="{{ asset(app.user.profilePhoto) }}" alt="Photo de profil" class="rounded-circle border" style="width:72px;height:72px;object-fit:cover;">
+                                {% else %}
+                                    <div class="rounded-circle border d-flex align-items-center justify-content-center bg-primary-subtle text-primary fw-bold" style="width:72px;height:72px;">
+                                        {{ profileInitial }}
+                                    </div>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    {{ form_label(profileForm.profilePhotoFile, 'Photo de profil', {'label_attr': {'class': 'form-label fw-bold small text-muted mb-1'}}) }}
+                                    {{ form_widget(profileForm.profilePhotoFile, {'attr': {'class': 'form-control shadow-none'}}) }}
+                                    <div class="form-text">Formats acceptes: JPG, PNG, WEBP, GIF (max 5 Mo)</div>
+                                    <div class="text-danger small mt-1">{{ form_errors(profileForm.profilePhotoFile) }}</div>
+                                </div>
                             </div>
                             
                             <div class="col-md-6">
-                                {{ form_label(profileForm.nom, 'Nom', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
-                                {{ form_widget(profileForm.nom, {'attr': {'class': 'form-control shadow-none'}}) }}
-                                <div class="text-danger small mt-1">{{ form_errors(profileForm.nom) }}</div>
+                                {{ form_label(profileForm.fullName, 'Nom complet', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(profileForm.fullName, {'attr': {'class': 'form-control shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(profileForm.fullName) }}</div>
                             </div>
 
                             <div class="col-12">

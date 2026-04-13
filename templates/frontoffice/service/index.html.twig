@@ -1,0 +1,92 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Services - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div>
+                <h1 class="h2 fw-bold text-dark mb-1">Mes Services & Abonnements</h1>
+                <p class="text-muted mb-0">Suivez vos abonnements récurrents et services souscrits.</p>
+            </div>
+            <a href="{{ path('service_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+                <i class="fas fa-plus me-2"></i> Ajouter un service
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for service in services %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                                    <i class="fas fa-concierge-bell text-primary fa-lg"></i>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                        <li><a class="dropdown-item" href="{{ path('service_show', {id: service.id}) }}"><i class="fas fa-eye me-2 text-primary"></i> Voir</a></li>
+                                        <li><a class="dropdown-item" href="{{ path('service_edit', {id: service.id}) }}"><i class="fas fa-edit me-2 text-warning"></i> Modifier</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h5 class="card-title fw-bold mb-1">{{ service.nomService }}</h5>
+                            <span class="badge bg-light text-dark border px-2 rounded-pill small mb-4">{{ service.typeService }}</span>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <div class="small text-muted text-uppercase fw-bold">Tarif</div>
+                                    <div class="h4 fw-bold text-primary mb-0">{{ service.tarif|number_format(2, ',', ' ') }} TND</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="small text-muted text-uppercase fw-bold">Fréquence</div>
+                                    <div class="fw-bold text-dark">{{ service.frequence|capitalize }}</div>
+                                </div>
+                            </div>
+
+                            <div class="py-3 border-top d-flex justify-content-between align-items-center">
+                                <div class="small text-muted">
+                                    <i class="fas fa-calendar-alt me-1"></i> Depuis le {{ service.dateDebut|date('d/m/Y') }}
+                                </div>
+                                {% set badge_class = service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'secondary') %}
+                                <span class="badge rounded-pill bg-{{ badge_class }} px-3">
+                                    {{ service.statut|capitalize }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <a href="{{ path('service_show', {id: service.id}) }}" class="btn btn-light w-100 rounded-pill fw-bold">Gérer le service</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block">
+                        <i class="fas fa-concierge-bell fa-4x text-light mb-4 d-block"></i>
+                        <h3 class="fw-bold">Aucun service enregistré</h3>
+                        <p class="text-muted mb-4">Centralisez vos abonnements pour mieux anticiper vos dépenses.</p>
+                        <a href="{{ path('service_new') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
+                            Ajouter mon premier service
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .transition-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .transition-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+</style>
+{% endblock %}

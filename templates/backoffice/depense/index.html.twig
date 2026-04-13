@@ -1,0 +1,116 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Gestion des Dépenses - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    {% set totalMontant = 0 %}
+    {% for item in depenses %}
+        {% set totalMontant = totalMontant + (item.montant|default(0)) %}
+    {% endfor %}
+
+    <h1 class="mb-4">📊 Gestion des Dépenses</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Dépenses</h5>
+                    <p class="card-text display-4">{{ depenses|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Montant</h5>
+                    <p class="card-text">
+                        {{ totalMontant|number_format(2, ',', ' ') }} TND
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Virements</h5>
+                    <p class="card-text display-4">{{ depenses|filter(d => d.mode_paiement == 'virement')|length }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Espèces</h5>
+                    <p class="card-text display-4">{{ depenses|filter(d => d.mode_paiement == 'espece')|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">📋 Liste des Dépenses</h5>
+            <a href="{{ path('admin_depense_new') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Nouvelle Dépense
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Utilisateur</th>
+                        <th>Budget</th>
+                        <th>Catégorie</th>
+                        <th>Montant</th>
+                        <th>Date</th>
+                        <th>Mode Paiement</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for depense in depenses %}
+                        <tr>
+                            <td>#{{ depense.id_depense }}</td>
+                            <td>
+                                <small><strong>{{ depense.user_prenom }} {{ depense.user_nom }}</strong><br>
+                                {{ depense.user_email }}</small>
+                            </td>
+                            <td>
+                                {% if depense.nom_budget %}
+                                    <span class="badge bg-info">{{ depense.nom_budget }}</span>
+                                {% else %}
+                                    <span class="text-muted small">Non associé</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ depense.categorie }}</strong></td>
+                            <td><span class="badge bg-danger">{{ depense.montant|number_format(2, ',', ' ') }} TND</span></td>
+                            <td>{{ depense.date_depense|date('d/m/Y') }}</td>
+                            <td class="small">{{ depense.mode_paiement|capitalize }}</td>
+                            <td>
+                                <a href="{{ path('admin_depense_show', {id: depense.id_depense}) }}" class="btn btn-sm btn-primary" title="Voir">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_depense_edit', {id: depense.id_depense}) }}" class="btn btn-sm btn-primary" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="post" action="{{ path('admin_depense_delete', {id: depense.id_depense}) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ depense.id_depense) }}">
+                                    <button type="submit" class="btn btn-sm btn-primary" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">Aucune dépense trouvée.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

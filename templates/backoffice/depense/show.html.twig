@@ -1,0 +1,91 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Détails de la Dépense - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <a href="{{ path('admin_depense_index') }}" class="text-decoration-none text-muted me-2">
+                <i class="fas fa-arrow-left fa-sm"></i>
+            </a>
+            Détails de la Dépense #{{ depense.id_depense }}
+        </h1>
+        <div class="btn-group shadow-sm">
+            <a href="{{ path('admin_depense_edit', {id: depense.id_depense}) }}" class="btn btn-warning">
+                <i class="fas fa-edit me-1"></i> Modifier
+            </a>
+            {{ include('backoffice/depense/_delete_form.html.twig') }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations sur la Dépense</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4 text-center">
+                        <label class="small font-weight-bold text-muted text-uppercase d-block">Montant de la dépense</label>
+                        <span class="h2 font-weight-bold text-danger">-{{ depense.montant|number_format(2, ',', ' ') }} TND</span>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6 border-end">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Catégorie</label>
+                            <span class="h5 fw-bold text-dark">{{ depense.categorie }}</span>
+                        </div>
+                        <div class="col-6 ps-3">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Date</label>
+                            <span class="h5 fw-bold text-dark">{{ depense.date_depense|date('d/m/Y') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6 border-end">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Mode de paiement</label>
+                            <span class="badge bg-light text-dark fs-6">{{ depense.mode_paiement|capitalize }}</span>
+                        </div>
+                        <div class="col-6 ps-3">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Budget associé</label>
+                            {% if depense.nom_budget %}
+                                <a href="{{ path('admin_budget_show', {id: depense.id_budget}) }}" class="text-decoration-none h5 fw-bold text-primary">
+                                    {{ depense.nom_budget }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">Aucun</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="small font-weight-bold text-muted text-uppercase d-block">Description</label>
+                        <p class="bg-light p-3 rounded text-dark mb-0">{{ depense.description|default('Aucune description fournie.') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Propriétaire de la Dépense</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-4 me-4">
+                            <i class="fas fa-user fa-3x text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-weight-bold text-dark mb-1">{{ depense.user_prenom }} {{ depense.user_nom }}</h4>
+                            <p class="text-muted mb-2"><i class="fas fa-envelope me-2"></i>{{ depense.user_email }}</p>
+                            <span class="badge bg-primary">Utilisateur #{{ depense.user_id }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

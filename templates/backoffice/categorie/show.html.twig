@@ -1,0 +1,71 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Détails de la Catégorie - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <a href="{{ path('admin_categorie_index') }}" class="text-decoration-none text-muted me-2">
+                <i class="fas fa-arrow-left fa-sm"></i>
+            </a>
+            Détails de la Catégorie #{{ categorie.id }}
+        </h1>
+        <div class="btn-group shadow-sm">
+            <a href="{{ path('admin_categorie_edit', {id: categorie.id}) }}" class="btn btn-warning px-4">
+                <i class="fas fa-edit me-2"></i> Modifier
+            </a>
+            {{ include('backoffice/categorie/_delete_form.html.twig') }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card shadow mb-4 border-0 text-center p-5">
+                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" 
+                     style="width: 100px; height: 100px; background-color: {{ categorie.couleur|default('#e2e8f0') }}; color: white; font-size: 3rem;">
+                    <i class="{{ categorie.icon|default('fas fa-tag') }}"></i>
+                </div>
+                <h2 class="h4 font-weight-bold text-dark">{{ categorie.nomCategorie }}</h2>
+                <p class="text-muted small">Créée le {{ categorie.createdAt|date('d/m/Y à H:i') }}</p>
+                <div class="badge bg-light text-dark border p-2 mt-2">
+                    Code Couleur: <code>{{ categorie.couleur|default('#4e73df') }}</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow mb-4 border-0">
+                <div class="card-header py-3 bg-white border-bottom">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations & Statistiques</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="small font-weight-bold text-muted text-uppercase d-block mb-2">Description</label>
+                        <p class="bg-light p-4 rounded-3 text-dark mb-0">
+                            {{ categorie.description|default('Aucune description fournie pour cette catégorie.') }}
+                        </p>
+                    </div>
+
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-6">
+                            <div class="border p-4 rounded-3 h-100">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Documents associés</div>
+                                <div class="h3 mb-0 font-weight-bold text-dark">{{ categorie.documents|length }}</div>
+                                <p class="text-muted small mt-2 mb-0">Nombre de documents classés dans cette catégorie.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border p-4 rounded-3 h-100 bg-light opacity-75">
+                                <div class="text-xs font-weight-bold text-muted text-uppercase mb-1">Dernière utilisation</div>
+                                <div class="h5 mb-0 font-weight-bold text-muted">Indisponible</div>
+                                <p class="text-muted small mt-2 mb-0">Donnée calculée dynamiquement.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

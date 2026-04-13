@@ -2,24 +2,66 @@
     <nav class="navbar navbar-expand-xl navbar-light text-center py-3">
         <div class="container">
             <a class="navbar-brand" href="{{ path('front_home_index') }}">
-                <img loading="preload" decoding="async" class="img-fluid" width="160" src="{{ asset('frontoffice/images/logo.png') }}" alt="FinTrack">
+                <img loading="preload" decoding="async" class="img-fluid" width="160" src="{{ asset('images/logo.png') }}" alt="FinTrack">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fo-navbar-links">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('front_home_index') }}">Accueil</a>
                     </li>
                     {% if app.user %}
+                        <li class="nav-item dropdown nav-hover-dropdown">
+                            <a class="nav-link dropdown-toggle" href="{{ path('compte_index') }}" id="comptesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Mes Comptes
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="comptesDropdown">
+                                <li><a class="dropdown-item" href="{{ path('compte_index') }}">Mes Comptes</a></li>
+                                <li><a class="dropdown-item" href="{{ path('credit_index') }}">Mes Crédits</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown nav-hover-dropdown">
+                            <a class="nav-link dropdown-toggle" href="{{ path('document_index') }}" id="documentsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Documents
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="documentsDropdown">
+                                <li><a class="dropdown-item" href="{{ path('document_index') }}">Mes Documents</a></li>
+                                <li><a class="dropdown-item" href="{{ path('echeance_index') }}">Mes Échéances</a></li>
+                                <li><a class="dropdown-item" href="{{ path('echeance_new') }}">Nouvelle Échéance</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown nav-hover-dropdown">
+                            <a class="nav-link dropdown-toggle" href="{{ path('service_produit_index') }}" id="servicesFacturesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Services & Factures
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="servicesFacturesDropdown">
+                                <li><a class="dropdown-item" href="{{ path('service_produit_index') }}">Services & Produits</a></li>
+                                <li><a class="dropdown-item" href="{{ path('facture_index') }}">Mes Factures</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown nav-hover-dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="gestionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Ma Gestion
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="gestionDropdown">
+                                <li><a class="dropdown-item" href="{{ path('budget_index') }}">Mes Budgets</a></li>
+                                <li><a class="dropdown-item" href="{{ path('depense_index') }}">Mes Dépenses</a></li>
+                         <!--test     <li><a class="dropdown-item" href="{{ path('service_produit_index') }}">Mes Factures (sync Services/Produits)</a></li> -->
+                            </ul>
+                        </li>
                         <li class="nav-item dropdown nav-hover-dropdown">
                             <a class="nav-link dropdown-toggle" href="{{ path('front_portefeuille_index') }}" id="userPagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Mes Portefeuilles
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="userPagesDropdown">
                                 <li><a class="dropdown-item" href="{{ path('front_portefeuille_index') }}">Mes Portefeuilles</a></li>
+                                <li><a class="dropdown-item" href="{{ path('front_portefeuille_new') }}">Nouveau Portefeuille</a></li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ path('front_carte_index') }}">Mes Cartes</a></li>
+                                <li><a class="dropdown-item" href="{{ path('front_carte_new') }}">Nouvelle Carte</a></li>
+                               <!--test     <li><a class="dropdown-item" href="{{ path('compte_index') }}">Mes Comptes Bancaires</a></li>   -->
                                 <li><a class="dropdown-item" href="{{ path('front_transaction_index') }}">Transactions</a></li>
                                 <li><a class="dropdown-item" href="{{ path('front_virement_index') }}">Virements</a></li>
                             </ul>
@@ -27,10 +69,20 @@
                     {% endif %}
                 </ul>
                 <div class="d-flex align-items-center">
+                    <button type="button" id="themeToggleBtn" class="btn btn-outline-secondary rounded-pill me-2 px-3" aria-label="Activer le mode sombre" aria-pressed="false" title="Mode sombre/clair">
+                        <i class="fas fa-moon me-1" aria-hidden="true"></i>
+                        <span class="d-none d-md-inline">Thème</span>
+                    </button>
                     {% if app.user %}
+                        {% set profileInitial = (app.user.fullName ?: app.user.email)|slice(0, 1)|upper %}
                         <div class="dropdown">
                             <a class="btn btn-outline-primary dropdown-toggle me-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle me-1"></i> {{ app.user.prenom }} {{ app.user.nom }}
+                                {% if app.user.profilePhoto %}
+                                    <img src="{{ asset(app.user.profilePhoto) }}" alt="Photo de profil" class="navbar-profile-avatar me-2">
+                                {% else %}
+                                    <span class="navbar-profile-avatar navbar-profile-avatar-fallback me-2">{{ profileInitial }}</span>
+                                {% endif %}
+                                {{ app.user.fullName ?: app.user.email }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{{ path('front_profile_index') }}">Mon Profil</a></li>
@@ -49,6 +101,38 @@
 </header>
 
 <style>
+.fo-navbar-links {
+    gap: 0.35rem;
+}
+
+.fo-navbar-links .nav-link {
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+    border-radius: 999px;
+}
+
+.fo-navbar-links .nav-link:hover {
+    background: rgba(13, 110, 253, 0.08);
+}
+
+.navbar-profile-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(13, 110, 253, 0.35);
+}
+
+.navbar-profile-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 110, 253, 0.12);
+    color: #0d6efd;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
 @media (min-width: 1200px) {
     .nav-hover-dropdown:hover .dropdown-menu {
         display: block;
@@ -56,3 +140,34 @@
     }
 }
 </style>
+
+<script>
+    (function () {
+        var button = document.getElementById('themeToggleBtn');
+        if (!button) {
+            return;
+        }
+
+        var icon = button.querySelector('i');
+        var setUi = function (theme) {
+            var isDark = theme === 'dark';
+            button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+            button.setAttribute('aria-label', isDark ? 'Activer le mode clair' : 'Activer le mode sombre');
+            if (icon) {
+                icon.classList.toggle('fa-moon', !isDark);
+                icon.classList.toggle('fa-sun', isDark);
+            }
+        };
+
+        var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        setUi(currentTheme);
+
+        button.addEventListener('click', function () {
+            var activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            var nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', nextTheme);
+            localStorage.setItem('ft-theme', nextTheme);
+            setUi(nextTheme);
+        });
+    })();
+</script>

@@ -1,0 +1,105 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Détails du Produit - {{ produit.nomProduit }}{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <!-- Header & Navigation -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div class="d-flex align-items-center">
+                <a href="{{ path('produit_index') }}" class="btn btn-white shadow-sm rounded-circle p-3 me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="h3 fw-bold mb-0">{{ produit.nomProduit }}</h1>
+                    <p class="text-muted mb-0">Réf: #{{ produit.id }} - Type: {{ produit.typeProduit }}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('produit_edit', {id: produit.id}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-edit me-2"></i> Modifier
+                </a>
+                {{ include('frontoffice/produit/_delete_form.html.twig') }}
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <!-- Top Banner with Price -->
+                        <div class="bg-primary bg-opacity-10 py-5 text-center border-bottom">
+                            <h6 class="text-primary small text-uppercase fw-bold mb-2">Valeur Estimée</h6>
+                            <h2 class="display-4 fw-bold text-primary mb-0">{{ produit.montant|number_format(2, ',', ' ') }} TND</h2>
+                            <p class="text-muted mt-2 mb-0">Enregistré le {{ produit.dateCreation|date('d F Y') }}</p>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="p-5">
+                            <div class="row g-4 mb-5">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-barcode text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Code Identification</label>
+                                            <code class="fw-bold text-dark fs-5">{{ produit.codeUnique }}</code>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-info-circle text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Statut Actuel</label>
+                                            {% set badge_class = produit.statut == 'disponible' ? 'success' : (produit.statut == 'vendu' ? 'info' : (produit.statut == 'en_reparation' ? 'warning' : 'secondary')) %}
+                                            <span class="badge rounded-pill bg-{{ badge_class }} px-3 fs-6">
+                                                {{ produit.statut|capitalize|replace({'_': ' '}) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-tag text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Catégorie / Type</label>
+                                            <span class="fw-bold text-dark fs-5">{{ produit.typeProduit }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-history text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Heure d'ajout</label>
+                                            <span class="fw-bold text-dark fs-5">{{ produit.dateCreation|date('H:i') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Info Banner -->
+                            <div class="bg-light p-4 rounded-4 border-start border-primary border-4">
+                                <label class="small text-muted text-uppercase d-block mb-2">Note sur le produit</label>
+                                <p class="mb-0 text-dark">Ce produit fait partie de votre inventaire sécurisé sur FinTrack. Vous pouvez suivre son statut et sa valeur à tout moment.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 text-center border-top">
+                        <p class="small text-muted mb-0">Gestion d'inventaire personnel • FinTrack Financial Services</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

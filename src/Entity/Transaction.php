@@ -32,11 +32,11 @@ class Transaction
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $description = null;
 
-    #[ORM\ManyToOne(targetEntity: CarteVirtuelle::class)]
+    #[ORM\ManyToOne(targetEntity: CarteVirtuelle::class, inversedBy: 'transactionsSource')]
     #[ORM\JoinColumn(name: "carte_source_id", referencedColumnName: "id", nullable: true)]
     private ?CarteVirtuelle $carte_source = null;
 
-    #[ORM\ManyToOne(targetEntity: CarteVirtuelle::class)]
+    #[ORM\ManyToOne(targetEntity: CarteVirtuelle::class, inversedBy: 'transactionsDest')]
     #[ORM\JoinColumn(name: "carte_dest_id", referencedColumnName: "id", nullable: true)]
     private ?CarteVirtuelle $carte_dest = null;
 

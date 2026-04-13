@@ -1,90 +1,196 @@
-{% extends "base.html.twig" %}
+{% extends 'frontoffice/base.html.twig' %}
 
-{% block title %}Register - FinTrack{% endblock %}
+{% block title %}Inscription - FinTrack{% endblock %}
 
 {% block body %}
-<section class="section bg-tertiary position-relative overflow-hidden">
-	<div class="container">
-		<div class="row justify-content-center align-items-start">
-			<div class="col-lg-5 mb-5 mb-lg-0">
-				<div class="block pe-0 pe-xl-5">
-					<p class="text-primary text-uppercase fw-bold mb-3">Sign Up</p>
-					<h1 class="mb-4">Create your FinTrack account</h1>
-					<p class="mb-4">Select CLIENT or ADMIN. After submit, you receive a verification code by email. Your account is created only after code validation.</p>
-					<a href="{{ path('app_login') }}" class="btn btn-outline-primary">Already have an account?</a>
-				</div>
-			</div>
-			<div class="col-lg-7">
-				<div class="bg-white p-4 p-md-5 shadow-sm">
-					<h2 class="h4 mb-4">Create account</h2>
-					{{ form_start(form) }}
-					<div class="row g-3">
-						<div class="col-md-6">
-							{{ form_label(form.email) }}
-							{{ form_widget(form.email, {'attr': {'class': 'form-control shadow-none'}}) }}
-							{{ form_errors(form.email) }}
-						</div>
-						<div class="col-md-6">
-							{{ form_label(form.fullName) }}
-							{{ form_widget(form.fullName, {'attr': {'class': 'form-control shadow-none'}}) }}
-							{{ form_errors(form.fullName) }}
-						</div>
-						<div class="col-md-6">
-							{{ form_label(form.plainPassword.first) }}
-							{{ form_widget(form.plainPassword.first, {'attr': {'class': 'form-control shadow-none'}}) }}
-							{{ form_errors(form.plainPassword.first) }}
-						</div>
-						<div class="col-md-6">
-							{{ form_label(form.plainPassword.second) }}
-							{{ form_widget(form.plainPassword.second, {'attr': {'class': 'form-control shadow-none'}}) }}
-							{{ form_errors(form.plainPassword.second) }}
-						</div>
-						<div class="col-md-6">
-							{{ form_label(form.roleChoice) }}
-							{{ form_widget(form.roleChoice, {'attr': {'class': 'form-control shadow-none', 'onchange': 'toggleAdminFields()'}}) }}
-							{{ form_errors(form.roleChoice) }}
-						</div>
-						<div class="col-md-6" id="adminFieldWrap">
-							{{ form_label(form.adminCode) }}
-							{{ form_widget(form.adminCode, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Required for ADMIN'}}) }}
-							{{ form_errors(form.adminCode) }}
-						</div>
-						<div class="col-md-6" id="cinFieldWrap">
-							{{ form_label(form.cin) }}
-							{{ form_widget(form.cin, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Optional'}}) }}
-						</div>
-						<div class="col-md-6" id="phoneFieldWrap">
-							{{ form_label(form.phone) }}
-							{{ form_widget(form.phone, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Optional'}}) }}
-						</div>
-					</div>
-					<div class="mt-4">
-						<button class="btn btn-primary w-100" type="submit">Register Account</button>
-					</div>
-					{{ form_end(form) }}
-				</div>
-			</div>
-		</div>
-	</div>
+<section class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-11 col-sm-10 col-md-9 col-lg-8 col-xl-7">
+                <div class="auth-card">
+                    <div class="auth-card-body">
+                        <div class="auth-header">
+                            <div class="mb-3">
+                                <i class="fas fa-user-plus fa-3x text-primary"></i>
+                            </div>
+                            <h2 class="auth-title">Créer un compte</h2>
+                            <p class="auth-subtitle">Rejoignez FinTrack et commencez à gérer vos finances</p>
+                        </div>
+
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} border-0 rounded-3 small mb-4">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+
+                        {{ form_start(form, {'attr': {'class': 'auth-form register-form', 'novalidate': 'novalidate', 'data-validate-url': path('app_register_validate')}}) }}
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    {{ form_label(form.fullName, 'Nom Complet', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.fullName, {'attr': {'class': 'form-control form-control-lg shadow-none', 'placeholder': 'Jean Dupont', 'data-field': 'fullName'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.fullName) }}</div>
+                                    <div class="text-danger small mt-1" data-error-for="fullName"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_label(form.email, 'Adresse Email', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control form-control-lg shadow-none', 'placeholder': 'jean@exemple.com', 'data-field': 'email'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.email) }}</div>
+                                    <div class="text-danger small mt-1" data-error-for="email"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_label(form.plainPassword.first, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.plainPassword.first, {'attr': {'class': 'form-control form-control-lg shadow-none', 'placeholder': '••••••••', 'data-field': 'plainPassword.first'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.plainPassword.first) }}</div>
+                                    <div class="text-danger small mt-1" data-error-for="plainPassword.first"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_label(form.plainPassword.second, 'Confirmer le mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.plainPassword.second, {'attr': {'class': 'form-control form-control-lg shadow-none', 'placeholder': '••••••••', 'data-field': 'plainPassword.second'}}) }}
+                                    <div class="text-danger small mt-1" data-error-for="plainPassword.second"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_label(form.cin, 'CIN (Optionnel)', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.cin, {'attr': {'class': 'form-control form-control-lg shadow-none', 'placeholder': 'Numéro CIN', 'data-field': 'cin'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.cin) }}</div>
+                                    <div class="text-danger small mt-1" data-error-for="cin"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.phone, {'attr': {'class': 'form-control form-control-lg shadow-none', 'placeholder': '+212 6...', 'data-field': 'phone'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.phone) }}</div>
+                                    <div class="text-danger small mt-1" data-error-for="phone"></div>
+                                </div>
+                            </div>
+
+                            <div class="text-danger small mt-4" data-error-for="general"></div>
+
+                            <div class="mt-5">
+                                <button type="submit" class="btn btn-auth w-100">
+                                    Créer mon compte
+                                </button>
+                            </div>
+
+                            <div class="auth-footer mt-4">
+                                <p class="mb-0">Déjà inscrit ? <a href="{{ path('app_login') }}" class="auth-link">Se connecter</a></p>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+                <div class="text-center mt-4 mb-5">
+                    <a href="{{ path('app_home') }}" class="text-muted text-decoration-none small">
+                        <i class="fas fa-arrow-left me-1"></i> Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 <script>
-function toggleAdminFields() {
-    const roleChoiceElement = document.getElementById('{{ form.roleChoice.vars.id }}');
-    const adminFieldWrap = document.getElementById('adminFieldWrap');
-    const cinFieldWrap = document.getElementById('cinFieldWrap');
-    const phoneFieldWrap = document.getElementById('phoneFieldWrap');
+    (function () {
+        var form = document.querySelector('.register-form');
+        if (!form) {
+            return;
+        }
 
-    if (!roleChoiceElement) {
-        return;
-    }
+        var validateUrl = form.getAttribute('data-validate-url');
+        var pendingTimer = null;
+        var submitting = false;
 
-    const isAdmin = roleChoiceElement.value === 'ADMIN';
-    adminFieldWrap.style.display = isAdmin ? 'block' : 'none';
-    cinFieldWrap.style.display = isAdmin ? 'none' : 'block';
-    phoneFieldWrap.style.display = isAdmin ? 'none' : 'block';
-}
+        var setFieldState = function (name, messages) {
+            var input = form.querySelector('[data-field="' + name + '"]');
+            var errorBox = form.querySelector('[data-error-for="' + name + '"]');
+            var hasError = messages && messages.length;
 
-document.addEventListener('DOMContentLoaded', toggleAdminFields);
+            if (input) {
+                input.classList.toggle('is-invalid', hasError);
+                input.classList.toggle('is-valid', !hasError && input.value.trim() !== '');
+            }
+
+            if (errorBox) {
+                errorBox.innerHTML = hasError ? messages.map(function (message) {
+                    return '<div>' + message + '</div>';
+                }).join('') : '';
+            }
+        };
+
+        var clearAllStates = function () {
+            ['fullName', 'email', 'plainPassword.first', 'plainPassword.second', 'cin', 'phone', 'general'].forEach(function (field) {
+                setFieldState(field, []);
+            });
+        };
+
+        var runValidation = function () {
+            if (!validateUrl) {
+                return Promise.resolve({ valid: true });
+            }
+
+            var formData = new FormData(form);
+            var submitButton = form.querySelector('button[type="submit"]');
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            return fetch(validateUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            }).then(function (response) {
+                return response.json().then(function (payload) {
+                    return { ok: response.ok, payload: payload };
+                });
+            }).then(function (result) {
+                clearAllStates();
+                if (result.payload && result.payload.errors) {
+                    Object.keys(result.payload.errors).forEach(function (field) {
+                        setFieldState(field, result.payload.errors[field]);
+                    });
+                }
+
+                return {
+                    valid: !!(result.payload && result.payload.valid),
+                    payload: result.payload || {}
+                };
+            }).catch(function () {
+                return { valid: true };
+            }).finally(function () {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            });
+        };
+
+        form.addEventListener('input', function () {
+            window.clearTimeout(pendingTimer);
+            pendingTimer = window.setTimeout(runValidation, 250);
+        });
+
+        form.addEventListener('blur', function (event) {
+            if (event.target && event.target.name) {
+                runValidation();
+            }
+        }, true);
+
+        form.addEventListener('submit', function (event) {
+            if (submitting) {
+                return;
+            }
+
+            event.preventDefault();
+            runValidation().then(function (result) {
+                if (result.valid) {
+                    submitting = true;
+                    form.submit();
+                }
+            });
+        });
+
+        runValidation();
+    })();
 </script>
 {% endblock %}

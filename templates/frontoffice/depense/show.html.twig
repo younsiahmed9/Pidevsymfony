@@ -1,0 +1,107 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Détails de la dépense - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <!-- Header & Navigation -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div class="d-flex align-items-center">
+                <a href="{{ path('depense_index') }}" class="btn btn-white shadow-sm rounded-circle p-3 me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="h3 fw-bold mb-0">Détails de la transaction</h1>
+                    <p class="text-muted mb-0">Réf: #{{ depense.id_depense }} - {{ depense.date_depense|date('d F Y') }}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('depense_edit', {id: depense.id_depense}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-edit me-2"></i> Modifier
+                </a>
+                {{ include('frontoffice/depense/_delete_form.html.twig') }}
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <!-- Top Banner with Amount -->
+                        <div class="bg-danger bg-opacity-10 py-5 text-center border-bottom">
+                            <h6 class="text-danger small text-uppercase fw-bold mb-2">Montant débité</h6>
+                            <h2 class="display-4 fw-bold text-danger mb-0">-{{ depense.montant|number_format(2, ',', ' ') }} TND</h2>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="p-5">
+                            <div class="row g-4 mb-5">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-tag text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Catégorie</label>
+                                            <span class="fw-bold text-dark fs-5">{{ depense.categorie }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-credit-card text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Mode de paiement</label>
+                                            <span class="fw-bold text-dark fs-5">{{ depense.mode_paiement|capitalize }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-wallet text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Budget associé</label>
+                                            {% if depense.nom_budget %}
+                                                <a href="{{ path('budget_show', {id: depense.id_budget}) }}" class="text-decoration-none fw-bold text-primary fs-5">
+                                                    {{ depense.nom_budget }}
+                                                </a>
+                                            {% else %}
+                                                <span class="fw-bold text-muted fs-5">Dépense libre</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light p-3 rounded-3 me-3">
+                                            <i class="fas fa-calendar-alt text-muted"></i>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted text-uppercase d-block">Date effective</label>
+                                            <span class="fw-bold text-dark fs-5">{{ depense.date_depense|date('d/m/Y') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="bg-light p-4 rounded-4">
+                                <label class="small text-muted text-uppercase d-block mb-2">Note / Description</label>
+                                <p class="mb-0 text-dark">{{ depense.description|default('Aucune description fournie pour cette transaction.') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 text-center border-top">
+                        <p class="small text-muted mb-0">Transaction sécurisée • FinTrack Financial Services</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

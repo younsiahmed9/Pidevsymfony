@@ -57,7 +57,7 @@
                                     {{ form_label(form.carte_dest, 'Carte Destination (Créditée)', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
                                     {{ form_widget(form.carte_dest, {'attr': {'class': 'form-select shadow-none'}}) }}
                                     <div class="text-danger small mt-1">{{ form_errors(form.carte_dest) }}</div>
-                                    <small class="text-muted">Laissez vide si externe au réseau Wallet.</small>
+                                    <small class="text-muted">La carte destination est obligatoire pour un virement programmé.</small>
                                 </div>
                             </div>
 

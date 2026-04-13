@@ -1,0 +1,116 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Détails du Crédit - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <a href="{{ path('admin_credit_index') }}" class="text-decoration-none text-muted me-2">
+                <i class="fas fa-arrow-left fa-sm"></i>
+            </a>
+            Détails du Crédit #{{ credit.id }}
+        </h1>
+        <div class="btn-group shadow-sm">
+            <a href="{{ path('admin_credit_edit', {id: credit.id}) }}" class="btn btn-warning px-4">
+                <i class="fas fa-edit me-2"></i> Modifier
+            </a>
+            {{ include('backoffice/credit/_delete_form.html.twig') }}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Credit Main Info -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4 border-0">
+                <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations Financières</h6>
+                    {% set badge_class = credit.status == 'approuve' ? 'success' : (credit.status == 'refuse' ? 'danger' : (credit.status == 'en_attente' ? 'warning' : 'info')) %}
+                    <span class="badge rounded-pill bg-{{ badge_class }} px-4 py-2 fs-6">
+                        {{ credit.status|capitalize|replace({'_': ' '}) }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-5 g-4">
+                        <div class="col-md-4">
+                            <div class="bg-light p-4 rounded-3 border-top border-primary border-4">
+                                <label class="small text-muted text-uppercase fw-bold d-block mb-1">Montant Capital</label>
+                                <span class="h3 font-weight-bold text-primary">{{ credit.montant|number_format(2, ',', ' ') }} TND</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-4 rounded-3 border-top border-danger border-4">
+                                <label class="small text-muted text-uppercase fw-bold d-block mb-1">Mensualité Est.</label>
+                                <span class="h3 font-weight-bold text-danger">{{ credit.mensualite|number_format(2, ',', ' ') }} TND</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-4 rounded-3 border-top border-info border-4">
+                                <label class="small text-muted text-uppercase fw-bold d-block mb-1">Total à Rembourser</label>
+                                {% set total = credit.mensualite * credit.dureeMois %}
+                                <span class="h3 font-weight-bold text-dark">{{ total|number_format(2, ',', ' ') }} TND</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Taux d'intérêt</label>
+                                <span class="h5 fw-bold">{{ credit.tauxInteret }}% par an</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Durée du prêt</label>
+                                <span class="h5 fw-bold">{{ credit.dureeMois }} Mois</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Date de début</label>
+                                <span class="h5 fw-bold">{{ credit.dateDebut|date('d F Y') }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 text-info">
+                                <label class="small text-muted text-uppercase fw-bold d-block">Coût du crédit (Intérêts)</label>
+                                <span class="h5 fw-bold">{{ (total - credit.montant)|number_format(2, ',', ' ') }} TND</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linked Account -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4 border-0">
+                <div class="card-header py-3 bg-white border-bottom">
+                    <h6 class="m-0 font-weight-bold text-primary">Compte & Bénéficiaire</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                            <i class="fas fa-university fa-4x text-primary"></i>
+                        </div>
+                        <h4 class="font-weight-bold text-dark">{{ credit.compte.utilisateur.fullName ?: credit.compte.utilisateur.email }}</h4>
+                        <p class="text-muted small"><i class="fas fa-envelope me-1"></i> {{ credit.compte.utilisateur.email }}</p>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <label class="small text-muted text-uppercase fw-bold d-block">Compte Associé</label>
+                        <a href="{{ path('admin_compte_show', {id: credit.compte.id}) }}" class="fw-bold text-decoration-none">
+                            <i class="fas fa-link me-1"></i> {{ credit.compte.numeroCompte }}
+                        </a>
+                    </div>
+                    <div>
+                        <label class="small text-muted text-uppercase fw-bold d-block">Type de compte</label>
+                        <span class="badge bg-light text-dark text-uppercase">{{ credit.compte.typeCompte }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

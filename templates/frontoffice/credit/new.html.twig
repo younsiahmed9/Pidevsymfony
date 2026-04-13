@@ -1,0 +1,43 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Nouvelle Demande de Crédit - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb bg-transparent p-0 small text-uppercase fw-bold">
+                        <li class="breadcrumb-item"><a href="{{ path('credit_index') }}" class="text-decoration-none text-muted">Mes Crédits</a></li>
+                        <li class="breadcrumb-item active text-primary" aria-current="page">Simulation & Demande</li>
+                    </ol>
+                </nav>
+
+                <!-- Card -->
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary text-white py-4 px-5">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3 me-4">
+                                <i class="fas fa-calculator fa-2x"></i>
+                            </div>
+                            <div>
+                                <h2 class="h3 mb-1 fw-bold">Demande de Crédit</h2>
+                                <p class="mb-0 text-white-50">Simulez votre prêt et envoyez votre demande en quelques clics.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-5 bg-white">
+                        <div class="alert alert-warning border-0 shadow-sm mb-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Note :</strong> Cette simulation est indicative. La décision finale dépendra de l'analyse de votre dossier par nos administrateurs.
+                        </div>
+                        {{ include('frontoffice/credit/_form.html.twig') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

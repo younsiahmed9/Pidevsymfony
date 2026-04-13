@@ -1,0 +1,52 @@
+<form method="POST" novalidate>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="user_id" class="form-label fw-bold">Utilisateur</label>
+            <select id="user_id" name="user_id" class="form-select" required>
+                <option value="">-- Sélectionner un utilisateur --</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}" {{ budget and budget.user_id == user.id ? 'selected' : '' }}>
+                        {{ user.prenom }} {{ user.nom }} ({{ user.email }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="nom_budget" class="form-label fw-bold">Nom du Budget</label>
+            <input type="text" id="nom_budget" name="nom_budget" class="form-control" value="{{ budget.nom_budget|default('') }}" required>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="montant_total" class="form-label fw-bold">Montant Total (TND)</label>
+            <input type="number" id="montant_total" name="montant_total" class="form-control" step="0.01" value="{{ budget.montant_total|default(0) }}" required>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="periode" class="form-label fw-bold">Période</label>
+            <select id="periode" name="periode" class="form-select" required>
+                <option value="mensuel" {{ budget and budget.periode == 'mensuel' ? 'selected' : '' }}>Mensuel</option>
+                <option value="annuel" {{ budget and budget.periode == 'annuel' ? 'selected' : '' }}>Annuel</option>
+                <option value="ponctuel" {{ budget and budget.periode == 'ponctuel' ? 'selected' : '' }}>Ponctuel</option>
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="statut" class="form-label fw-bold">Statut</label>
+            <select id="statut" name="statut" class="form-select" required>
+                <option value="actif" {{ budget and budget.statut == 'actif' ? 'selected' : '' }}>Actif</option>
+                <option value="en_attente" {{ budget and budget.statut == 'en_attente' ? 'selected' : '' }}>En Attente</option>
+                <option value="ferme" {{ budget and budget.statut == 'ferme' ? 'selected' : '' }}>Fermé</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary px-4">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer') }}
+        </button>
+        <a href="{{ path('admin_budget_index') }}" class="btn btn-secondary px-4">
+            <i class="fas fa-times me-2"></i>Annuler
+        </a>
+    </div>
+</form>

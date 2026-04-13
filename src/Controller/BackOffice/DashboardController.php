@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Controller\Admin;
+namespace App\Controller\BackOffice;
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/admin')]
@@ -23,13 +23,15 @@ final class DashboardController extends AbstractController
     #[Route('/dashboard', name: 'admin_dashboard', methods: ['GET'])]
     public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $search = trim((string) $request->query->get('q', ''));
         $sort = strtolower(trim((string) $request->query->get('sort', 'created_at')));
         $direction = strtolower(trim((string) $request->query->get('direction', 'desc')));
 
         $sortMap = [
             'nsc' => 'u.id',
-            'nom' => 'u.nom',
+            'nom' => 'u.full_name',
             'email' => 'u.email',
             'role' => 'u.role',
             'solde' => 'u.solde',
@@ -40,7 +42,7 @@ final class DashboardController extends AbstractController
         $sortDirection = $direction === 'asc' ? 'ASC' : 'DESC';
 
         $kpiSql = 'SELECT
-            (SELECT COUNT(*) FROM utilisateur) AS nb_utilisateurs,
+            (SELECT COUNT(*) FROM users) AS nb_utilisateurs,
             (SELECT COUNT(*) FROM portefeuille) AS nb_portefeuilles,
             (SELECT COUNT(*) FROM carte_virtuelle) AS nb_cartes,
             (SELECT COUNT(*) FROM transaction) AS nb_transactions';
@@ -52,15 +54,23 @@ final class DashboardController extends AbstractController
             'nb_transactions' => 0,
         ];
 
-        $userSql = 'SELECT u.id, u.nom, u.prenom, u.email, u.role, u.solde, u.created_at
-            FROM utilisateur u
+        $userSql = 'SELECT
+                u.id,
+                TRIM(SUBSTRING_INDEX(COALESCE(u.full_name, ""), " ", -1)) AS nom,
+                TRIM(SUBSTRING_INDEX(COALESCE(u.full_name, ""), " ", 1)) AS prenom,
+                u.email,
+                LOWER(u.role) AS role,
+                u.is_active,
+                u.solde,
+                u.created_at,
+                u.updated_at
+            FROM users u
             WHERE 1=1';
 
         $params = [];
         if ($search !== '') {
             $userSql .= ' AND (
-                u.nom LIKE :q
-                OR u.prenom LIKE :q
+                u.full_name LIKE :q
                 OR u.email LIKE :q
                 OR u.role LIKE :q
                 OR CAST(u.id AS CHAR) LIKE :q
@@ -74,6 +84,7 @@ final class DashboardController extends AbstractController
         $portefeuilleFilters = $this->buildPortefeuilleFilters($request);
         $portefeuilles = $this->fetchFilteredPortefeuilles($entityManager, $portefeuilleFilters);
         $portefeuilleStats = $this->fetchPortefeuilleStats($entityManager, $portefeuilleFilters);
+        $transferStats = $this->fetchTransferStats($entityManager);
 
         $administrators = 0;
         $activeClients = 0;
@@ -82,15 +93,22 @@ final class DashboardController extends AbstractController
             $role = strtolower((string) ($user['role'] ?? ''));
             if ($role === 'admin') {
                 ++$administrators;
-            } else {
+            } elseif ((int) ($user['is_active'] ?? 0) === 1) {
                 ++$activeClients;
             }
         }
 
         $totalUsers = (int) ($kpis['nb_utilisateurs'] ?? 0);
+        $activeUsers = 0;
+        foreach ($users as $user) {
+            if ((int) ($user['is_active'] ?? 0) === 1) {
+                ++$activeUsers;
+            }
+        }
+
         $stats = [
             'totalUsers' => $totalUsers,
-            'activeUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
             'activeClients' => $activeClients,
             'administrators' => $administrators,
         ];
@@ -105,12 +123,15 @@ final class DashboardController extends AbstractController
             'portefeuilleFilters' => $portefeuilleFilters,
             'portefeuilles' => $portefeuilles,
             'portefeuilleStats' => $portefeuilleStats,
+            'transferStats' => $transferStats,
         ]);
     }
 
     #[Route('/dashboard/portefeuilles/export/pdf', name: 'admin_portefeuille_export_pdf', methods: ['GET'])]
     public function exportPortefeuillesPdf(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $filters = $this->buildPortefeuilleFilters($request);
         $portefeuilles = $this->fetchFilteredPortefeuilles($entityManager, $filters);
 
@@ -171,11 +192,11 @@ final class DashboardController extends AbstractController
                 p.created_at,
                 p.updated_at,
                 u.id AS owner_id,
-                u.nom AS owner_nom,
-                u.prenom AS owner_prenom,
+                TRIM(SUBSTRING_INDEX(COALESCE(u.full_name, ""), " ", -1)) AS owner_nom,
+                TRIM(SUBSTRING_INDEX(COALESCE(u.full_name, ""), " ", 1)) AS owner_prenom,
                 u.email AS owner_email
             FROM portefeuille p
-            INNER JOIN utilisateur u ON u.id = p.utilisateur_id
+            INNER JOIN users u ON u.id = p.user_id
             WHERE 1=1';
 
         $params = [];
@@ -184,8 +205,7 @@ final class DashboardController extends AbstractController
                 p.nom LIKE :q
                 OR p.devise_principale LIKE :q
                 OR u.email LIKE :q
-                OR u.nom LIKE :q
-                OR u.prenom LIKE :q
+                OR u.full_name LIKE :q
                 OR CAST(p.id AS CHAR) LIKE :q
             )';
             $params['q'] = '%' . $filters['q'] . '%';
@@ -206,8 +226,7 @@ final class DashboardController extends AbstractController
                 p.nom LIKE :q
                 OR p.devise_principale LIKE :q
                 OR u.email LIKE :q
-                OR u.nom LIKE :q
-                OR u.prenom LIKE :q
+                OR u.full_name LIKE :q
                 OR CAST(p.id AS CHAR) LIKE :q
             )';
             $params['q'] = '%' . $filters['q'] . '%';
@@ -216,10 +235,10 @@ final class DashboardController extends AbstractController
         $portfolioSummarySql = 'SELECT
                 COUNT(*) AS total_portefeuilles,
                 COALESCE(SUM(p.solde_total), 0) AS total_solde,
-                COUNT(DISTINCT p.utilisateur_id) AS total_owners,
+                COUNT(DISTINCT p.user_id) AS total_owners,
                 COUNT(DISTINCT p.devise_principale) AS total_devises
             FROM portefeuille p
-            INNER JOIN utilisateur u ON u.id = p.utilisateur_id
+            INNER JOIN users u ON u.id = p.user_id
             WHERE 1=1' . $whereSql;
 
         $portfolioSummary = $entityManager->getConnection()->fetchAssociative($portfolioSummarySql, $params) ?: [];
@@ -228,7 +247,7 @@ final class DashboardController extends AbstractController
                 COUNT(c.id) AS total_cards,
                 COALESCE(SUM(CASE WHEN c.is_active = 1 THEN 1 ELSE 0 END), 0) AS active_cards
             FROM portefeuille p
-            INNER JOIN utilisateur u ON u.id = p.utilisateur_id
+            INNER JOIN users u ON u.id = p.user_id
             LEFT JOIN carte_virtuelle c ON c.portefeuille_id = p.id
             WHERE 1=1' . $whereSql;
 
@@ -238,7 +257,7 @@ final class DashboardController extends AbstractController
                 COALESCE(c.type, "Inconnu") AS type,
                 COUNT(c.id) AS total
             FROM portefeuille p
-            INNER JOIN utilisateur u ON u.id = p.utilisateur_id
+            INNER JOIN users u ON u.id = p.user_id
             INNER JOIN carte_virtuelle c ON c.portefeuille_id = p.id
             WHERE 1=1' . $whereSql . '
             GROUP BY c.type
@@ -254,6 +273,33 @@ final class DashboardController extends AbstractController
             'totalCards' => (int) ($cardSummary['total_cards'] ?? 0),
             'activeCards' => (int) ($cardSummary['active_cards'] ?? 0),
             'cardTypes' => $cardTypes,
+        ];
+    }
+
+    private function fetchTransferStats(EntityManagerInterface $entityManager): array
+    {
+        $summary = $entityManager->getConnection()->fetchAssociative(
+            'SELECT
+                COALESCE(SUM(CASE WHEN t.type = "TRANSFERT" THEN 1 ELSE 0 END), 0) AS normal_transfers,
+                COALESCE(SUM(CASE WHEN t.type IN ("VIREMENT_PROGRAMME", "TRANSFERT_PROGRAMME") THEN 1 ELSE 0 END), 0) AS programmed_transfers,
+                COALESCE(SUM(CASE WHEN t.type IN ("TRANSFERT", "VIREMENT_PROGRAMME", "TRANSFERT_PROGRAMME") THEN t.montant ELSE 0 END), 0) AS transferred_amount
+             FROM transaction t
+               WHERE t.statut IN ("SUCCESS", "COMPLETED")'
+        ) ?: [];
+
+        $fees = $entityManager->getConnection()->fetchAssociative(
+            'SELECT
+                COALESCE(SUM(fee_amount), 0) AS total_fees,
+                COALESCE(SUM(CASE WHEN applied_fee_rate = 0.01 THEN 1 ELSE 0 END), 0) AS discounted_transfers
+             FROM transfer_fee_event'
+        ) ?: [];
+
+        return [
+            'normalTransfers' => (int) ($summary['normal_transfers'] ?? 0),
+            'programmedTransfers' => (int) ($summary['programmed_transfers'] ?? 0),
+            'transferredAmount' => (float) ($summary['transferred_amount'] ?? 0),
+            'totalFees' => (float) ($fees['total_fees'] ?? 0),
+            'discountedTransfers' => (int) ($fees['discounted_transfers'] ?? 0),
         ];
     }
 }

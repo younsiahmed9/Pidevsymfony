@@ -1,0 +1,20 @@
+{% set dossierData = dossierFormData|default({
+    nom_dossier: '',
+    description: ''
+}) %}
+
+<div class="mb-4">
+    <label for="nom_dossier" class="form-label fw-bold text-dark mb-2">Nom du dossier</label>
+    <div class="input-group">
+        <span class="input-group-text bg-light border-0"><i class="fas fa-folder text-muted"></i></span>
+        <input type="text" id="nom_dossier" name="nom_dossier" class="form-control bg-light border-0 py-3 shadow-none" placeholder="Ex: Contrats de travail" value="{{ dossierData.nom_dossier }}" required>
+    </div>
+</div>
+
+<div class="mb-1">
+    <label for="description" class="form-label fw-bold text-dark mb-2">Description (Optionnelle)</label>
+    <div class="input-group">
+        <span class="input-group-text bg-light border-0"><i class="fas fa-align-left text-muted"></i></span>
+        <textarea id="description" name="description" class="form-control bg-light border-0 py-3 shadow-none" rows="3" placeholder="Description courte du contenu du dossier...">{{ dossierData.description }}</textarea>
+    </div>
+</div>

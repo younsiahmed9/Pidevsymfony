@@ -109,13 +109,7 @@
                                             <tr>
                                                 <td><small class="text-muted">{{ trx.date|date('d/m/Y H:i') }}</small></td>
                                                 <td>
-                                                    {% if trx.type == 'DEPOT' %}
-                                                        <span class="text-success"><i class="fas fa-arrow-down me-1"></i>Dépôt</span>
-                                                    {% elseif trx.type == 'RETRAIT' %}
-                                                        <span class="text-danger"><i class="fas fa-arrow-up me-1"></i>Retrait</span>
-                                                    {% else %}
-                                                        <span class="text-primary"><i class="fas fa-exchange-alt me-1"></i>Transfert</span>
-                                                    {% endif %}
+                                                    <span class="text-primary"><i class="fas fa-exchange-alt me-1"></i>Transfert</span>
                                                     <div class="small text-muted mt-1">{{ trx.description }}</div>
                                                 </td>
                                                 <td>

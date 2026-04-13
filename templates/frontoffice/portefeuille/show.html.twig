@@ -13,8 +13,26 @@
                 </a>
                 <h2 class="h3 fw-bold mb-0">{{ portefeuille.nom }}</h2>
                 <p class="text-muted">Portefeuille en {{ portefeuille.devise_principale }}</p>
+                <div class="small mt-2">
+                    <span class="badge bg-info-subtle text-info me-2">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        Position détectée: {{ detectedLocation.city ?? 'Inconnue' }}{% if detectedLocation.country_name is defined and detectedLocation.country_name %}, {{ detectedLocation.country_name }}{% endif %}
+                    </span>
+                    <span class="badge bg-secondary-subtle text-secondary me-2">
+                        Ville profil: {{ profileCity ?? 'Non renseignée' }}
+                    </span>
+                    <span class="text-muted">IP: {{ clientIp ?? 'N/A' }}</span>
+                </div>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <div class="d-flex gap-2 justify-content-md-end flex-wrap mb-2">
+                    <a href="{{ path('front_portefeuille_edit', {'id': portefeuille.id}) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-pen me-1"></i> Modifier
+                    </a>
+                    <a href="{{ path('front_carte_new', {'portefeuille_id': portefeuille.id}) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-credit-card me-1"></i> Ajouter une carte
+                    </a>
+                </div>
                 <div class="p-3 bg-white rounded shadow-sm d-inline-block text-end">
                     <p class="text-muted small mb-0">Solde Total</p>
                     <h3 class="mb-0 fw-bold text-primary">{{ portefeuille.solde_total|number_format(2, ',', ' ') }} <span class="fs-6 text-muted">{{ portefeuille.devise_principale }}</span></h3>
@@ -32,22 +50,47 @@
                     </div>
                     <div class="card-body px-4">
                         {% if cartes is empty %}
-                            <p class="text-muted text-center py-3">Aucune carte associée à ce portefeuille.</p>
+                            <div class="text-center py-4">
+                                <p class="text-muted mb-3">Aucune carte associée à ce portefeuille.</p>
+                                <a href="{{ path('front_carte_new', {'portefeuille_id': portefeuille.id}) }}" class="btn btn-outline-primary">Créer la première carte</a>
+                            </div>
                         {% else %}
                             <div class="list-group list-group-flush">
                                 {% for carte in cartes %}
-                                    <a href="{{ path('front_carte_show', {'id': carte.id}) }}" class="list-group-item list-group-item-action px-0 border-bottom py-3">
-                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div class="list-group-item px-0 border-bottom py-3">
+                                        <div class="d-flex w-100 justify-content-between align-items-center gap-3">
                                             <div>
                                                 <h6 class="mb-1 text-dark fw-bold">Carte {{ carte.type }}</h6>
                                                 <small class="text-muted">**** **** **** {{ carte.numero_carte|slice(-4) }}</small>
+                                                <div class="mt-1">
+                                                    <span class="badge {{ carte.is_active ? 'bg-success' : 'bg-danger' }}">{{ carte.is_active ? 'Active' : 'Inactive' }}</span>
+                                                </div>
                                             </div>
                                             <div class="text-end">
-                                                <span class="badge {{ carte.is_active ? 'bg-success' : 'bg-danger' }} mb-1">{{ carte.is_active ? 'Active' : 'Inactive' }}</span>
-                                                <div class="fw-bold small">{{ carte.solde|number_format(2, ',', ' ') }} {{ carte.devise }}</div>
+                                                <div class="fw-bold small mb-2">{{ carte.solde|number_format(2, ',', ' ') }} {{ carte.devise }}</div>
+                                                <div class="btn-group btn-group-sm" role="group" aria-label="Actions carte">
+                                                    <a href="{{ path('front_carte_show', {'id': carte.id}) }}" class="btn btn-outline-info" title="Voir">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ path('front_carte_edit', {'id': carte.id}) }}" class="btn btn-outline-primary" title="Modifier">
+                                                        <i class="fas fa-pen"></i>
+                                                    </a>
+                                                    <form method="post" action="{{ path('front_carte_toggle', {'id': carte.id}) }}" class="d-inline-block">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ carte.id) }}">
+                                                        <button class="btn btn-outline-warning" title="{{ carte.is_active ? 'Désactiver' : 'Activer' }}">
+                                                            <i class="fas {{ carte.is_active ? 'fa-lock' : 'fa-unlock' }}"></i>
+                                                        </button>
+                                                    </form>
+                                                    <form method="post" action="{{ path('front_carte_delete', {'id': carte.id}) }}" class="d-inline-block" onsubmit="return confirm('Supprimer définitivement cette carte ?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ carte.id) }}">
+                                                        <button class="btn btn-outline-danger" title="Supprimer">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
-                                    </a>
+                                    </div>
                                 {% endfor %}
                             </div>
                         {% endif %}
@@ -60,7 +103,12 @@
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-history me-2 text-primary"></i>Historique du portefeuille</h5>
-                        <a href="{{ path('front_transaction_new') }}" class="btn btn-sm btn-primary">Faire une transaction</a>
+                        <div class="d-flex gap-2 flex-wrap justify-content-end">
+                            <a href="{{ path('front_virement_new') }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-clock me-1"></i>Transfert programmé
+                            </a>
+                            <a href="{{ path('front_transaction_new') }}" class="btn btn-sm btn-primary">Faire une transaction</a>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         {% if transactions is empty %}
@@ -101,7 +149,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <span class="badge {{ trx.statut in ['COMPLETED', 'TERMINE'] ? 'bg-success' : (trx.statut in ['PENDING', 'EN_ATTENTE'] ? 'bg-warning' : 'bg-danger') }}">
+                                                    <span class="badge {{ trx.statut in ['SUCCESS', 'COMPLETED', 'TERMINE'] ? 'bg-success' : (trx.statut in ['PENDING', 'EN_ATTENTE'] ? 'bg-warning' : 'bg-danger') }}">
                                                         {{ trx.statut }}
                                                     </span>
                                                 </td>

@@ -6,6 +6,7 @@ use App\Repository\CarteVirtuelleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CarteVirtuelleRepository::class)]
 #[ORM\Table(name: "carte_virtuelle")]
@@ -17,7 +18,8 @@ class CarteVirtuelle
     private ?int $id = null;
 
     #[ORM\Column(name: "numero_carte", type: "string", length: 32, unique: true)]
-    private ?string $numero_carte = null;
+    #[Assert\NotBlank(message: 'Le numéro de carte est obligatoire.')]
+    private ?string $numero_carte = '';
 
     #[ORM\Column(type: "string", length: 8, nullable: true)]
     private ?string $cvv = null;
@@ -29,16 +31,26 @@ class CarteVirtuelle
     private ?string $solde = "0.00";
 
     #[ORM\Column(type: "decimal", precision: 15, scale: 2, options: ["default" => 1000])]
+    #[Assert\NotBlank(message: 'Le plafond est obligatoire.')]
+    #[Assert\Regex(
+        pattern: '/^\d+(\.\d{1,2})?$/',
+        message: 'Le plafond doit être un nombre avec au plus 2 décimales.'
+    )]
     private ?string $plafond = "1000.00";
 
     #[ORM\Column(type: "string", length: 20, options: ["default" => "NORMAL"])]
+    #[Assert\NotBlank(message: 'Le type de carte est obligatoire.')]
+    #[Assert\Choice(choices: ['NORMAL', 'SILVER', 'GOLD'], message: 'Type de carte invalide.')]
     private ?string $type = "NORMAL";
 
     #[ORM\Column(type: "string", length: 10, options: ["default" => "TND"])]
+    #[Assert\NotBlank(message: 'La devise est obligatoire.')]
+    #[Assert\Choice(choices: ['TND', 'EUR', 'USD'], message: 'Devise invalide.')]
     private ?string $devise = "TND";
 
     #[ORM\ManyToOne(targetEntity: Portefeuille::class, inversedBy: "cartes")]
     #[ORM\JoinColumn(name: "portefeuille_id", nullable: false)]
+    #[Assert\NotNull(message: 'Veuillez sélectionner un portefeuille.')]
     private ?Portefeuille $portefeuille = null;
 
     #[ORM\Column(name: "is_active", type: "boolean", options: ["default" => true])]

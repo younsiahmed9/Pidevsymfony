@@ -1,0 +1,6 @@
+<form method="post" action="{{ path('admin_credit_delete', {'id': credit.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce crédit ? Cette action est irréversible.');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ credit.id) }}">
+    <button class="btn btn-outline-danger shadow-sm">
+        <i class="fas fa-trash-alt me-1"></i> Supprimer le crédit
+    </button>
+</form>

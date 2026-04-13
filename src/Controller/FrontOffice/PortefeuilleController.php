@@ -2,7 +2,8 @@
 
 namespace App\Controller\FrontOffice;
 
-use App\Entity\Utilisateur;
+use App\Entity\User;
+use App\Service\Transfer\GeoLocateService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -10,6 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
 
 #[Route('/portefeuille')]
 final class PortefeuilleController extends AbstractController
@@ -17,15 +20,15 @@ final class PortefeuilleController extends AbstractController
     #[Route('/', name: 'front_portefeuille_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $portefeuilles = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id, nom, devise_principale, solde_total FROM portefeuille WHERE utilisateur_id = :uid ORDER BY id DESC',
+            'SELECT id, nom, devise_principale, solde_total FROM portefeuille WHERE user_id = :uid ORDER BY id DESC',
             ['uid' => $user->getId()]
         );
 
@@ -37,10 +40,10 @@ final class PortefeuilleController extends AbstractController
     #[Route('/new', name: 'front_portefeuille_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -48,7 +51,13 @@ final class PortefeuilleController extends AbstractController
             'nom' => '',
             'devise_principale' => 'TND',
         ])
-            ->add('nom', TextType::class)
+            ->add('nom', TextType::class, [
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Le nom du portefeuille ne peut pas être vide.']),
+                    new Length(['min' => 1, 'max' => 100, 'minMessage' => 'Le nom doit contenir au moins 1 caractère.', 'maxMessage' => 'Le nom ne peut pas dépasser 100 caractères.']),
+                ],
+            ])
             ->add('devise_principale', ChoiceType::class, [
                 'choices' => [
                     'TND' => 'TND',
@@ -61,12 +70,12 @@ final class PortefeuilleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-
             $entityManager->getConnection()->insert('portefeuille', [
                 'nom' => $data['nom'],
+                'thumbnail' => null,
                 'solde_total' => '0.00',
                 'devise_principale' => $data['devise_principale'],
-                'utilisateur_id' => $user->getId(),
+                'user_id' => $user->getId(),
                 'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
                 'updated_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             ]);
@@ -76,21 +85,22 @@ final class PortefeuilleController extends AbstractController
 
         return $this->render('frontoffice/portefeuille/new.html.twig', [
             'form' => $form,
+            'isEditMode' => false,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'front_portefeuille_edit', methods: ['GET', 'POST'])]
     public function edit(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $portefeuille = $entityManager->getConnection()->fetchAssociative(
-            'SELECT id, nom, devise_principale FROM portefeuille WHERE id = :id AND utilisateur_id = :uid',
+            'SELECT id, nom, devise_principale FROM portefeuille WHERE id = :id AND user_id = :uid',
             ['id' => $id, 'uid' => $user->getId()]
         );
 
@@ -102,7 +112,13 @@ final class PortefeuilleController extends AbstractController
             'nom' => (string) $portefeuille['nom'],
             'devise_principale' => (string) $portefeuille['devise_principale'],
         ])
-            ->add('nom', TextType::class)
+            ->add('nom', TextType::class, [
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Le nom du portefeuille ne peut pas être vide.']),
+                    new Length(['min' => 1, 'max' => 100, 'minMessage' => 'Le nom doit contenir au moins 1 caractère.', 'maxMessage' => 'Le nom ne peut pas dépasser 100 caractères.']),
+                ],
+            ])
             ->add('devise_principale', ChoiceType::class, [
                 'choices' => [
                     'TND' => 'TND',
@@ -115,14 +131,13 @@ final class PortefeuilleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-
             $entityManager->getConnection()->update('portefeuille', [
                 'nom' => $data['nom'],
                 'devise_principale' => $data['devise_principale'],
                 'updated_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             ], [
                 'id' => $id,
-                'utilisateur_id' => $user->getId(),
+                'user_id' => $user->getId(),
             ]);
 
             return $this->redirectToRoute('front_portefeuille_index');
@@ -130,21 +145,22 @@ final class PortefeuilleController extends AbstractController
 
         return $this->render('frontoffice/portefeuille/new.html.twig', [
             'form' => $form,
+            'isEditMode' => true,
         ]);
     }
 
     #[Route('/{id}', name: 'front_portefeuille_show', methods: ['GET'])]
-    public function show(int $id, EntityManagerInterface $entityManager): Response
+    public function show(int $id, Request $request, EntityManagerInterface $entityManager, GeoLocateService $geoLocateService): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $portefeuille = $entityManager->getConnection()->fetchAssociative(
-            'SELECT id, nom, devise_principale, solde_total FROM portefeuille WHERE id = :id AND utilisateur_id = :uid',
+            'SELECT id, nom, devise_principale, solde_total FROM portefeuille WHERE id = :id AND user_id = :uid',
             ['id' => $id, 'uid' => $user->getId()]
         );
 
@@ -170,26 +186,43 @@ final class PortefeuilleController extends AbstractController
             ['pid' => (int) $portefeuille['id']]
         );
 
+        try {
+            $profileCityRaw = $entityManager->getConnection()->fetchOne(
+                'SELECT city FROM clients WHERE user_id = :uid',
+                ['uid' => (int) $user->getId()]
+            );
+        } catch (\Throwable) {
+            $profileCityRaw = null;
+        }
+
+        $profileCity = is_string($profileCityRaw) ? trim($profileCityRaw) : '';
+        $profileCity = $profileCity !== '' ? $profileCity : null;
+
+        $location = $geoLocateService->locate($request->getClientIp());
+
         return $this->render('frontoffice/portefeuille/show.html.twig', [
             'portefeuille' => $portefeuille,
             'cartes' => $cartes,
             'transactions' => $transactions,
+            'detectedLocation' => $location,
+            'profileCity' => $profileCity,
+            'clientIp' => $request->getClientIp(),
         ]);
     }
 
     #[Route('/{id}', name: 'front_portefeuille_delete', methods: ['POST'])]
     public function delete(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var Utilisateur|null $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
-        if (!$user instanceof Utilisateur) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         if ($this->isCsrfTokenValid('delete' . $id, $request->getPayload()->getString('_token'))) {
             $entityManager->getConnection()->executeStatement(
-                'DELETE FROM portefeuille WHERE id = :id AND utilisateur_id = :uid',
+                'DELETE FROM portefeuille WHERE id = :id AND user_id = :uid',
                 ['id' => $id, 'uid' => $user->getId()]
             );
         }
