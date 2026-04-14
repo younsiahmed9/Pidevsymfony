@@ -1,0 +1,64 @@
+<form method="POST" novalidate>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="user_id" class="form-label fw-bold">Client / Utilisateur</label>
+            <select id="user_id" name="user_id" class="form-select" required>
+                <option value="">-- Sélectionner un utilisateur --</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}" {{ facture and facture.user_id == user.id ? 'selected' : '' }}>
+                        {{ user.prenom }} {{ user.nom }} ({{ user.email }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="numeroFacture" class="form-label fw-bold">Numéro de Facture</label>
+            <input type="text" id="numeroFacture" name="numeroFacture" class="form-control" value="{{ facture.numeroFacture|default('') }}" placeholder="Ex: FAC-2026-001 (Auto si vide)">
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="montant" class="form-label fw-bold">Montant (TND)</label>
+            <input type="number" id="montant" name="montant" class="form-control" step="0.01" value="{{ facture.montant|default('') }}" placeholder="0.00" required>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="statut" class="form-label fw-bold">Statut de paiement</label>
+            <select id="statut" name="statut" class="form-select" required>
+                <option value="non_payee" {{ facture and facture.statut == 'non_payee' ? 'selected' : '' }}>Non Payée</option>
+                <option value="payee" {{ facture and facture.statut == 'payee' ? 'selected' : '' }}>Payée</option>
+                <option value="en_retard" {{ facture and facture.statut == 'en_retard' ? 'selected' : '' }}>En Retard</option>
+                <option value="annulee" {{ facture and facture.statut == 'annulee' ? 'selected' : '' }}>Annulée</option>
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="dateFacture" class="form-label fw-bold">Date de Facturation</label>
+            <input type="date" id="dateFacture" name="dateFacture" class="form-control" value="{{ facture.dateFacture|default('now'|date('Y-m-d')) }}" required>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="dateEcheance" class="form-label fw-bold">Date d'Échéance</label>
+            <input type="date" id="dateEcheance" name="dateEcheance" class="form-control" value="{{ facture.dateEcheance|default('') }}">
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="service" class="form-label fw-bold">Service lié (Optionnel)</label>
+            <input type="text" id="service" name="service" class="form-control" value="{{ facture.service|default('') }}" placeholder="Ex: Abonnement Internet">
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label for="produit" class="form-label fw-bold">Produit lié (Optionnel)</label>
+            <input type="text" id="produit" name="produit" class="form-control" value="{{ facture.produit|default('') }}" placeholder="Ex: Ordinateur Dell">
+        </div>
+    </div>
+
+    <div class="mt-4 pt-3 border-top">
+        <button type="submit" class="btn btn-primary px-4 shadow-sm">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer') }}
+        </button>
+        <a href="{{ path('admin_facture_index') }}" class="btn btn-secondary px-4 shadow-sm">
+            <i class="fas fa-times me-2"></i>Annuler
+        </a>
+    </div>
+</form>

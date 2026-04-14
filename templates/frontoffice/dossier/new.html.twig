@@ -1,0 +1,15 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Nouveau Dossier - FinTrack{% endblock %}
+{% block page_title %}Nouveau Dossier{% endblock %}
+{% block page_subtitle %}Créer un dossier{% endblock %}
+{% block content %}
+<div class="mb-4"><a href="{{ path('user_dossier_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a></div>
+<div class="row"><div class="col-md-6"><div class="form-card">
+    <h6 class="fw-semibold mb-4 pb-2 border-bottom">Nouveau dossier</h6>
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="mb-3">{{ form_label(form.nomDossier, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.nomDossier, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.nomDossier) }}</div>
+    <div class="mb-3">{{ form_label(form.description, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}{{ form_errors(form.description) }}</div>
+    <div class="d-flex gap-2 mt-3"><button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Créer</button><a href="{{ path('user_dossier_index') }}" class="btn btn-outline-secondary">Annuler</a></div>
+    {{ form_end(form) }}
+</div></div></div>
+{% endblock %}

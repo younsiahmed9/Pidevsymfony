@@ -1,0 +1,151 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Register - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section bg-tertiary position-relative overflow-hidden">
+    <div class="container">
+        <div class="row justify-content-center align-items-start">
+            <div class="col-lg-5 mb-5 mb-lg-0">
+                <div class="block pe-0 pe-xl-5">
+                    <p class="text-primary text-uppercase fw-bold mb-3">Sign Up</p>
+                    <h1 class="mb-4">Create your FinTrack account</h1>
+                    <p class="mb-4">Choose CLIENT or ADMIN. After submit, you receive a verification code by email. Your account is created only after code validation.</p>
+                    <a href="{{ path('app_login') }}" class="btn btn-outline-primary">Already have an account?</a>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="bg-white p-4 p-md-5 shadow-sm">
+                    <h2 class="h4 mb-4">Create account</h2>
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label == 'error' ? 'danger' : label }} border-0 rounded-3 small mb-4">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                    {{ form_start(form) }}
+                    {{ form_widget(form.faceDescriptor, {'attr': {'data-face-signup-input': 'true'}}) }}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            {{ form_label(form.email) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control shadow-none', 'data-field': 'email'}}) }}
+                            <div class="text-danger small mt-1">{{ form_errors(form.email) }}</div>
+                            <div class="text-danger small mt-1" data-error-for="email"></div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_label(form.fullName) }}
+                            {{ form_widget(form.fullName, {'attr': {'class': 'form-control shadow-none', 'data-field': 'fullName'}}) }}
+                            <div class="text-danger small mt-1">{{ form_errors(form.fullName) }}</div>
+                            <div class="text-danger small mt-1" data-error-for="fullName"></div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_label(form.plainPassword.first) }}
+                            {{ form_widget(form.plainPassword.first, {'attr': {'class': 'form-control shadow-none', 'data-field': 'plainPassword.first'}}) }}
+                            <div class="text-danger small mt-1">{{ form_errors(form.plainPassword.first) }}</div>
+                            <div class="text-danger small mt-1" data-error-for="plainPassword.first"></div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_label(form.plainPassword.second) }}
+                            {{ form_widget(form.plainPassword.second, {'attr': {'class': 'form-control shadow-none', 'data-field': 'plainPassword.second'}}) }}
+                            <div class="text-danger small mt-1" data-error-for="plainPassword.second"></div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_label(form.roleChoice) }}
+                            {{ form_widget(form.roleChoice, {'attr': {'class': 'form-control shadow-none', 'onchange': 'toggleAdminFields()', 'data-field': 'roleChoice'}}) }}
+                            <div class="text-danger small mt-1" data-error-for="roleChoice"></div>
+                        </div>
+                        <div class="col-md-6" id="adminFieldWrap">
+                            {{ form_label(form.adminCode) }}
+                            {{ form_widget(form.adminCode, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Required for ADMIN', 'data-field': 'adminCode'}}) }}
+                            <div class="text-danger small mt-1">{{ form_errors(form.adminCode) }}</div>
+                            <div class="text-danger small mt-1" data-error-for="adminCode"></div>
+                        </div>
+                        <div class="col-md-6" id="cinFieldWrap">
+                            {{ form_label(form.cin) }}
+                            {{ form_widget(form.cin, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Optional', 'data-field': 'cin'}}) }}
+                            <div class="text-danger small mt-1" data-error-for="cin"></div>
+                        </div>
+                        <div class="col-md-6" id="phoneFieldWrap">
+                            {{ form_label(form.phone) }}
+                            {{ form_widget(form.phone, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Optional', 'data-field': 'phone'}}) }}
+                            <div class="text-danger small mt-1" data-error-for="phone"></div>
+                        </div>
+                        <div class="col-12">
+                            <div class="border rounded-3 p-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <strong>Face ID (Optional)</strong>
+                                        <div class="small text-muted" data-face-signup-status>You can add Face ID now, or skip and add it later from profile.</div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#signupFaceIdModal">Capture Face ID</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-danger small mt-4" data-error-for="general"></div>
+
+                    <div class="mt-4">
+                        <button class="btn btn-primary w-100" type="submit">Register Account</button>
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="signupFaceIdModal" tabindex="-1" aria-labelledby="signupFaceIdModalLabel" aria-hidden="true" data-face-id-capture-modal="true" data-face-id-target="#{{ form.faceDescriptor.vars.id }}">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signupFaceIdModalLabel">Capture Face ID for Signup</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
+                    <video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
+                </div>
+                <p class="text-muted mb-0" data-face-id-status>Allow camera access, then capture your face.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-face-id-capture>Capture Face ID</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleAdminFields() {
+    const roleChoiceElement = document.getElementById('{{ form.roleChoice.vars.id }}');
+    const adminFieldWrap = document.getElementById('adminFieldWrap');
+    const cinFieldWrap = document.getElementById('cinFieldWrap');
+    const phoneFieldWrap = document.getElementById('phoneFieldWrap');
+
+    if (!roleChoiceElement) {
+        return;
+    }
+
+    const isAdmin = roleChoiceElement.value === 'ADMIN';
+    adminFieldWrap.style.display = isAdmin ? 'block' : 'none';
+    cinFieldWrap.style.display = isAdmin ? 'none' : 'block';
+    phoneFieldWrap.style.display = isAdmin ? 'none' : 'block';
+}
+
+document.addEventListener('DOMContentLoaded', toggleAdminFields);
+
+document.addEventListener('faceid:capture-success', function () {
+    const statusElement = document.querySelector('[data-face-signup-status]');
+    if (statusElement) {
+        statusElement.textContent = 'Face ID captured successfully. It will be linked after email verification.';
+        statusElement.classList.remove('text-muted');
+        statusElement.classList.add('text-success');
+    }
+});
+
+</script>
+<script src="{{ asset('frontoffice/js/face-id.js') }}"></script>
+{% endblock %}

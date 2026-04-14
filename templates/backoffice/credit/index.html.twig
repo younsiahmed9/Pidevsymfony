@@ -1,0 +1,102 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Gestion des Crédits - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-hand-holding-usd me-2 text-primary"></i>Gestion des Crédits</h1>
+        <a href="{{ path('admin_credit_new') }}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50 me-1"></i> Nouveau Crédit
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ path('admin_credit_index') }}" class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-uppercase">Recherche</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="q" value="{{ q }}" class="form-control bg-light border-start-0" placeholder="Numéro de compte...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-uppercase">Statut</label>
+                    <select name="status" class="form-select bg-light">
+                        <option value="">Tous les statuts</option>
+                        <option value="en_attente" {{ status == 'en_attente' ? 'selected' : '' }}>En attente</option>
+                        <option value="approuve" {{ status == 'approuve' ? 'selected' : '' }}>Approuvé</option>
+                        <option value="refuse" {{ status == 'refuse' ? 'selected' : '' }}>Refusé</option>
+                        <option value="rembourse" {{ status == 'rembourse' ? 'selected' : '' }}>Remboursé</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card shadow mb-4 border-0">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">📋 Liste des Crédits Accordés</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">ID</th>
+                            <th>Bénéficiaire</th>
+                            <th>Montant</th>
+                            <th>Taux</th>
+                            <th>Mensualité</th>
+                            <th>Durée</th>
+                            <th>Statut</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for credit in credits %}
+                            <tr>
+                                <td class="ps-3 text-muted small">#{{ credit.id }}</td>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ credit.compte.utilisateur.fullName ?: credit.compte.utilisateur.email }}</div>
+                                    <div class="small text-muted"><i class="fas fa-university me-1"></i> {{ credit.compte.numeroCompte }}</div>
+                                </td>
+                                <td><span class="fw-bold text-primary">{{ credit.montant|number_format(2, ',', ' ') }} TND</span></td>
+                                <td>{{ credit.tauxInteret }}%</td>
+                                <td><span class="text-danger fw-bold">{{ credit.mensualite|number_format(2, ',', ' ') }} TND</span></td>
+                                <td>{{ credit.dureeMois }} mois</td>
+                                <td>
+                                    {% set badge_class = credit.status == 'approuve' ? 'success' : (credit.status == 'refuse' ? 'danger' : (credit.status == 'en_attente' ? 'warning' : 'info')) %}
+                                    <span class="badge rounded-pill bg-{{ badge_class }} px-3">
+                                        {{ credit.status|capitalize|replace({'_': ' '}) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group shadow-sm">
+                                        <a href="{{ path('admin_credit_show', {id: credit.id}) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
+                                        <a href="{{ path('admin_credit_edit', {id: credit.id}) }}" class="btn btn-sm btn-outline-warning"><i class="fas fa-edit"></i></a>
+                                        <form method="post" action="{{ path('admin_credit_delete', {id: credit.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce crédit ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ credit.id) }}">
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5">Aucun crédit trouvé.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

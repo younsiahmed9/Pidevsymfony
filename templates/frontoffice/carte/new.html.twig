@@ -1,0 +1,206 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% set isEditMode = isEditMode|default(false) %}
+{% block title %}{{ isEditMode ? 'Modifier la Carte Virtuelle' : 'Créer une Carte Virtuelle' }} - FinTrack{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .carte-form-ui .form-select,
+        .carte-form-ui .form-control {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+
+        .carte-form-ui .form-select:focus,
+        .carte-form-ui .form-control:focus {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+
+        .carte-form-ui .form-select option {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <!-- Bouton retour -->
+                <a href="{{ selectedPortefeuilleId|default(null) ? path('front_portefeuille_show', {'id': selectedPortefeuilleId}) : path('front_carte_index') }}" class="text-muted text-decoration-none d-inline-block mb-3">
+                    <i class="fas fa-arrow-left me-1"></i> {{ isEditMode ? 'Retour à la carte' : 'Retour aux cartes' }}
+                </a>
+
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h3 class="h4 fw-bold mb-0">{{ isEditMode ? 'Modifier la Carte Virtuelle' : 'Nouvelle Carte Virtuelle' }}</h3>
+                        <p class="text-muted small">{{ isEditMode ? 'Mettez à jour les paramètres de cette carte.' : 'Générez une carte pour vos paiements en ligne.' }}</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation carte-form-ui carte-create-form', 'novalidate': 'novalidate', 'data-validate-url': path('front_carte_validate')}}) }}
+                            <input type="hidden" name="carte_id" value="{{ carteId|default('') }}">
+                            
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.portefeuille, 'Portefeuille de rattachement', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.portefeuille, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.portefeuille) }}</div>
+                                <div class="form-text">La carte puisera ses fonds depuis ce portefeuille.</div>
+                                <div class="text-danger small mt-1" data-error-for="portefeuille"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.type, 'Type de carte', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.type, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.type) }}</div>
+                                    <div class="text-danger small mt-1" data-error-for="type"></div>
+                                </div>
+
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.devise, 'Devise', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.devise, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.devise) }}</div>
+                                    <div class="text-danger small mt-1" data-error-for="devise"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.plafond, 'Plafond mensuel', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.plafond, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Ex: 1000'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.plafond) }}</div>
+                                <div class="form-text">Limitez vos dépenses avec ce plafond.</div>
+                                <div class="text-danger small mt-1" data-error-for="plafond"></div>
+                            </div>
+
+                            <div class="text-danger small mt-1 mb-3" data-error-for="general"></div>
+
+                            <div class="d-grid mt-5">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-credit-card me-2"></i>{{ isEditMode ? 'Mettre à jour la carte' : 'Générer la carte' }}
+                                </button>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function () {
+        var form = document.querySelector('.carte-create-form');
+        if (!form) {
+            return;
+        }
+
+        var validateUrl = form.getAttribute('data-validate-url');
+        var pendingTimer = null;
+        var submitting = false;
+
+        var setFieldState = function (name, messages) {
+            var input = form.querySelector('[name$="[' + name + ']"], [name="' + name + '"]');
+            var errorBox = form.querySelector('[data-error-for="' + name + '"]');
+
+            if (!input || !errorBox) {
+                return;
+            }
+
+            var hasError = messages && messages.length;
+            input.classList.toggle('is-invalid', hasError);
+            input.classList.toggle('is-valid', !hasError);
+            errorBox.innerHTML = hasError ? messages.map(function (message) {
+                return '<div>' + message + '</div>';
+            }).join('') : '';
+        };
+
+        var clearGeneralError = function () {
+            var generalBox = form.querySelector('[data-error-for="general"]');
+            if (generalBox) {
+                generalBox.innerHTML = '';
+            }
+        };
+
+        var clearAllStates = function () {
+            ['portefeuille', 'type', 'devise', 'plafond'].forEach(function (name) {
+                setFieldState(name, []);
+            });
+            clearGeneralError();
+        };
+
+        var runValidation = function () {
+            if (!validateUrl) {
+                return Promise.resolve({ valid: true });
+            }
+
+            var formData = new FormData(form);
+            var submitButton = form.querySelector('button[type="submit"]');
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            return fetch(validateUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            }).then(function (response) {
+                return response.json().then(function (payload) {
+                    return { ok: response.ok, payload: payload };
+                });
+            }).then(function (result) {
+                clearAllStates();
+                if (result.payload && result.payload.errors) {
+                    Object.keys(result.payload.errors).forEach(function (field) {
+                        setFieldState(field, result.payload.errors[field]);
+                    });
+                }
+
+                return {
+                    valid: !!(result.payload && result.payload.valid),
+                    payload: result.payload || {}
+                };
+            }).catch(function () {
+                return { valid: true };
+            }).finally(function () {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            });
+        };
+
+        form.addEventListener('input', function () {
+            window.clearTimeout(pendingTimer);
+            pendingTimer = window.setTimeout(runValidation, 250);
+        });
+
+        form.addEventListener('blur', function () {
+            runValidation();
+        }, true);
+
+        form.addEventListener('submit', function (event) {
+            if (submitting) {
+                return;
+            }
+
+            event.preventDefault();
+            runValidation().then(function (result) {
+                if (result.valid) {
+                    submitting = true;
+                    form.submit();
+                }
+            });
+        });
+
+        runValidation();
+    })();
+</script>
+{% endblock %}

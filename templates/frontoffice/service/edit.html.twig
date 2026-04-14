@@ -1,0 +1,42 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Modifier le Service - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb bg-transparent p-0 small text-uppercase fw-bold">
+                        <li class="breadcrumb-item"><a href="{{ path('service_index') }}" class="text-decoration-none text-muted">Mes Services</a></li>
+                        <li class="breadcrumb-item active text-primary" aria-current="page">Modifier Service</li>
+                    </ol>
+                </nav>
+
+                <!-- Card -->
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-header bg-warning text-white py-4 px-5">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white bg-opacity-25 rounded-circle p-3 me-4">
+                                    <i class="fas fa-edit fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h2 class="h3 mb-1 fw-bold">Modifier le service</h2>
+                                    <p class="mb-0 text-white-50">#{{ service.id|default('') }} - {{ service.nomService|default('') }}</p>
+                                </div>
+                            </div>
+                            {{ include('frontoffice/service/_delete_form.html.twig') }}
+                        </div>
+                    </div>
+                    <div class="card-body p-5 bg-white">
+                        {{ include('frontoffice/service/_form.html.twig', {'button_label': 'Mettre à jour le service'}) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

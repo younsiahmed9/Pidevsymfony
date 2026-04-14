@@ -1,0 +1,94 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Budgets{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="h2 fw-bold text-dark mb-1">Mes Budgets</h1>
+                <p class="text-muted mb-0">Gérez vos limites de dépenses par catégorie.</p>
+            </div>
+            <a href="{{ path('budget_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+                <i class="fas fa-plus me-2"></i> Nouveau Budget
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for budget in budgets %}
+                {% set progress = budget.montant_total > 0 ? (budget.total_depense / budget.montant_total * 100) : 0 %}
+                {% set progress_capped = progress > 100 ? 100 : progress %}
+                {% set progress_color = progress > 90 ? 'danger' : (progress > 70 ? 'warning' : 'success') %}
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                                    <i class="fas fa-wallet text-primary fa-lg"></i>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                        <li><a class="dropdown-item" href="{{ path('budget_show', {id: budget.id_budget}) }}"><i class="fas fa-eye me-2 text-primary"></i> Voir détails</a></li>
+                                        <li><a class="dropdown-item" href="{{ path('budget_edit', {id: budget.id_budget}) }}"><i class="fas fa-edit me-2 text-warning"></i> Modifier</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h5 class="card-title fw-bold mb-1">{{ budget.nom_budget }}</h5>
+                            <p class="text-muted small mb-4">{{ budget.periode|capitalize }}</p>
+
+                            <div class="d-flex justify-content-between align-items-end mb-2">
+                                <span class="text-muted small">Progression</span>
+                                <span class="fw-bold {{ progress > 100 ? 'text-danger' : '' }}">{{ progress|number_format(0) }}%</span>
+                            </div>
+                            <div class="progress mb-4" style="height: 8px;">
+                                <div class="progress-bar bg-{{ progress_color }} rounded-pill" role="progressbar" style="width: {{ progress_capped }}%"></div>
+                            </div>
+
+                            <div class="row g-0 py-3 border-top mt-auto">
+                                <div class="col-6 border-end">
+                                    <div class="small text-muted mb-1">Dépensé</div>
+                                    <div class="fw-bold text-dark">{{ budget.total_depense|number_format(2, ',', ' ') }} TND</div>
+                                </div>
+                                <div class="col-6 ps-3">
+                                    <div class="small text-muted mb-1">Limite</div>
+                                    <div class="fw-bold text-primary">{{ budget.montant_total|number_format(2, ',', ' ') }} TND</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <a href="{{ path('budget_show', {id: budget.id_budget}) }}" class="btn btn-light w-100 rounded-pill fw-bold">Détails du budget</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block">
+                        <i class="fas fa-piggy-bank fa-4x text-light mb-4 d-block"></i>
+                        <h3 class="fw-bold">Aucun budget pour le moment</h3>
+                        <p class="text-muted mb-4">Commencez par créer un budget pour mieux gérer vos finances.</p>
+                        <a href="{{ path('budget_new') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
+                            Créer mon premier budget
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .transition-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .transition-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+</style>
+{% endblock %}

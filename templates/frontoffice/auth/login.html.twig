@@ -1,0 +1,73 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Connexion - FinTrack{% endblock %}
+
+{% block body %}
+<section class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-11 col-sm-8 col-md-6 col-lg-5 col-xl-4">
+                <div class="auth-card">
+                    <div class="auth-card-body">
+                        <div class="auth-header">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-line fa-3x text-primary"></i>
+                            </div>
+                            <h2 class="auth-title">Connexion</h2>
+                            <p class="auth-subtitle">Accédez à votre compte FinTrack</p>
+                        </div>
+
+                        {% if error %}
+                            <div class="alert alert-danger border-0 rounded-3 small mb-4">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </div>
+                        {% endif %}
+
+                        {% if app.user %}
+                            <div class="text-center py-3">
+                                <p class="mb-3">Vous êtes déjà connecté en tant que <strong>{{ app.user.userIdentifier }}</strong></p>
+                                <a href="{{ path('app_logout') }}" class="btn btn-outline-danger w-100 rounded-3">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                </a>
+                            </div>
+                        {% else %}
+                            <form method="post" action="{{ path('app_login') }}">
+                                <div class="mb-3">
+                                    <label for="inputEmail" class="form-label">Adresse Email</label>
+                                    <div class="input-group">
+                                        <input type="email" value="{{ last_username|default('') }}" name="email" id="inputEmail" class="form-control form-control-lg shadow-none" autocomplete="email" required autofocus placeholder="nom@exemple.com">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label for="inputPassword" class="form-label mb-0">Mot de passe</label>
+                                        <a href="#" class="small auth-link">Oublié ?</a>
+                                    </div>
+                                    <input type="password" name="password" id="inputPassword" class="form-control form-control-lg shadow-none" autocomplete="current-password" required placeholder="••••••••">
+                                </div>
+
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                                <button class="btn btn-auth w-100 mb-3" type="submit">
+                                    Se connecter
+                                </button>
+                                
+                                <div class="auth-footer">
+                                    <p class="mb-0">Pas encore de compte ? <a href="{{ path('app_register') }}" class="auth-link">Créer un compte</a></p>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="{{ path('app_home') }}" class="text-muted text-decoration-none small">
+                        <i class="fas fa-arrow-left me-1"></i> Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

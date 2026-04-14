@@ -1,0 +1,99 @@
+<form method="POST" novalidate>
+    {% set serviceData = service|default({}) %}
+    {% set formErrors = formErrors|default({}) %}
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="nomService" class="form-label fw-bold text-muted small text-uppercase">Nom du Service</label>
+                <input type="text" id="nomService" name="nomService" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ serviceData.nomService|default('') }}" placeholder="Ex: Abonnement Netflix, Salle de sport..." required>
+                <div class="form-text">Donnez un nom clair à ce service ou abonnement.</div>
+                {% for error in formErrors.nomService|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="tarif" class="form-label fw-bold text-muted small text-uppercase">Tarif (TND)</label>
+                <div class="input-group">
+                    <span class="input-group-text border-0 bg-light"><i class="fas fa-coins text-primary"></i></span>
+                    <input type="number" id="tarif" name="tarif" class="form-control form-control-lg border-0 bg-light shadow-none" step="0.01" value="{{ serviceData.tarif|default('') }}" placeholder="0.00" required>
+                </div>
+                <div class="form-text">Le coût récurrent ou ponctuel.</div>
+                {% for error in formErrors.tarif|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="frequence" class="form-label fw-bold text-muted small text-uppercase">Fréquence de facturation</label>
+                <select id="frequence" name="frequence" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="unique" {{ serviceData.frequence|default('') == 'unique' ? 'selected' : '' }}>Une seule fois</option>
+                    <option value="mensuel" {{ serviceData.frequence|default('') == 'mensuel' ? 'selected' : '' }}>Mensuel</option>
+                    <option value="trimestriel" {{ serviceData.frequence|default('') == 'trimestriel' ? 'selected' : '' }}>Trimestriel</option>
+                    <option value="annuel" {{ serviceData.frequence|default('') == 'annuel' ? 'selected' : '' }}>Annuel</option>
+                </select>
+                <div class="form-text">À quelle fréquence payez-vous ce service ?</div>
+                {% for error in formErrors.frequence|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="typeService" class="form-label fw-bold text-muted small text-uppercase">Type de service</label>
+                <input type="text" id="typeService" name="typeService" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ serviceData.typeService|default('') }}" placeholder="Ex: Divertissement, Santé, Logement..." required>
+                {% for error in formErrors.typeService|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="statut" class="form-label fw-bold text-muted small text-uppercase">Statut actuel</label>
+                <select id="statut" name="statut" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="actif" {{ serviceData.statut|default('') == 'actif' ? 'selected' : '' }}>Actif</option>
+                    <option value="suspendu" {{ serviceData.statut|default('') == 'suspendu' ? 'selected' : '' }}>Suspendu</option>
+                    <option value="termine" {{ serviceData.statut|default('') == 'termine' ? 'selected' : '' }}>Terminé</option>
+                </select>
+                {% for error in formErrors.statut|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="dateDebut" class="form-label fw-bold text-muted small text-uppercase">Date de début</label>
+                <input type="date" id="dateDebut" name="dateDebut" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ serviceData.dateDebut|default('now'|date('Y-m-d')) }}" required>
+                {% for error in formErrors.dateDebut|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="dateFin" class="form-label fw-bold text-muted small text-uppercase">Date de fin (Optionnel)</label>
+                <input type="date" id="dateFin" name="dateFin" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ serviceData.dateFin|default('') }}">
+                {% for error in formErrors.dateFin|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-4 border-top d-flex gap-3">
+        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer le service') }}
+        </button>
+        <a href="{{ path('service_index') }}" class="btn btn-light btn-lg px-4 rounded-pill">
+            Annuler
+        </a>
+    </div>
+</form>

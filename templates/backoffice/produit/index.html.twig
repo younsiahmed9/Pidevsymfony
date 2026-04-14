@@ -1,0 +1,155 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Gestion des Produits - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    {% set totalValeur = 0 %}
+    {% for p in produits %}
+        {% set totalValeur = totalValeur + (p.montant|default(0)) %}
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-box me-2 text-primary"></i>Gestion des Produits</h1>
+        <a href="{{ path('admin_produit_new') }}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50 me-1"></i> Nouveau Produit
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Produits</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ produits|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Disponibles</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ produits|filter(p => p.statut == 'disponible')|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Valeur Totale</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalValeur|number_format(2, ',', ' ') }} TND</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">📋 Inventaire des Produits</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" width="100%" cellspacing="0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Nom du Produit</th>
+                            <th>Propriétaire</th>
+                            <th>Prix/Valeur</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produit in produits %}
+                            <tr>
+                                <td><code class="text-primary fw-bold">{{ produit.codeUnique }}</code></td>
+                                <td><span class="fw-bold text-dark">{{ produit.nomProduit }}</span></td>
+                                <td>
+                                    <div class="small">
+                                        <i class="fas fa-user me-1 text-muted"></i> {{ produit.user_prenom }} {{ produit.user_nom }}<br>
+                                        <i class="fas fa-envelope me-1 text-muted"></i> {{ produit.user_email }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-soft-info text-info border border-info px-3">
+                                        {{ produit.montant|number_format(2, ',', ' ') }} TND
+                                    </span>
+                                </td>
+                                <td><span class="text-muted small">{{ produit.typeProduit }}</span></td>
+                                <td>
+                                    {% set badge_class = produit.statut == 'disponible' ? 'success' : (produit.statut == 'vendu' ? 'info' : (produit.statut == 'en_reparation' ? 'warning' : 'danger')) %}
+                                    <span class="badge rounded-pill bg-{{ badge_class }}">
+                                        {{ produit.statut|capitalize|replace({'_': ' '}) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group shadow-sm" role="group">
+                                        <a href="{{ path('admin_produit_show', {id: produit.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('admin_produit_edit', {id: produit.id}) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('admin_produit_delete', {id: produit.id}) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ produit.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <div class="text-muted mb-3">
+                                        <i class="fas fa-box-open fa-3x mb-3 text-light"></i><br>
+                                        Aucun produit trouvé dans la base de données.
+                                    </div>
+                                    <a href="{{ path('admin_produit_new') }}" class="btn btn-primary btn-sm rounded-pill px-4">
+                                        Ajouter le premier produit
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-info { background-color: rgba(54, 185, 204, 0.1); }
+    .border-left-primary { border-left: .25rem solid #4e73df !important; }
+    .border-left-success { border-left: .25rem solid #1cc88a !important; }
+    .border-left-info { border-left: .25rem solid #36b9cc !important; }
+</style>
+{% endblock %}

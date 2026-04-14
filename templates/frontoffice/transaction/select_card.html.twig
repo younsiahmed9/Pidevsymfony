@@ -1,0 +1,163 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Sélectionner une Carte - Transfert - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <h1 class="h3 mb-1">Effectuer un Transfert</h1>
+        <p class="text-muted mb-4">Sélectionnez une carte source pour débuter votre transfert.</p>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            <button type="button" class="btn btn-outline-primary" id="openExchangeSnapshotBtn">
+                <i class="fas fa-chart-line me-2"></i>Voir les taux de change
+            </button>
+            <a href="{{ path('front_virement_new') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-calendar me-2"></i>Transfert programmé
+            </a>
+        </div>
+
+        <!-- Cards Selection -->
+        <div class="row">
+            {% if cards|length > 0 %}
+                {% for card in cards %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card border-0 shadow-sm h-100 transfer-card">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <span class="badge bg-{{ card.type == 'GOLD' ? 'warning' : (card.type == 'SILVER' ? 'secondary' : 'primary') }}">
+                                        {{ card.type }}
+                                    </span>
+                                </div>
+                                <h5 class="card-title mb-2">Carte {{ card.portefeuille_nom }}</h5>
+                                <p class="text-muted small mb-3">**** {{ card.numero_carte|slice(-4) }}</p>
+                                
+                                <div class="mb-3">
+                                    <p class="mb-1"><small class="text-muted">Solde Disponible</small></p>
+                                    <h4 class="mb-0 fw-bold">{{ card.solde|number_format(2, ',', ' ') }} <small>{{ card.devise }}</small></h4>
+                                </div>
+
+                                <hr class="my-3">
+
+                                <div class="d-grid gap-2">
+                                    <a href="{{ path('front_transaction_transfert') }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-arrow-right me-1"></i> Transfert Normal
+                                    </a>
+                                    <a href="{{ path('front_virement_new') }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-calendar me-1"></i> Transfert Programmé
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Aucune carte disponible.</strong> Vous devez créer au moins une carte avant d'effectuer un transfert.
+                        <a href="{{ path('front_carte_new') }}" class="alert-link">Créer une carte</a>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const openBtn = document.getElementById('openExchangeSnapshotBtn');
+            if (!openBtn) {
+                return;
+            }
+
+            const modalHtml = `
+                <div class="modal fade" id="exchangeSnapshotModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-light">
+                                <h5 class="modal-title"><i class="fas fa-chart-line me-2"></i>Taux de change en direct</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" id="exchangeSnapshotBody">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="mt-3 mb-0">Chargement des taux en direct...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            const modalEl = document.getElementById('exchangeSnapshotModal');
+            const modal = new bootstrap.Modal(modalEl);
+            const bodyEl = document.getElementById('exchangeSnapshotBody');
+
+            openBtn.addEventListener('click', async function () {
+                modal.show();
+                bodyEl.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-3 mb-0">Chargement des taux en direct...</p>
+                    </div>`;
+
+                try {
+                    const response = await fetch('{{ path("front_transaction_exchange_snapshot") }}', { headers: { 'Accept': 'application/json' } });
+                    const data = await response.json();
+
+                    if (!data.ok) {
+                        bodyEl.innerHTML = `
+                            <div class="alert alert-danger mb-0">
+                                Impossible de charger les taux: ${data.message || 'Erreur inconnue'}
+                            </div>`;
+                        return;
+                    }
+
+                    const row = (currency, firstLabel, firstValue, secondLabel, secondValue) => `
+                        <tr>
+                            <td class="fw-bold">${currency}</td>
+                            <td>${firstLabel} ${firstValue}</td>
+                            <td>${secondLabel} ${secondValue}</td>
+                        </tr>`;
+
+                    bodyEl.innerHTML = `
+                        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <strong>Tableau live</strong>
+                                <div class="text-muted small">Mis à jour à ${data.updatedAt}</div>
+                            </div>
+                            <span class="badge bg-success">API de change</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Devise</th>
+                                        <th>Taux 1 unité vers</th>
+                                        <th>Taux 1 unité vers</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${row('TND', 'USD', Number(data.rows[0].to_usd).toFixed(4), 'EUR', Number(data.rows[0].to_eur).toFixed(4))}
+                                    ${row('USD', 'TND', Number(data.rows[1].to_tnd).toFixed(4), 'EUR', Number(data.rows[1].to_eur).toFixed(4))}
+                                    ${row('EUR', 'TND', Number(data.rows[2].to_tnd).toFixed(4), 'USD', Number(data.rows[2].to_usd).toFixed(4))}
+                                </tbody>
+                            </table>
+                        </div>`;
+                } catch (error) {
+                    bodyEl.innerHTML = `
+                        <div class="alert alert-danger mb-0">
+                            Impossible de charger les taux: ${error.message}
+                        </div>`;
+                }
+            });
+        });
+    </script>
+{% endblock %}

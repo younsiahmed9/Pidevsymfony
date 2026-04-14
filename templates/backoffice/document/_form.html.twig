@@ -1,0 +1,149 @@
+<form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <label for="id_utilisateur" class="form-label fw-bold text-dark mb-2">Utilisateur propriétaire</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-user text-muted"></i></span>
+                <select id="id_utilisateur" name="id_utilisateur" class="form-select bg-light border-0 py-3 shadow-none" required>
+                    <option value="">Choisir un utilisateur...</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {{ selectedUserId|default(null) == user.id ? 'selected' : '' }}>
+                            {{ user.fullName ?: user.email }} ({{ user.email }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="titre" class="form-label fw-bold text-dark mb-2">Titre du document</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-heading text-muted"></i></span>
+                <input type="text" id="titre" name="titre" class="form-control bg-light border-0 py-3 shadow-none" placeholder="Ex: Contrat Assurance 2024" value="{{ document.titre|default('') }}" required>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="type_document" class="form-label fw-bold text-dark mb-2">Type de document</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-file-alt text-muted"></i></span>
+                <select id="type_document" name="type_document" class="form-select bg-light border-0 py-3 shadow-none" required>
+                    {% for type in ['contrat', 'facture', 'releve', 'identite', 'assurance', 'fiscal', 'autre'] %}
+                        <option value="{{ type }}" {{ document.typeDocument == type ? 'selected' : '' }}>{{ type|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="statut" class="form-label fw-bold text-dark mb-2">Statut</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-info-circle text-muted"></i></span>
+                <select id="statut" name="statut" class="form-select bg-light border-0 py-3 shadow-none" required>
+                    {% for stat in ['valide', 'expire', 'a_renouveler', 'archive'] %}
+                        <option value="{{ stat }}" {{ document.statut == stat ? 'selected' : '' }}>{{ stat|capitalize|replace({'_': ' '}) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label for="id_categorie" class="form-label fw-bold text-dark mb-0">Catégorie</label>
+                <a href="{{ path('admin_categorie_new') }}" class="small text-decoration-none fw-semibold">
+                    <i class="fas fa-plus-circle me-1"></i>Créer une catégorie
+                </a>
+            </div>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-tag text-muted"></i></span>
+                <select id="id_categorie" name="id_categorie" class="form-select bg-light border-0 py-3 shadow-none">
+                    <option value="">Aucune catégorie</option>
+                    {% for categorie in categories %}
+                        <option value="{{ categorie.id }}" {{ document.categorie and document.categorie.id == categorie.id ? 'selected' : '' }}>
+                            {{ categorie.nomCategorie }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="id_dossier" class="form-label fw-bold text-dark mb-2">Dossier</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-folder text-muted"></i></span>
+                <select id="id_dossier" name="id_dossier" class="form-select bg-light border-0 py-3 shadow-none">
+                    <option value="">Aucun dossier</option>
+                    {% for dossier in dossiers %}
+                        <option value="{{ dossier.id }}" {{ document.dossier and document.dossier.id == dossier.id ? 'selected' : '' }}>
+                            {{ dossier.nomDossier }} ({{ dossier.utilisateur.fullName ?: dossier.utilisateur.email }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="date_document" class="form-label fw-bold text-dark mb-2">Date du document</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="far fa-calendar text-muted"></i></span>
+                <input type="date" id="date_document" name="date_document" class="form-control bg-light border-0 py-3 shadow-none" value="{{ document.dateDocument ? document.dateDocument|date('Y-m-d') : '' }}">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="date_echeance" class="form-label fw-bold text-dark mb-2">Date d'échéance</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="far fa-calendar-times text-muted"></i></span>
+                <input type="date" id="date_echeance" name="date_echeance" class="form-control bg-light border-0 py-3 shadow-none" value="{{ document.dateEcheance ? document.dateEcheance|date('Y-m-d') : '' }}">
+            </div>
+        </div>
+
+        <div class="col-12">
+            <label for="fichier" class="form-label fw-bold text-dark mb-2">Fichier (PDF, Image)</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-cloud-upload-alt text-muted"></i></span>
+                <input type="file" id="fichier" name="fichier" class="form-control bg-light border-0 py-3 shadow-none" {{ document.id ? '' : 'required' }}>
+            </div>
+            {% if document.cheminFichier %}
+                <div class="form-text small text-primary mt-2">
+                    <i class="fas fa-file-alt me-1"></i> Fichier actuel : {{ document.cheminFichier }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-12">
+            <label for="tags" class="form-label fw-bold text-dark mb-2">Tags (séparés par des virgules)</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-hashtag text-muted"></i></span>
+                <input type="text" id="tags" name="tags" class="form-control bg-light border-0 py-3 shadow-none" placeholder="Ex: urgent, 2024, assurance" value="{{ document.tags|default('') }}">
+            </div>
+        </div>
+
+        <div class="col-12">
+            <label for="description" class="form-label fw-bold text-dark mb-2">Description / Notes</label>
+            <textarea id="description" name="description" class="form-control bg-light border-0 py-3 shadow-none" rows="3" placeholder="Informations complémentaires sur le document...">{{ document.description|default('') }}</textarea>
+        </div>
+    </div>
+
+    <div class="d-grid mt-5">
+        <button type="submit" class="btn btn-{{ document.id ? 'warning text-white' : 'primary' }} btn-lg rounded-pill fw-bold shadow-sm py-3 transition-hover">
+            <i class="fas fa-save me-2"></i> {{ document.id ? 'Mettre à jour le Document' : 'Importer le Document' }}
+        </button>
+    </div>
+</form>
+
+<script>
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>

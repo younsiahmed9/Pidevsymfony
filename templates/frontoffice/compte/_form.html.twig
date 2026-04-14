@@ -1,0 +1,116 @@
+{% set isExistingCompte = compte is defined and compte.id %}
+{% set compteNumero = isExistingCompte ? compte.numeroCompte : '' %}
+{% set compteType = isExistingCompte ? compte.typeCompte : '' %}
+{% set compteSolde = isExistingCompte ? compte.solde : '' %}
+{% set compteTauxInteret = isExistingCompte and compte.tauxInteret is not null ? compte.tauxInteret : '' %}
+{% set comptePlafond = isExistingCompte and compte.plafondDecouvert is not null ? compte.plafondDecouvert : '' %}
+
+<form method="POST" novalidate class="account-create-form" data-validate-url="{{ path('compte_validate') }}">
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="numero_compte" class="form-label fw-bold text-muted small text-uppercase">Numéro de Compte</label>
+                <input type="text" id="numero_compte" name="numero_compte" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ compteNumero }}" placeholder="Ex: TN0123456789..." required>
+                <div class="form-text">Saisissez votre numéro de compte tel qu'indiqué sur votre RIB.</div>
+                <div class="text-danger small mt-1" data-error-for="numero_compte"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="type_compte" class="form-label fw-bold text-muted small text-uppercase">Type de Compte</label>
+                <select id="type_compte" name="type_compte" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="courant" {{ compteType == 'courant' ? 'selected' : '' }}>Compte Courant</option>
+                    <option value="epargne" {{ compteType == 'epargne' ? 'selected' : '' }}>Compte Épargne</option>
+                </select>
+                <div class="text-danger small mt-1" data-error-for="type_compte"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="solde" class="form-label fw-bold text-muted small text-uppercase">Solde Initial (TND)</label>
+                <div class="input-group">
+                    <span class="input-group-text border-0 bg-light"><i class="fas fa-coins text-primary"></i></span>
+                    <input type="number" id="solde" name="solde" class="form-control form-control-lg border-0 bg-light shadow-none" step="0.01" value="{{ compteSolde }}" placeholder="0.00" required>
+                </div>
+                <div class="text-danger small mt-1" data-error-for="solde"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6" id="taux_interet_wrapper">
+            <div class="form-group">
+                <label for="taux_interet" class="form-label fw-bold text-muted small text-uppercase">Taux d'intérêt (%)</label>
+                <input type="number" id="taux_interet" name="taux_interet" class="form-control form-control-lg border-0 bg-light shadow-none" step="0.01" value="{{ compteTauxInteret }}" placeholder="Ex: 2.5">
+                <div class="text-danger small mt-1" data-error-for="taux_interet"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6" id="plafond_decouvert_wrapper">
+            <div class="form-group">
+                <label for="plafond_decouvert" class="form-label fw-bold text-muted small text-uppercase">Plafond Découvert (TND)</label>
+                <input type="number" id="plafond_decouvert" name="plafond_decouvert" class="form-control form-control-lg border-0 bg-light shadow-none" step="0.01" value="{{ comptePlafond }}" placeholder="Ex: 500.00">
+                <div class="text-danger small mt-1" data-error-for="plafond_decouvert"></div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="text-danger small mt-1" data-error-for="general"></div>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-4 border-top d-flex gap-3">
+        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Ouvrir mon compte') }}
+        </button>
+        <a href="{{ path('compte_index') }}" class="btn btn-light btn-lg px-4 rounded-pill">
+            Annuler
+        </a>
+    </div>
+</form>
+
+<script>
+    (function () {
+        var typeSelect = document.getElementById('type_compte');
+        var tauxWrap = document.getElementById('taux_interet_wrapper');
+        var plafondWrap = document.getElementById('plafond_decouvert_wrapper');
+        var tauxInput = document.getElementById('taux_interet');
+        var plafondInput = document.getElementById('plafond_decouvert');
+
+        if (!typeSelect || !tauxWrap || !plafondWrap || !tauxInput || !plafondInput) {
+            return;
+        }
+
+        var toggleTypeSpecificFields = function () {
+            var typeValue = typeSelect.value;
+
+            if (typeValue === 'courant') {
+                plafondWrap.style.display = '';
+                plafondInput.required = true;
+
+                tauxWrap.style.display = 'none';
+                tauxInput.required = false;
+                tauxInput.value = '';
+                return;
+            }
+
+            if (typeValue === 'epargne') {
+                tauxWrap.style.display = '';
+                tauxInput.required = true;
+
+                plafondWrap.style.display = 'none';
+                plafondInput.required = false;
+                plafondInput.value = '';
+                return;
+            }
+
+            tauxWrap.style.display = '';
+            plafondWrap.style.display = '';
+            tauxInput.required = false;
+            plafondInput.required = false;
+        };
+
+        typeSelect.addEventListener('change', toggleTypeSpecificFields);
+        toggleTypeSpecificFields();
+    })();
+</script>

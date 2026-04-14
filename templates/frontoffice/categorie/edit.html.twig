@@ -1,0 +1,43 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Modifier la Catégorie{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <a href="{{ path('categorie_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+            </a>
+            <span class="badge rounded-pill px-3 py-2" style="background-color: {{ categorie.couleur|default('#4e73df') }}15; color: {{ categorie.couleur|default('#4e73df') }}; font-weight: 600;">
+                Catégorie ID: #{{ categorie.id }}
+            </span>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-header bg-warning py-4 text-center">
+                        <div class="bg-white bg-opacity-25 d-inline-block p-3 rounded-circle mb-3 shadow-sm">
+                            <i class="fas {{ categorie.icon|default('fa-folder-open') }} fa-2x text-white"></i>
+                        </div>
+                        <h2 class="h3 fw-bold text-white mb-0">Modifier la Catégorie</h2>
+                        <p class="text-white text-opacity-75 small mb-0">Modifiez les informations de la catégorie "{{ categorie.nomCategorie }}".</p>
+                    </div>
+                    <div class="card-body p-4 p-md-5 bg-white">
+                        {{ include('frontoffice/categorie/_form.html.twig') }}
+                    </div>
+                    <div class="card-footer bg-light border-0 p-4 pt-0">
+                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                            <span>Dernière modification : {{ "now"|date('d/m/Y') }}</span>
+                            <span class="fw-bold" style="color: {{ categorie.couleur|default('#4e73df') }};">
+                                <i class="fas fa-circle me-1" style="font-size: 8px;"></i> Actif
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Services & Produits - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h1 class="h2 fw-bold text-dark mb-2">Services & Produits</h1>
+            <p class="text-muted">Gérez vos abonnements et votre inventaire personnel en un seul endroit.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Services Section -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                    <div class="card-header bg-primary text-white p-4 border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="h4 mb-0"><i class="fas fa-concierge-bell me-2"></i>Mes Services</h3>
+                            <a href="{{ path('service_new') }}" class="btn btn-white btn-sm rounded-pill px-3">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if services %}
+                            <div class="list-group list-group-flush">
+                                {% for service in services %}
+                                    <a href="{{ path('service_show', {id: service.id}) }}" class="list-group-item list-group-item-action border-0 px-0 py-3 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-dark">{{ service.nomService }}</h6>
+                                            <span class="small text-muted">{{ service.typeService }} • {{ service.frequence|capitalize }}</span>
+                                            <div class="small text-primary mt-1">
+                                                <i class="fas fa-file-invoice me-1"></i>{{ service.facturesCount|default(0) }} facture(s) liee(s)
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold text-primary">{{ service.tarif|number_format(2, ',', ' ') }} TND</div>
+                                            {% set badge_class = service.statut == 'actif' ? 'success' : 'secondary' %}
+                                            <span class="badge rounded-pill bg-{{ badge_class }} small" style="font-size: 0.7rem;">{{ service.statut|capitalize }}</span>
+                                        </div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                            <div class="text-center mt-4">
+                                <a href="{{ path('service_index') }}" class="btn btn-outline-primary rounded-pill px-4">Voir tous les services</a>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-concierge-bell fa-3x text-light mb-3"></i>
+                                <p class="text-muted">Aucun service enregistré.</p>
+                                <a href="{{ path('service_new') }}" class="btn btn-primary rounded-pill px-4">Ajouter un service</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produits Section -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                    <div class="card-header bg-dark text-white p-4 border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="h4 mb-0"><i class="fas fa-box me-2"></i>Mes Produits</h3>
+                            <a href="{{ path('produit_new') }}" class="btn btn-white btn-sm rounded-pill px-3">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if produits %}
+                            <div class="list-group list-group-flush">
+                                {% for produit in produits %}
+                                    <a href="{{ path('produit_show', {id: produit.id}) }}" class="list-group-item list-group-item-action border-0 px-0 py-3 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-dark">{{ produit.nomProduit }}</h6>
+                                            <span class="small text-muted">{{ produit.typeProduit }} • Code: {{ produit.codeUnique }}</span>
+                                            <div class="small text-primary mt-1">
+                                                <i class="fas fa-file-invoice me-1"></i>{{ produit.facturesCount|default(0) }} facture(s) liee(s)
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold text-dark">{{ produit.montant|number_format(2, ',', ' ') }} TND</div>
+                                            {% set badge_class = produit.statut == 'disponible' ? 'success' : 'info' %}
+                                            <span class="badge rounded-pill bg-{{ badge_class }} small" style="font-size: 0.7rem;">{{ produit.statut|capitalize }}</span>
+                                        </div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                            <div class="text-center mt-4">
+                                <a href="{{ path('produit_index') }}" class="btn btn-outline-dark rounded-pill px-4">Voir tout l'inventaire</a>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-boxes fa-3x text-light mb-3"></i>
+                                <p class="text-muted">Votre inventaire est vide.</p>
+                                <a href="{{ path('produit_new') }}" class="btn btn-dark rounded-pill px-4">Ajouter un produit</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

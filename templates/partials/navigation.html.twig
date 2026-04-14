@@ -1,0 +1,93 @@
+<!-- navigation -->
+<header class="navigation bg-tertiary">
+	<style>
+		.profile-avatar-btn {
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			border: 2px solid #fff;
+			background: #d9e2ff;
+			padding: 0;
+			overflow: hidden;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 700;
+			color: #25314c;
+			font-size: 0.85rem;
+		}
+
+		.profile-avatar-btn img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.navbar-actions {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			flex-wrap: wrap;
+			gap: 0.25rem 0.5rem;
+		}
+
+		.admin-nav-shell {
+			max-width: 1520px;
+			padding-left: 1.5rem;
+			padding-right: 1.5rem;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		/* Global modal layering fix for pages with fixed header/sidebar */
+		.modal {
+			z-index: 2000 !important;
+		}
+
+		.modal-backdrop {
+			z-index: 1990 !important;
+		}
+
+		.modal-dialog,
+		.modal-content {
+			pointer-events: auto;
+		}
+	</style>
+	<nav class="navbar navbar-expand-xl navbar-light text-start py-1">
+		<div class="container-fluid d-flex align-items-center{% if is_granted('ROLE_ADMIN') %} admin-nav-shell{% endif %}">
+			<a class="navbar-brand" href="{{ path('app_home') }}">
+				<img loading="prelaod" decoding="async" class="img-fluid" width="160" src="{{ asset('images/logo.png') }}" alt="FinTrack">
+			</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				{% if not is_granted('ROLE_ADMIN') %}
+					<ul class="navbar-nav ms-0 me-auto mb-2 mb-lg-0">
+						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}">Home</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}#services">Services</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}#how-it-works">How It Works</a></li>
+						<li class="nav-item"><a class="nav-link" href="{{ path('app_home') }}#contact">Contact</a></li>
+					</ul>
+				{% endif %}
+				<div class="navbar-actions ms-auto">
+					{% if app.user %}
+						{% set displayName = app.user.fullName is defined and app.user.fullName ? app.user.fullName : ((app.user.prenom|default('') ~ ' ' ~ app.user.nom|default(''))|trim) %}
+						{% if not displayName %}
+							{% set displayName = app.user.email|default(app.user.userIdentifier|default('User')) %}
+						{% endif %}
+						<span class="text-dark">{{ displayName }}</span>
+						<a href="{{ is_granted('ROLE_ADMIN') ? path('app_admin_messages') : path('app_messages') }}" class="btn btn-outline-primary">Messages</a>
+						{% if is_granted('ROLE_ADMIN') %}
+							<a href="{{ path('admin_dashboard') }}" class="btn btn-outline-primary">Admin</a>
+						{% endif %}
+						<a href="{{ path('app_logout') }}" class="btn btn-primary">Logout</a>
+					{% else %}
+						<a href="{{ path('app_login') }}" class="btn btn-outline-primary">Log In</a>
+						<a href="{{ path('app_register') }}" class="btn btn-primary">Sign Up</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</nav>
+</header>
+<!-- /navigation -->

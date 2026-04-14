@@ -1,0 +1,200 @@
+<form method="POST" novalidate class="budget-form" data-validate-url="{{ path('budget_validate') }}">
+    {% set budgetData = budget|default({}) %}
+    {% set formErrors = formErrors|default({}) %}
+    <input type="hidden" name="id_budget" value="{{ budgetData.id_budget|default('') }}">
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="nom_budget" class="form-label fw-bold text-muted small text-uppercase">Nom du Budget</label>
+                <input type="text" id="nom_budget" name="nom_budget" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ budgetData.nom_budget|default('') }}" placeholder="Ex: Vacances 2026, Loyer, Courses..." pattern="[A-Za-zÀ-ÿ0-9\s\-']+" title="Le nom du budget peut contenir lettres, chiffres, espaces, tirets ou apostrophes et doit inclure au moins une lettre." required>
+                <div class="form-text">Donnez un nom clair à votre budget.</div>
+                {% for error in formErrors.nom_budget|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+                <div class="text-danger small mt-1" data-error-for="nom_budget"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="montant_total" class="form-label fw-bold text-muted small text-uppercase">Montant Limite (TND)</label>
+                <div class="input-group">
+                    <span class="input-group-text border-0 bg-light"><i class="fas fa-coins text-primary"></i></span>
+                    <input type="number" id="montant_total" name="montant_total" class="form-control form-control-lg border-0 bg-light shadow-none" step="0.01" value="{{ budgetData.montant_total|default('') }}" placeholder="0.00" required>
+                </div>
+                <div class="form-text">Le montant maximum à ne pas dépasser.</div>
+                {% for error in formErrors.montant_total|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+                <div class="text-danger small mt-1" data-error-for="montant_total"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="periode" class="form-label fw-bold text-muted small text-uppercase">Période</label>
+                <select id="periode" name="periode" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="mensuel" {{ budgetData.periode|default('') == 'mensuel' ? 'selected' : '' }}>Mensuel</option>
+                    <option value="annuel" {{ budgetData.periode|default('') == 'annuel' ? 'selected' : '' }}>Annuel</option>
+                    <option value="ponctuel" {{ budgetData.periode|default('') == 'ponctuel' ? 'selected' : '' }}>Ponctuel</option>
+                </select>
+                <div class="form-text">Fréquence de ce budget.</div>
+                {% for error in formErrors.periode|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+                <div class="text-danger small mt-1" data-error-for="periode"></div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="statut" class="form-label fw-bold text-muted small text-uppercase">Statut Initial</label>
+                <div class="d-flex gap-3 mt-2">
+                    <div class="form-check custom-option">
+                        <input class="form-check-input d-none" type="radio" name="statut" id="statut_actif" value="actif" {{ budgetData.statut|default('actif') == 'actif' ? 'checked' : '' }}>
+                        <label class="form-check-label px-4 py-2 rounded-pill border pointer-event" for="statut_actif">
+                            <i class="fas fa-check-circle me-1"></i> Actif
+                        </label>
+                    </div>
+                    <div class="form-check custom-option">
+                        <input class="form-check-input d-none" type="radio" name="statut" id="statut_attente" value="en_attente" {{ budgetData.statut|default('actif') == 'en_attente' ? 'checked' : '' }}>
+                        <label class="form-check-label px-4 py-2 rounded-pill border pointer-event" for="statut_attente">
+                            <i class="fas fa-clock me-1"></i> En Attente
+                        </label>
+                    </div>
+                </div>
+                {% for error in formErrors.statut|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+                <div class="text-danger small mt-1" data-error-for="statut"></div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="text-danger small mt-1" data-error-for="general"></div>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-4 border-top d-flex gap-3">
+        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Créer le budget') }}
+        </button>
+        <a href="{{ path('budget_index') }}" class="btn btn-light btn-lg px-4 rounded-pill">
+            Annuler
+        </a>
+    </div>
+</form>
+
+<style>
+    .custom-option input:checked + label {
+        background-color: var(--primary-blue);
+        color: white;
+        border-color: var(--primary-blue) !important;
+    }
+    .custom-option label {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-color: #dee2e6 !important;
+        color: #6c757d;
+    }
+    .custom-option label:hover {
+        background-color: #f8fafc;
+    }
+</style>
+
+<script>
+    (function () {
+        var form = document.querySelector('.budget-form');
+        if (!form) {
+            return;
+        }
+
+        var validateUrl = form.getAttribute('data-validate-url');
+        var pendingTimer = null;
+
+        var setFieldState = function (name, messages) {
+            var input = form.querySelector('[name="' + name + '"]');
+            var errorBox = form.querySelector('[data-error-for="' + name + '"]');
+            if (!input || !errorBox) {
+                return;
+            }
+
+            var hasError = messages && messages.length;
+            input.classList.toggle('is-invalid', hasError);
+            input.classList.toggle('is-valid', !hasError);
+            errorBox.innerHTML = hasError ? messages.map(function (message) {
+                return '<div>' + message + '</div>';
+            }).join('') : '';
+        };
+
+        var clearAllStates = function () {
+            ['nom_budget', 'montant_total', 'periode', 'statut'].forEach(function (name) {
+                setFieldState(name, []);
+            });
+
+            var generalBox = form.querySelector('[data-error-for="general"]');
+            if (generalBox) {
+                generalBox.innerHTML = '';
+            }
+        };
+
+        var runValidation = function () {
+            if (typeof window.fetch !== 'function') {
+                return Promise.resolve({ valid: true });
+            }
+
+            if (!validateUrl) {
+                return Promise.resolve({ valid: true });
+            }
+
+            var formData = new FormData(form);
+            var submitButton = form.querySelector('button[type="submit"]');
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            return fetch(validateUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            }).then(function (response) {
+                return response.json().then(function (payload) {
+                    return { ok: response.ok, payload: payload };
+                });
+            }).then(function (result) {
+                clearAllStates();
+
+                if (result.payload && result.payload.errors) {
+                    Object.keys(result.payload.errors).forEach(function (field) {
+                        setFieldState(field, result.payload.errors[field]);
+                    });
+                }
+
+                return {
+                    valid: !!(result.payload && result.payload.valid),
+                    payload: result.payload || {}
+                };
+            }).catch(function () {
+                return { valid: true };
+            }).finally(function () {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            });
+        };
+
+        form.addEventListener('input', function () {
+            window.clearTimeout(pendingTimer);
+            pendingTimer = window.setTimeout(runValidation, 250);
+        });
+
+        form.addEventListener('blur', function () {
+            runValidation();
+        }, true);
+
+        runValidation();
+    })();
+</script>

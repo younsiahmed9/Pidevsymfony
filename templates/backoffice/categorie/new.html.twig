@@ -1,0 +1,103 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Nouvelle Catégorie - Admin{% endblock %}
+
+{% block body %}
+<div class="mb-4">
+    <a href="{{ path('admin_categorie_index') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i> Retour
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="form-card">
+            <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations de la catégorie</h6>
+
+            <form method="post" novalidate>
+            <div class="mb-3">
+                <label for="nom_categorie" class="form-label fw-medium">Nom de la catégorie</label>
+                <input type="text" id="nom_categorie" name="nom_categorie" class="form-control" value="{{ categorie.nomCategorie|default('') }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="icon" class="form-label fw-medium">Icône</label>
+                <div class="input-group">
+                    <span class="input-group-text" id="iconPreviewBox"><i id="iconPreviewEl" class="fas fa-tag"></i></span>
+                    <input type="text" id="icon" name="icon" class="form-control" value="{{ categorie.icon|default('fas fa-tag') }}" required>
+                </div>
+                <div class="form-text">Ex: <code>fas fa-file-pdf</code>, <code>fas fa-university</code>, <code>fas fa-home</code></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="couleur" class="form-label fw-medium">Couleur</label>
+                <div class="input-group">
+                    <input type="color" id="colorPicker" value="{{ categorie.couleur|default('#3b82f6') }}"
+                           style="width:44px;height:38px;padding:2px 4px;border:1px solid #dee2e6;border-radius:8px 0 0 8px;cursor:pointer;background:#fff;flex-shrink:0;">
+                    <input type="text" id="couleur" name="couleur" class="form-control" value="{{ categorie.couleur|default('#3b82f6') }}" required>
+                </div>
+                <div class="form-text">Code hexadécimal (ex: #3b82f6). Laisser vide pour la couleur par défaut.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label fw-medium">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="4">{{ categorie.description|default('') }}</textarea>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn-primary-custom">
+                    <i class="fas fa-save me-1"></i> Créer
+                </button>
+                <a href="{{ path('admin_categorie_index') }}" class="btn btn-outline-secondary">Annuler</a>
+            </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="form-card text-center">
+            <h6 class="fw-semibold mb-3">Aperçu</h6>
+            <div id="previewWrap" style="border-radius:12px;padding:1.5rem;border:2px solid #3b82f6;background:#f8fafc;">
+                <div id="previewIconWrap" style="width:52px;height:52px;border-radius:12px;background:#eff6ff;display:inline-flex;align-items:center;justify-content:center;margin-bottom:0.75rem;">
+                    <i id="previewIcon2" class="fas fa-tag" style="color:#3b82f6;font-size:1.3rem;"></i>
+                </div>
+                <div id="previewLabel" class="fw-semibold" style="color:#0f172a;">Nouvelle catégorie</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const iconInput    = document.getElementById('icon');
+const couleurInput = document.getElementById('couleur');
+const colorPicker  = document.getElementById('colorPicker');
+
+function getColor() {
+    const v = couleurInput ? couleurInput.value.trim() : '';
+    return /^#[0-9a-fA-F]{6}$/.test(v) ? v : '#3b82f6';
+}
+
+if (colorPicker && couleurInput) {
+    colorPicker.addEventListener('input', () => {
+        couleurInput.value = colorPicker.value;
+        refreshPreview();
+    });
+    couleurInput.addEventListener('input', () => {
+        const c = getColor();
+        colorPicker.value = c;
+        refreshPreview();
+    });
+}
+iconInput && iconInput.addEventListener('input', refreshPreview);
+
+function refreshPreview() {
+    const cls   = (iconInput ? iconInput.value.trim() : '') || 'fas fa-tag';
+    const color = getColor();
+    document.getElementById('iconPreviewEl').className  = cls;
+    document.getElementById('previewIcon2').className   = cls;
+    document.getElementById('previewIcon2').style.color = color;
+    document.getElementById('previewIconWrap').style.background = color + '25';
+    document.getElementById('previewWrap').style.borderColor    = color;
+}
+refreshPreview();
+</script>
+{% endblock %}

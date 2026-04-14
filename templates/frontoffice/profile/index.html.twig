@@ -1,0 +1,108 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mon Profil - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row align-items-center mb-4">
+            <div class="col-md-6">
+                <h2 class="h3 fw-bold mb-0">Mon Profil</h2>
+                <p class="text-muted">Gérez vos informations personnelles</p>
+            </div>
+            <div class="col-md-6 text-md-end text-start mt-3 mt-md-0">
+                <div class="d-inline-flex align-items-center p-3 bg-white rounded shadow-sm">
+                    <div class="me-3">
+                        <p class="text-muted small mb-0">Solde Total</p>
+                        <h4 class="mb-0 fw-bold text-primary">{{ balanceTotal|default(0)|number_format(2, ',', ' ') }} <span class="fs-6 text-muted">EUR</span></h4>
+                    </div>
+                    <div class="bg-primary-subtle text-primary rounded-circle p-3">
+                        <i class="fas fa-wallet fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h4 class="h5 mb-0"><i class="fas fa-user-edit me-2 text-primary"></i>Informations Personnelles</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        {% set profileInitial = (app.user.fullName ?: app.user.email)|slice(0, 1)|upper %}
+                        {{ form_start(profileForm, {'attr': {'class': 'row g-3', 'novalidate': 'novalidate'}}) }}
+
+                            <div class="col-12 d-flex align-items-center gap-3 mb-3">
+                                {% if app.user.profilePhoto %}
+                                    <img src="{{ asset(app.user.profilePhoto) }}" alt="Photo de profil" class="rounded-circle border" style="width:72px;height:72px;object-fit:cover;">
+                                {% else %}
+                                    <div class="rounded-circle border d-flex align-items-center justify-content-center bg-primary-subtle text-primary fw-bold" style="width:72px;height:72px;">
+                                        {{ profileInitial }}
+                                    </div>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    {{ form_label(profileForm.profilePhotoFile, 'Photo de profil', {'label_attr': {'class': 'form-label fw-bold small text-muted mb-1'}}) }}
+                                    {{ form_widget(profileForm.profilePhotoFile, {'attr': {'class': 'form-control shadow-none'}}) }}
+                                    <div class="form-text">Formats acceptes: JPG, PNG, WEBP, GIF (max 5 Mo)</div>
+                                    <div class="text-danger small mt-1">{{ form_errors(profileForm.profilePhotoFile) }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form_label(profileForm.fullName, 'Nom complet', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(profileForm.fullName, {'attr': {'class': 'form-control shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(profileForm.fullName) }}</div>
+                            </div>
+
+                            <div class="col-12">
+                                {{ form_label(profileForm.email, 'Adresse Email', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(profileForm.email, {'attr': {'class': 'form-control shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(profileForm.email) }}</div>
+                            </div>
+
+                            <div class="col-12 mt-4 text-end">
+                                <button type="button" class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#faceIdEnrollModal">
+                                    <i class="fas fa-face-smile me-2"></i>{{ app.user.hasFaceTemplate ? 'Mettre a jour Face ID' : 'Activer Face ID' }}
+                                </button>
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Mettre à jour</button>
+                            </div>
+
+                        {{ form_end(profileForm) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="faceIdEnrollModal" tabindex="-1" aria-labelledby="faceIdEnrollModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="faceIdEnrollModalLabel">Enrollement Face ID</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ path('app_face_id_enroll') }}" data-face-id-form>
+                <div class="modal-body">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('face_id_enroll') }}">
+                    <input type="hidden" name="face_descriptor" data-face-id-input>
+                    <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
+                        <video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
+                    </div>
+                    <p class="text-muted mb-0" data-face-id-status>Autorisez la camera puis capturez votre visage.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" data-face-id-submit>Capturer et enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('frontoffice/js/face-id.js') }}"></script>
+{% endblock %}

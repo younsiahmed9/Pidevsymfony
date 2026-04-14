@@ -1,0 +1,97 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Détails du Service - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <a href="{{ path('admin_service_index') }}" class="text-decoration-none text-muted me-2">
+                <i class="fas fa-arrow-left fa-sm"></i>
+            </a>
+            Détails du Service #{{ service.id }}
+        </h1>
+        <div class="btn-group shadow-sm">
+            <a href="{{ path('admin_service_edit', {id: service.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit me-1"></i> Modifier
+            </a>
+            {{ include('backoffice/service/_delete_form.html.twig') }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-7 col-lg-6">
+            <div class="card shadow mb-4 h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations sur le Service</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="small font-weight-bold text-muted text-uppercase d-block">Nom du Service</label>
+                        <span class="h3 font-weight-bold text-dark">{{ service.nomService }}</span>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6 border-end">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Tarif</label>
+                            <span class="h4 font-weight-bold text-primary">{{ service.tarif|number_format(2, ',', ' ') }} TND</span>
+                        </div>
+                        <div class="col-6 ps-3">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Type</label>
+                            <span class="h4 font-weight-bold text-dark">{{ service.typeService }}</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6 border-end">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Fréquence</label>
+                            <span class="badge bg-info fs-6 px-3">{{ service.frequence|capitalize }}</span>
+                        </div>
+                        <div class="col-6 ps-3">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Statut</label>
+                            {% set badge_class = service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') %}
+                            <span class="badge rounded-pill bg-{{ badge_class }} fs-6 px-3">
+                                {{ service.statut|capitalize }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-0">
+                        <div class="col-6 border-end">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Date de Début</label>
+                            <span class="text-dark fw-bold">{{ service.dateDebut|date('d/m/Y') }}</span>
+                        </div>
+                        <div class="col-6 ps-3">
+                            <label class="small font-weight-bold text-muted text-uppercase d-block">Date de Fin</label>
+                            <span class="text-dark fw-bold">{{ service.dateFin ? service.dateFin|date('d/m/Y') : 'Non définie' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-5 col-lg-6">
+            <div class="card shadow mb-4 h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations sur l'Utilisateur</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-block mb-3">
+                            <i class="fas fa-user fa-4x text-primary"></i>
+                        </div>
+                        <h4 class="font-weight-bold text-dark">{{ service.user_prenom }} {{ service.user_nom }}</h4>
+                        <p class="text-muted"><i class="fas fa-envelope me-2"></i>{{ service.user_email }}</p>
+                    </div>
+                    <hr>
+                    <div class="mt-4">
+                        <label class="small font-weight-bold text-muted text-uppercase d-block mb-2">Autres détails</label>
+                        <p class="small text-muted mb-1">ID Utilisateur: <span class="text-dark fw-bold">#{{ service.user_id }}</span></p>
+                        <p class="small text-muted">Date du dossier: <span class="text-dark fw-bold">{{ "now"|date('d/m/Y H:i') }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

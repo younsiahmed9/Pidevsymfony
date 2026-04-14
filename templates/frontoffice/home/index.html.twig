@@ -1,0 +1,71 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Accueil - FinTrack{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<section class="banner bg-tertiary position-relative overflow-hidden py-5">
+    <div class="container mt-5">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="block text-center text-lg-start pe-0 pe-xl-5">
+                    <h1 class="text-capitalize mb-4">Gérez votre argent simplement et en toute sécurité</h1>
+                    <p class="mb-4">
+                        Créez plusieurs portefeuilles, émettez des cartes virtuelles et suivez 
+                        vos transactions en temps réel avec FinTrack.
+                    </p>
+                    {% if not app.user %}
+                        <a type="button" class="btn btn-primary" href="{{ path('app_register') }}">
+                            Ouvrir un compte <i class="fas fa-arrow-right ms-2" style="font-size: 14px;"></i>
+                        </a>
+                    {% else %}
+                        <a type="button" class="btn btn-primary" href="{{ path('front_dashboard_index') }}">
+                            Accéder à mon Dashboard <i class="fas fa-arrow-right ms-2" style="font-size: 14px;"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="ps-lg-5 text-center">
+                    <img loading="lazy" decoding="async" src="{{ asset('frontoffice/images/banner/banner.png') }}" alt="banner image" class="w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Fonctionnalités -->
+<section class="section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-title text-center mb-5">
+                    <p class="text-primary text-uppercase fw-bold mb-3">Nos Services</p>
+                    <h1>Découvrez nos fonctionnalités</h1>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="shadow rounded bg-white p-4 text-center h-100">
+                    <div class="icon mb-4"><i class="fas fa-wallet text-primary" style="font-size:40px"></i></div>
+                    <h3 class="mb-3 h4">Multi-Portefeuilles</h3>
+                    <p class="mb-0">Séparez vos fonds dans différents portefeuilles pour mieux organiser vos dépenses (perso, pro, vacances).</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="shadow rounded bg-white p-4 text-center h-100">
+                    <div class="icon mb-4"><i class="fas fa-credit-card text-primary" style="font-size:40px"></i></div>
+                    <h3 class="mb-3 h4">Cartes Virtuelles</h3>
+                    <p class="mb-0">Créez des cartes virtuelles sécurisées pour vos achats en ligne et gérez vos plafonds.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="shadow rounded bg-white p-4 text-center h-100">
+                    <div class="icon mb-4"><i class="fas fa-exchange-alt text-primary" style="font-size:40px"></i></div>
+                    <h3 class="mb-3 h4">Virements Programmés</h3>
+                    <p class="mb-0">Automatisez vos envois d'argent mensuels ou hebdomadaires en quelques clics.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Programmer un Virement - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <!-- Bouton retour -->
+                <a href="{{ path('front_virement_index') }}" class="text-muted text-decoration-none d-inline-block mb-3">
+                    <i class="fas fa-arrow-left me-1"></i> Retour aux virements programmés
+                </a>
+
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h3 class="h4 fw-bold mb-0">Programmer un Virement</h3>
+                        <p class="text-muted small">Automatisez l'envoi d'argent vers l'un de vos comptes ou vers un tiers.</p>
+                    </div>
+                    
+                    <div class="card-body p-4 pt-3">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                            
+                            <h5 class="mt-2 mb-3 fs-6 text-primary border-bottom pb-2">Informations Générales</h5>
+                            
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.destinataire, 'Nom du destinataire', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.destinataire, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Ex: Propriétaire, Coach, Salle de sport...'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.destinataire) }}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.montant, 'Montant à transférer', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.montant, {'attr': {'class': 'form-control shadow-none', 'placeholder': '0.00'}}) }}
+                                    </div>
+                                    <div class="text-danger small mt-1">{{ form_errors(form.montant) }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.devise, 'Devise', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.devise, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.devise) }}</div>
+                                </div>
+                            </div>
+
+                            <h5 class="mt-3 mb-3 fs-6 text-primary border-bottom pb-2">Cartes associées</h5>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.carte_source, 'Carte Source (Débitée)', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.carte_source, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.carte_source) }}</div>
+                                </div>
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.carte_dest, 'Carte Destination (Créditée)', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.carte_dest, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.carte_dest) }}</div>
+                                    <small class="text-muted">La carte destination est obligatoire pour un virement programmé.</small>
+                                </div>
+                            </div>
+
+                            <h5 class="mt-3 mb-3 fs-6 text-primary border-bottom pb-2">Planification</h5>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.frequence, 'Fréquence', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.frequence, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.frequence) }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.prochaine_execution, 'Première/Prochaine date d\'exécution', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.prochaine_execution, {'attr': {'class': 'form-control shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.prochaine_execution) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.description, 'Mofit / Description', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control shadow-none', 'rows': '2', 'placeholder': 'Loyer d\'octobre...'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.description) }}</div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i>Enregistrer le virement
+                                </button>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

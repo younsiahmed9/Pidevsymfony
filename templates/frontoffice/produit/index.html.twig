@@ -1,0 +1,92 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Produits - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div>
+                <h1 class="h2 fw-bold text-dark mb-1">Mes Produits & Actifs</h1>
+                <p class="text-muted mb-0">Gérez votre inventaire personnel et la valeur de vos biens.</p>
+            </div>
+            <a href="{{ path('produit_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+                <i class="fas fa-plus me-2"></i> Ajouter un produit
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for produit in produits %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                                    <i class="fas fa-box text-primary fa-lg"></i>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                        <li><a class="dropdown-item" href="{{ path('produit_show', {id: produit.id}) }}"><i class="fas fa-eye me-2 text-primary"></i> Voir</a></li>
+                                        <li><a class="dropdown-item" href="{{ path('produit_edit', {id: produit.id}) }}"><i class="fas fa-edit me-2 text-warning"></i> Modifier</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h5 class="card-title fw-bold mb-1">{{ produit.nomProduit }}</h5>
+                            <span class="badge bg-light text-dark border px-2 rounded-pill small mb-4">{{ produit.typeProduit }}</span>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <div class="small text-muted text-uppercase fw-bold">Valeur</div>
+                                    <div class="h4 fw-bold text-primary mb-0">{{ produit.montant|number_format(2, ',', ' ') }} TND</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="small text-muted text-uppercase fw-bold">ID Code</div>
+                                    <code class="fw-bold text-dark">{{ produit.codeUnique }}</code>
+                                </div>
+                            </div>
+
+                            <div class="py-3 border-top d-flex justify-content-between align-items-center">
+                                <div class="small text-muted">
+                                    <i class="fas fa-calendar-alt me-1"></i> Ajouté le {{ produit.dateCreation|date('d/m/Y') }}
+                                </div>
+                                {% set badge_class = produit.statut == 'disponible' ? 'success' : (produit.statut == 'vendu' ? 'info' : (produit.statut == 'en_reparation' ? 'warning' : 'secondary')) %}
+                                <span class="badge rounded-pill bg-{{ badge_class }} px-3">
+                                    {{ produit.statut|capitalize|replace({'_': ' '}) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <a href="{{ path('produit_show', {id: produit.id}) }}" class="btn btn-light w-100 rounded-pill fw-bold">Voir la fiche</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block">
+                        <i class="fas fa-boxes fa-4x text-light mb-4 d-block"></i>
+                        <h3 class="fw-bold">Votre inventaire est vide</h3>
+                        <p class="text-muted mb-4">Commencez par ajouter vos biens (électronique, mobilier, véhicules...) pour suivre leur valeur.</p>
+                        <a href="{{ path('produit_new') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
+                            Ajouter mon premier produit
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .transition-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .transition-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+    }
+</style>
+{% endblock %}

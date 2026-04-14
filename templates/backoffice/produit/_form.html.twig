@@ -1,0 +1,48 @@
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.user_id, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.user_id, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.user_id) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.nomProduit, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.nomProduit, {'attr': {'class': 'form-control', 'placeholder': 'Ex: iPhone 15 Pro, Bureau bois...'}}) }}
+            {{ form_errors(form.nomProduit) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.montant, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.montant, {'attr': {'class': 'form-control', 'placeholder': '0.00'}}) }}
+            {{ form_errors(form.montant) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.codeUnique, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.codeUnique, {'attr': {'class': 'form-control', 'placeholder': 'Ex: PRD-123456 (Auto-généré si vide)'}}) }}
+            {{ form_errors(form.codeUnique) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.typeProduit, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.typeProduit, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Électronique, Mobilier...'}}) }}
+            {{ form_errors(form.typeProduit) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.statut, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.statut) }}
+        </div>
+    </div>
+
+    <div class="mt-4 pt-3 border-top">
+        <button type="submit" class="btn btn-primary px-4 shadow-sm">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer') }}
+        </button>
+        <a href="{{ path('admin_produit_index') }}" class="btn btn-secondary px-4 shadow-sm">
+            <i class="fas fa-times me-2"></i>Annuler
+        </a>
+    </div>
+{{ form_end(form) }}

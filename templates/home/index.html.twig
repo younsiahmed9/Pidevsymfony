@@ -1,0 +1,144 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Home - FinTrack{% endblock %}
+
+{% block body %}
+<section class="banner bg-tertiary position-relative overflow-hidden">
+	<div class="container">
+		<div class="row align-items-center justify-content-center">
+			<div class="col-lg-6 mb-5 mb-lg-0">
+				<div class="block text-center text-lg-start pe-0 pe-xl-5">
+					<h1 class="text-capitalize mb-4">manage your finances with a secure Symfony wallet</h1>
+					<p class="mb-4">FinTrack combines the Wallet Bootstrap design with a manual Symfony authentication flow for clients and administrators.</p>
+					<div class="d-flex gap-3 justify-content-center justify-content-lg-start flex-wrap">
+						{% if app.user %}
+                            <a class="btn btn-primary" href="{{ is_granted('ROLE_ADMIN') ? path('admin_dashboard') : path('front_dashboard_index') }}">Go to dashboard <span style="font-size: 14px;" class="ms-2 fas fa-arrow-right"></span></a>
+						{% else %}
+							<a class="btn btn-primary" href="{{ path('app_register') }}">Create account <span style="font-size: 14px;" class="ms-2 fas fa-arrow-right"></span></a>
+							<a class="btn btn-outline-primary" href="{{ path('app_login') }}">Log In</a>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="ps-lg-5 text-center">
+					<img loading="lazy" decoding="async" src="{{ asset('images/banner/banner.png') }}" alt="banner image" class="w-100">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="has-shapes">
+		<svg class="shape shape-left text-light" viewBox="0 0 192 752" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M-30.883 0C-41.3436 36.4248 -22.7145 75.8085 4.29154 102.398C31.2976 128.987 65.8677 146.199 97.6457 166.87C129.424 187.542 160.139 213.902 172.162 249.847C193.542 313.799 149.886 378.897 129.069 443.036C97.5623 540.079 122.109 653.229 191 728.495" stroke="currentColor" stroke-miterlimit="10" /><path d="M-55.5959 7.52271C-66.0565 43.9475 -47.4274 83.3312 -20.4214 109.92C6.58466 136.51 41.1549 153.722 72.9328 174.393C104.711 195.064 135.426 221.425 147.449 257.37C168.829 321.322 125.174 386.42 104.356 450.559C72.8494 547.601 97.3965 660.752 166.287 736.018" stroke="currentColor" stroke-miterlimit="10" /></svg>
+		<svg class="shape shape-right text-light" viewBox="0 0 731 746" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.1794 745.14C1.80036 707.275 -5.75764 666.015 8.73984 629.537C27.748 581.745 80.4729 554.968 131.538 548.843C182.604 542.703 234.032 552.841 285.323 556.748C336.615 560.64 391.543 557.276 433.828 527.964C492.452 487.323 511.701 408.123 564.607 360.255C608.718 320.353 675.307 307.183 731.29 327.323" stroke="currentColor" stroke-miterlimit="10" /></svg>
+	</div>
+</section>
+
+<section class="section" id="services">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 col-md-6">
+                <div class="section-title pt-4">
+                    <p class="text-primary text-uppercase fw-bold mb-3">Our Services</p>
+                    <h1>Secure access for clients and admins</h1>
+                    <p>Login, signup, and role-based access are handled manually in Symfony without third-party auth bundles.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 service-item">
+                <div class="block">
+                    <span class="colored-box text-center h3 mb-4">01</span>
+                    <h3 class="mb-3 service-title">Client Accounts</h3>
+                    <p class="mb-0 service-description">Create client profiles with CIN and phone support, then access the client area after login.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 service-item">
+                <div class="block">
+                    <span class="colored-box text-center h3 mb-4">02</span>
+                    <h3 class="mb-3 service-title">Admin Access</h3>
+                    <p class="mb-0 service-description">Admin registration is protected by a secret code and redirects to the admin dashboard.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 service-item">
+                <div class="block">
+                    <span class="colored-box text-center h3 mb-4">03</span>
+                    <h3 class="mb-3 service-title">Custom Auth Flow</h3>
+                    <p class="mb-0 service-description">The authenticator validates credentials, CSRF, and role-based redirects using native Symfony security.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 service-item">
+                <div class="block">
+                    <span class="colored-box text-center h3 mb-4">04</span>
+                    <h3 class="mb-3 service-title">Wallet Theme UI</h3>
+                    <p class="mb-0 service-description">The interface reuses the original Wallet Bootstrap styling, assets, and layout structure.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 service-item">
+                <div class="block">
+                    <span class="colored-box text-center h3 mb-4">05</span>
+                    <h3 class="mb-3 service-title">Responsive Layout</h3>
+                    <p class="mb-0 service-description">The pages remain responsive across desktop and mobile while keeping the original theme feel.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section bg-light" id="how-it-works">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="section-title">
+                    <p class="text-primary text-uppercase fw-bold mb-3">How It Works</p>
+                    <h1>Start with signup, then access the correct area by role</h1>
+                    <p>Choose CLIENT or ADMIN during registration, provide the required fields, and Symfony routes the user to the right dashboard after login.</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-4 bg-white shadow-sm h-100">
+                            <h4 class="mb-3">1. Register</h4>
+                            <p class="mb-0">Fill the signup form and choose the account type.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 bg-white shadow-sm h-100">
+                            <h4 class="mb-3">2. Verify</h4>
+                            <p class="mb-0">Admin accounts require the secret admin code on the server.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 bg-white shadow-sm h-100">
+                            <h4 class="mb-3">3. Login</h4>
+                            <p class="mb-0">Authenticate with email and password, protected by CSRF.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 bg-white shadow-sm h-100">
+                            <h4 class="mb-3">4. Redirect</h4>
+                            <p class="mb-0">Symfony sends admins to the dashboard and clients to the front area.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="contact">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="section-title">
+                    <p class="text-primary text-uppercase fw-bold mb-3">Get Started</p>
+                    <h1>Ready to use the Wallet design inside Symfony?</h1>
+                    <p class="mb-4">The login and signup screens now live in the same visual system as the wallet-bootstrap-main template.</p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{{ path('app_login') }}" class="btn btn-primary">Log In</a>
+                        <a href="{{ path('app_register') }}" class="btn btn-outline-primary">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

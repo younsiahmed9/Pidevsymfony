@@ -1,0 +1,6 @@
+<form method="post" action="{{ path('admin_document_delete', {'id': document.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce document ? Cette action est irréversible.');" style="display: inline-block;">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+    <button class="btn btn-outline-danger btn-sm rounded-pill fw-bold shadow-sm px-4">
+        <i class="fas fa-trash-alt me-2 text-danger"></i> Supprimer le document
+    </button>
+</form>

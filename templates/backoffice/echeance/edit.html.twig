@@ -1,0 +1,33 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Modifier l'Échéance - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4 px-4">
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <a href="{{ path('admin_echeance_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm bg-white">
+            <i class="fas fa-arrow-left me-2 text-primary"></i> Retour à la liste
+        </a>
+        <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning px-3 py-2 fw-bold shadow-sm">
+            Échéance ID: #{{ echeance.id }}
+        </span>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
+                <div class="card-header bg-warning py-4 text-center">
+                    <div class="bg-white bg-opacity-25 d-inline-block p-4 rounded-circle mb-3 shadow-sm">
+                        <i class="fas fa-edit fa-3x text-white"></i>
+                    </div>
+                    <h2 class="h4 fw-bold text-white mb-0">Modifier l'Échéance</h2>
+                    <p class="text-white text-opacity-75 small mb-0 mt-2">Mise à jour de "{{ echeance.titre }}".</p>
+                </div>
+                <div class="card-body p-4 p-md-5 bg-white shadow-sm">
+                    {{ include('backoffice/echeance/_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

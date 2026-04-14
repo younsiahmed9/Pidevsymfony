@@ -1,0 +1,120 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Détails de la Catégorie{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="mb-4">
+            <a href="{{ path('categorie_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                    <div class="p-5 text-center" style="background-color: {{ categorie.couleur|default('#4e73df') }}10;">
+                        <div class="bg-white shadow-sm d-inline-block p-4 rounded-circle mb-4">
+                            <i class="fas {{ categorie.icon|default('fa-folder') }} fa-3x" style="color: {{ categorie.couleur|default('#4e73df') }};"></i>
+                        </div>
+                        <h2 class="fw-bold text-dark">{{ categorie.nomCategorie }}</h2>
+                        <span class="badge rounded-pill px-3 py-2" style="background-color: {{ categorie.couleur|default('#4e73df') }}20; color: {{ categorie.couleur|default('#4e73df') }}; font-weight: 600;">
+                            ID: #{{ categorie.id }}
+                        </span>
+                    </div>
+                    <div class="card-body p-4 border-top">
+                        <h6 class="text-uppercase text-muted small fw-bold mb-3">Informations générales</h6>
+                        <div class="mb-4">
+                            <label class="text-muted small d-block mb-1">Description</label>
+                            <p class="text-dark">{{ categorie.description|default('Aucune description fournie.') }}</p>
+                        </div>
+                        <div class="mb-4">
+                            <label class="text-muted small d-block mb-1">Couleur</label>
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-block rounded-circle me-2 shadow-sm" style="width: 20px; height: 20px; background-color: {{ categorie.couleur|default('#4e73df') }};"></span>
+                                <span class="text-dark fw-bold">{{ categorie.couleur|default('#4e73df') }}</span>
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="text-muted small d-block mb-1">Créé le</label>
+                            <p class="text-dark fw-bold mb-0">{{ categorie.createdAt|date('d/m/Y à H:i') }}</p>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 p-4 pt-0">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a href="{{ path('categorie_edit', {id: categorie.id}) }}" class="btn btn-warning w-100 rounded-pill fw-bold text-white shadow-sm">
+                                    <i class="fas fa-edit me-2"></i> Modifier
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <form method="post" action="{{ path('categorie_delete', {'id': categorie.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer cette catégorie ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ categorie.id) }}">
+                                    <button class="btn btn-danger w-100 rounded-pill fw-bold shadow-sm">
+                                        <i class="fas fa-trash-alt me-2"></i> Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
+                        <h4 class="fw-bold text-dark mb-0">Documents associés ({{ categorie.documents|length }})</h4>
+                        <a href="{{ path('document_new') }}" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
+                            <i class="fas fa-plus me-1"></i> Ajouter
+                        </a>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if categorie.documents|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle border-0">
+                                    <thead class="bg-light text-muted small text-uppercase">
+                                        <tr>
+                                            <th class="border-0">Titre</th>
+                                            <th class="border-0">Type</th>
+                                            <th class="border-0">Date</th>
+                                            <th class="border-0">Statut</th>
+                                            <th class="border-0 text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="border-top-0">
+                                        {% for document in categorie.documents %}
+                                            <tr>
+                                                <td class="border-0 fw-bold text-dark">{{ document.titre }}</td>
+                                                <td class="border-0"><span class="badge bg-light text-dark text-capitalize px-3 py-2 rounded-pill">{{ document.typeDocument }}</span></td>
+                                                <td class="border-0 text-muted">{{ document.dateDocument|date('d/m/Y') }}</td>
+                                                <td class="border-0">
+                                                    {% set status_color = document.statut == 'valide' ? 'success' : (document.statut == 'expire' ? 'danger' : 'warning') %}
+                                                    <span class="badge bg-{{ status_color }} bg-opacity-10 text-{{ status_color }} px-3 py-2 rounded-pill text-capitalize">{{ document.statut }}</span>
+                                                </td>
+                                                <td class="border-0 text-end">
+                                                    <a href="{{ path('document_show', {id: document.id}) }}" class="btn btn-light btn-sm rounded-circle p-2 shadow-sm" title="Voir détails">
+                                                        <i class="fas fa-eye text-primary"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="bg-light p-4 rounded-4 d-inline-block mb-3">
+                                    <i class="fas fa-file-invoice fa-3x text-muted"></i>
+                                </div>
+                                <h5 class="fw-bold">Aucun document trouvé</h5>
+                                <p class="text-muted">Associez des documents à cette catégorie pour mieux les organiser.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

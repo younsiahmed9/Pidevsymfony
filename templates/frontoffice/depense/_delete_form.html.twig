@@ -1,0 +1,6 @@
+<form method="post" action="{{ path('depense_delete', {'id': depense.id_depense}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette dépense ? Cette action est irréversible.');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ depense.id_depense) }}">
+    <button class="btn btn-outline-danger btn-sm rounded-pill px-3">
+        <i class="fas fa-trash-alt me-1"></i> Supprimer la dépense
+    </button>
+</form>

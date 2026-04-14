@@ -1,0 +1,98 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Compte {{ compte.numeroCompte }} - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <!-- Header & Navigation -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div class="d-flex align-items-center">
+                <a href="{{ path('compte_index') }}" class="btn btn-white shadow-sm rounded-circle p-3 me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="h3 fw-bold mb-0">Détails du compte</h1>
+                    <p class="text-muted mb-0">Réf: {{ compte.numeroCompte }}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('compte_edit', {id: compte.id}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-edit me-2"></i> Modifier
+                </a>
+                <a href="{{ path('credit_index', {compte_id: compte.id}) }}" class="btn btn-outline-info rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-hand-holding-usd me-2"></i> Crédits liés
+                </a>
+                <a href="{{ path('credit_new', {compte_id: compte.id}) }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-plus-circle me-2"></i> Demander crédit
+                </a>
+                {{ include('frontoffice/compte/_delete_form.html.twig') }}
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Balance & Info -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-body p-0">
+                        <div class="bg-primary p-5 text-center text-white">
+                            <h6 class="text-white-50 small text-uppercase fw-bold mb-2">Solde Disponible</h6>
+                            <h2 class="display-5 fw-bold mb-0">{{ compte.solde|number_format(2, ',', ' ') }} TND</h2>
+                        </div>
+                        <div class="p-4 bg-white">
+                            <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                <span class="text-muted">Type de compte</span>
+                                <span class="fw-bold text-dark text-uppercase">{{ compte.typeCompte }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+                                <span class="text-muted">État</span>
+                                {% set badge_class = compte.etat == 'actif' ? 'success' : (compte.etat == 'bloque' ? 'danger' : 'secondary') %}
+                                <span class="badge rounded-pill bg-{{ badge_class }} px-3">{{ compte.etat|capitalize }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Ouvert le</span>
+                                <span class="fw-bold text-dark">{{ compte.dateCreation|date('d/m/Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-4">Conditions du compte</h6>
+                        <div class="mb-3">
+                            <label class="small text-muted d-block">Taux d'intérêt annuel</label>
+                            <span class="fw-bold text-dark">{{ compte.tauxInteret ? compte.tauxInteret ~ '%' : '0.00%' }}</span>
+                        </div>
+                        <div class="mb-0">
+                            <label class="small text-muted d-block">Plafond découvert autorisé</label>
+                            <span class="fw-bold text-dark">{{ compte.plafondDecouvert ? compte.plafondDecouvert ~ ' TND' : '0.00 TND' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Transactions Placeholder -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">Dernières opérations</h5>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill">
+                            <i class="fas fa-download me-1"></i> Relevé
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="text-center py-5">
+                            <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+                                <i class="fas fa-list-ul fa-2x text-muted opacity-50"></i>
+                            </div>
+                            <h6 class="fw-bold">Historique bientôt disponible</h6>
+                            <p class="text-muted small px-4">L'intégration de vos transactions bancaires est en cours de finalisation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

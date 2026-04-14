@@ -1,0 +1,256 @@
+{% set documentFormData = documentFormData|default({
+    id_document: '',
+    id_categorie: '',
+    id_dossier: '',
+    titre: '',
+    type_document: 'contrat',
+    statut: 'valide',
+    date_document: '',
+    date_echeance: '',
+    tags: '',
+    description: ''
+}) %}
+
+<form method="post" enctype="multipart/form-data" class="needs-validation document-form" novalidate data-validate-url="{{ path('document_validate') }}">
+    <input type="hidden" name="document_id" value="{{ documentFormData.id_document }}">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <label for="titre" class="form-label fw-bold text-dark mb-2">Titre du document</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-heading text-muted"></i></span>
+                <input type="text" id="titre" name="titre" class="form-control bg-light border-0 py-3 shadow-none" placeholder="Ex: Ma Facture EDF Janvier" value="{{ documentFormData.titre }}" required>
+            </div>
+            <div class="text-danger small mt-1" data-error-for="titre"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="type_document" class="form-label fw-bold text-dark mb-2">Type de document</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-file-alt text-muted"></i></span>
+                <select id="type_document" name="type_document" class="form-select bg-light border-0 py-3 shadow-none" required>
+                    {% for type in ['contrat', 'facture', 'releve', 'identite', 'assurance', 'fiscal', 'autre'] %}
+                        <option value="{{ type }}" {{ documentFormData.type_document == type ? 'selected' : '' }}>{{ type|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="text-danger small mt-1" data-error-for="type_document"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="id_categorie" class="form-label fw-bold text-dark mb-2">Catégorie</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-tag text-muted"></i></span>
+                <select id="id_categorie" name="id_categorie" class="form-select bg-light border-0 py-3 shadow-none" required>
+                    <option value="">-- Choisir une catégorie --</option>
+                    {% for categorie in categories|default([]) %}
+                        <option value="{{ categorie.id }}" {{ documentFormData.id_categorie == categorie.id ? 'selected' : '' }}>
+                            {{ categorie.nomCategorie }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <div class="text-danger small" data-error-for="id_categorie"></div>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_categorie_new') }}" class="small text-decoration-none fw-semibold ms-auto">
+                        <i class="fas fa-folder-plus me-1"></i>Créer une catégorie
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label for="id_dossier" class="form-label fw-bold text-dark mb-0">Dossier de rangement</label>
+                <a href="{{ path('dossier_document_new') }}" class="small text-decoration-none fw-semibold">
+                    <i class="fas fa-folder-plus me-1"></i>Créer un dossier
+                </a>
+            </div>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-folder text-muted"></i></span>
+                <select id="id_dossier" name="id_dossier" class="form-select bg-light border-0 py-3 shadow-none">
+                    <option value="">Aucun dossier (Vrac)</option>
+                    {% for dossier in dossiers %}
+                        <option value="{{ dossier.id }}" {{ documentFormData.id_dossier == dossier.id ? 'selected' : '' }}>
+                            {{ dossier.nomDossier }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="text-danger small mt-1" data-error-for="id_dossier"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="date_document" class="form-label fw-bold text-dark mb-2">Date du document</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="far fa-calendar text-muted"></i></span>
+                <input type="date" id="date_document" name="date_document" class="form-control bg-light border-0 py-3 shadow-none" value="{{ documentFormData.date_document }}">
+            </div>
+            <div class="text-danger small mt-1" data-error-for="date_document"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="date_echeance" class="form-label fw-bold text-dark mb-2">Date d'échéance / Rappel</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="far fa-calendar-times text-muted"></i></span>
+                <input type="date" id="date_echeance" name="date_echeance" class="form-control bg-light border-0 py-3 shadow-none" value="{{ documentFormData.date_echeance }}">
+            </div>
+            <div class="text-danger small mt-1" data-error-for="date_echeance"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="statut" class="form-label fw-bold text-dark mb-2">Statut actuel</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-info-circle text-muted"></i></span>
+                <select id="statut" name="statut" class="form-select bg-light border-0 py-3 shadow-none" required>
+                    {% for stat in ['valide', 'expire', 'a_renouveler', 'archive'] %}
+                        <option value="{{ stat }}" {{ documentFormData.statut == stat ? 'selected' : '' }}>{{ stat|capitalize|replace({'_': ' '}) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="text-danger small mt-1" data-error-for="statut"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label for="fichier" class="form-label fw-bold text-dark mb-2">Sélectionner le fichier</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-cloud-upload-alt text-muted"></i></span>
+                <input type="file" id="fichier" name="fichier" class="form-control bg-light border-0 py-3 shadow-none" {{ documentFormData.id_document ? '' : 'required' }}>
+            </div>
+            <div class="text-danger small mt-1" data-error-for="fichier"></div>
+        </div>
+
+        <div class="col-12">
+            <label for="tags" class="form-label fw-bold text-dark mb-2">Tags personnalisés</label>
+            <div class="input-group">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-hashtag text-muted"></i></span>
+                <input type="text" id="tags" name="tags" class="form-control bg-light border-0 py-3 shadow-none" placeholder="Ex: 2024, important, impots" value="{{ documentFormData.tags }}">
+            </div>
+            <div class="text-danger small mt-1" data-error-for="tags"></div>
+        </div>
+
+        <div class="col-12">
+            <label for="description" class="form-label fw-bold text-dark mb-2">Notes complémentaires</label>
+            <textarea id="description" name="description" class="form-control bg-light border-0 py-3 shadow-none" rows="3" placeholder="Description courte du contenu du document...">{{ documentFormData.description }}</textarea>
+            <div class="text-danger small mt-1" data-error-for="description"></div>
+        </div>
+    </div>
+
+    <div class="d-grid mt-5">
+        <button type="submit" class="btn btn-{{ documentFormData.id_document ? 'warning text-white' : 'primary' }} btn-lg rounded-pill fw-bold shadow-sm py-3 transition-hover">
+            <i class="fas fa-save me-2"></i> {{ documentFormData.id_document ? 'Mettre à jour le Document' : 'Importer le Document' }}
+        </button>
+    </div>
+</form>
+
+<script>
+    (function () {
+        var form = document.querySelector('.document-form');
+        if (!form) {
+            return;
+        }
+
+        var validateUrl = form.getAttribute('data-validate-url');
+        var pendingTimer = null;
+        var submitting = false;
+
+        var setFieldState = function (name, messages) {
+            var input = form.querySelector('[name="' + name + '"]');
+            var errorBox = form.querySelector('[data-error-for="' + name + '"]');
+            if (!input || !errorBox) {
+                return;
+            }
+
+            var hasError = messages && messages.length;
+            input.classList.toggle('is-invalid', hasError);
+            input.classList.toggle('is-valid', !hasError);
+            errorBox.innerHTML = hasError ? messages.map(function (message) {
+                return '<div>' + message + '</div>';
+            }).join('') : '';
+        };
+
+        var clearGeneralError = function () {
+            var generalBox = form.querySelector('[data-error-for="general"]');
+            if (generalBox) {
+                generalBox.innerHTML = '';
+            }
+        };
+
+        var clearAllStates = function () {
+            ['document_id', 'titre', 'type_document', 'id_categorie', 'id_dossier', 'date_document', 'date_echeance', 'statut', 'fichier', 'tags', 'description'].forEach(function (name) {
+                setFieldState(name, []);
+            });
+            clearGeneralError();
+        };
+
+        var runValidation = function () {
+            if (!validateUrl) {
+                return Promise.resolve({ valid: true });
+            }
+
+            var formData = new FormData(form);
+            var submitButton = form.querySelector('button[type="submit"]');
+
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            return fetch(validateUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            }).then(function (response) {
+                return response.json().then(function (payload) {
+                    return { ok: response.ok, payload: payload };
+                });
+            }).then(function (result) {
+                clearAllStates();
+                if (result.payload && result.payload.errors) {
+                    Object.keys(result.payload.errors).forEach(function (field) {
+                        setFieldState(field, result.payload.errors[field]);
+                    });
+                }
+                return {
+                    valid: !!(result.payload && result.payload.valid),
+                    payload: result.payload || {}
+                };
+            }).catch(function () {
+                // Silent fallback: server-side validation still applies on submit.
+                return { valid: true };
+            }).finally(function () {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            });
+        };
+
+        form.addEventListener('input', function () {
+            window.clearTimeout(pendingTimer);
+            pendingTimer = window.setTimeout(runValidation, 250);
+        });
+
+        form.addEventListener('blur', function (event) {
+            if (event.target && event.target.name) {
+                runValidation();
+            }
+        }, true);
+
+        form.addEventListener('submit', function (event) {
+            if (submitting) {
+                return;
+            }
+
+            event.preventDefault();
+            runValidation().then(function (result) {
+                if (result.valid) {
+                    submitting = true;
+                    form.submit();
+                }
+            });
+        });
+
+        runValidation();
+    })()
+</script>

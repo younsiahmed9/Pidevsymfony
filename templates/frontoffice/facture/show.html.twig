@@ -1,0 +1,135 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Facture {{ facture.numeroFacture }} - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <!-- Header & Navigation -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div class="d-flex align-items-center">
+                <a href="{{ path('facture_index') }}" class="btn btn-white shadow-sm rounded-circle p-3 me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="h3 fw-bold mb-0">Détails de la facture</h1>
+                    <p class="text-muted mb-0">Réf: {{ facture.numeroFacture }}</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button onclick="window.print()" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-print me-2"></i> Imprimer
+                </button>
+                <a href="{{ path('facture_edit', {id: facture.id}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-edit me-2"></i> Modifier
+                </a>
+                {{ include('frontoffice/facture/_delete_form.html.twig') }}
+            </div>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden invoice-printable">
+                    <div class="card-body p-0">
+                        <!-- Invoice Header -->
+                        <div class="bg-primary text-white p-5">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <img src="{{ asset('images/logo.png') }}" width="150" class="mb-4 filter-white" alt="FinTrack">
+                                    <h4 class="fw-bold mb-1">FinTrack Inc.</h4>
+                                    <p class="mb-0 opacity-75 small">Services Financiers Numériques<br>Tunis, Tunisie</p>
+                                </div>
+                                <div class="col-md-6 text-md-end mt-4 mt-md-0">
+                                    <h2 class="text-uppercase fw-bold mb-1">Facture</h2>
+                                    <p class="mb-0 fs-5">{{ facture.numeroFacture }}</p>
+                                    <div class="mt-3">
+                                        {% set badge_class = facture.statut == 'payee' ? 'success' : (facture.statut == 'non_payee' ? 'danger' : 'warning') %}
+                                        <span class="badge bg-{{ badge_class }} fs-6 px-4 py-2 text-uppercase">
+                                            {{ facture.statut|capitalize|replace({'_': ' '}) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Invoice Info -->
+                        <div class="p-5">
+                            <div class="row mb-5">
+                                <div class="col-sm-6">
+                                    <h6 class="text-muted small text-uppercase fw-bold mb-3">Facturé à</h6>
+                                    <h5 class="fw-bold text-dark mb-1">{{ app.user.fullName ?: app.user.email }}</h5>
+                                    <p class="text-muted small mb-0">{{ app.user.email }}</p>
+                                </div>
+                                <div class="col-sm-6 text-sm-end mt-4 mt-sm-0">
+                                    <div class="row">
+                                        <div class="col-6 text-muted small text-uppercase fw-bold">Date d'émission:</div>
+                                        <div class="col-6 fw-bold">{{ facture.dateFacture|date('d/m/Y') }}</div>
+                                        <div class="col-6 text-muted small text-uppercase fw-bold mt-2">Date d'échéance:</div>
+                                        <div class="col-6 fw-bold text-danger mt-2">{{ facture.dateEcheance ? facture.dateEcheance|date('d/m/Y') : 'Immédiat' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="table-responsive mb-5">
+                                <table class="table table-borderless align-middle">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4 py-3">Description du service / produit</th>
+                                            <th class="text-end pe-4 py-3">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="border-bottom">
+                                        <tr>
+                                            <td class="ps-4 py-4">
+                                                {% if facture.service %}
+                                                    <h6 class="fw-bold mb-1">Service: {{ facture.service }}</h6>
+                                                    <p class="text-muted small mb-0">Prestation de services financiers via FinTrack</p>
+                                                {% elseif facture.produit %}
+                                                    <h6 class="fw-bold mb-1">Produit: {{ facture.produit }}</h6>
+                                                    <p class="text-muted small mb-0">Vente d'actif / produit personnel</p>
+                                                {% else %}
+                                                    <h6 class="fw-bold mb-1">Transaction diverse</h6>
+                                                    <p class="text-muted small mb-0">Frais de gestion ou opération ponctuelle</p>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end pe-4 fs-5 fw-bold text-dark">
+                                                {{ facture.montant|number_format(2, ',', ' ') }} TND
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td class="text-end py-4 text-muted small text-uppercase fw-bold">Total à payer</td>
+                                            <td class="text-end pe-4 py-4 h3 fw-bold text-primary">
+                                                {{ facture.montant|number_format(2, ',', ' ') }} TND
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <!-- Footer Note -->
+                            <div class="bg-light p-4 rounded-4 text-center mt-5">
+                                <p class="mb-0 small text-muted">Merci pour votre confiance. Pour toute question, contactez notre support à support@fintrack.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .filter-white { filter: brightness(0) invert(1); }
+    @media print {
+        .btn, header, footer, nav { display: none !important; }
+        section.py-5 { display: block !important; padding: 0 !important; background: #fff !important; min-height: auto !important; }
+        .invoice-printable { box-shadow: none !important; margin: 0 !important; width: 100% !important; display: block !important; }
+        body { background: white !important; }
+        .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+        .card, .card-body { overflow: visible !important; }
+    }
+</style>
+{% endblock %}

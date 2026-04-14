@@ -1,0 +1,826 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Admin Dashboard - FinTrack{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .admin-page {
+        min-height: calc(100vh - 145px);
+        overflow: visible;
+        padding-bottom: 2rem;
+    }
+
+    .admin-layout {
+        align-items: stretch;
+        min-height: 100%;
+    }
+
+    .admin-sidebar {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
+        height: auto;
+        overflow: hidden;
+        background: linear-gradient(180deg, #071a34 0%, #0b2347 100%);
+    }
+
+    .admin-sidebar .card-body {
+        height: 100%;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .admin-menu-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .admin-menu-group-title {
+        color: #8fa9d6;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        margin: 0 0 0.6rem;
+    }
+
+    .admin-menu-divider {
+        border-color: rgba(255, 255, 255, 0.08);
+        margin: 1rem 0;
+    }
+
+    .admin-menu-btn {
+        text-align: left;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.65rem 0.9rem;
+        background: rgba(255, 255, 255, 0.04);
+        color: #d6e4ff;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .admin-menu-btn.active,
+    .admin-menu-btn:hover {
+        background: #1f4fa1;
+        border-color: #5f8fe4;
+        color: #fff;
+    }
+
+    .admin-site-link {
+        display: block;
+        width: 100%;
+        text-align: left;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 0.65rem 0.9rem;
+        background: rgba(255, 255, 255, 0.03);
+        color: #d6e4ff;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        margin-bottom: 0.6rem;
+    }
+
+    .admin-site-link:hover {
+        background: #173969;
+        color: #fff;
+        border-color: #5f8fe4;
+    }
+
+    .admin-content {
+        height: auto;
+        overflow: visible;
+        padding-right: 0.35rem;
+    }
+
+    .chart-card {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
+        height: 100%;
+    }
+
+    .chart-card .card-header {
+        background: #f7f9fc;
+        border-bottom: 1px solid #e8edf5;
+        font-weight: 700;
+    }
+
+    .chart-wrap {
+        position: relative;
+        min-height: 280px;
+    }
+
+    .actions-cell {
+        min-width: 220px;
+        white-space: nowrap;
+    }
+
+    .action-inline-form {
+        display: inline;
+    }
+
+    .users-board {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 14px 35px rgba(17, 24, 39, 0.08);
+        background: #ffffff;
+    }
+
+    .users-board-header {
+        background: linear-gradient(120deg, #123a7b 0%, #2258a8 100%);
+        color: #fff;
+        padding: 1rem 1.25rem;
+    }
+
+    .users-board-title {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+    }
+
+    .users-count-badge {
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: #fff;
+        font-weight: 600;
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+    }
+
+    .users-table {
+        margin-bottom: 0;
+    }
+
+    .users-table thead th {
+        background: #f7f9fc;
+        color: #2f3f5a;
+        font-size: 0.78rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-weight: 700;
+        border-bottom: 1px solid #e8edf5;
+        white-space: nowrap;
+        padding: 0.85rem 0.85rem;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .users-table tbody td {
+        border-bottom: 1px solid #eef2f8;
+        padding: 0.85rem 0.85rem;
+        vertical-align: middle;
+    }
+
+    .users-table tbody tr:hover {
+        background: #f9fbff;
+    }
+
+    .user-id-pill {
+        display: inline-block;
+        min-width: 36px;
+        text-align: center;
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #1e3a5f;
+        background: #e8f1ff;
+    }
+
+    .avatar-chip {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e3ebf8;
+        box-shadow: 0 2px 8px rgba(13, 34, 66, 0.08);
+    }
+
+    .avatar-fallback {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #eef3ff;
+        color: #264472;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #e3ebf8;
+    }
+
+    .name-cell {
+        line-height: 1.15;
+    }
+
+    .name-main {
+        font-weight: 600;
+        color: #1f2e49;
+    }
+
+    .name-sub {
+        color: #7083a0;
+        font-size: 0.78rem;
+    }
+
+    .role-chip,
+    .status-chip {
+        border-radius: 999px;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+
+    .role-admin {
+        background: #fff1bf;
+        color: #7b5a00;
+    }
+
+    .role-client {
+        background: #d7efff;
+        color: #0d4c73;
+    }
+
+    .status-active {
+        background: #d9f6e6;
+        color: #0f6a40;
+    }
+
+    .status-inactive {
+        background: #ffe0e0;
+        color: #8a1f1f;
+    }
+
+    .date-cell {
+        color: #5f7190;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+
+    .users-table-wrap {
+        max-height: 52vh;
+        overflow: auto;
+    }
+
+    .users-toolbar {
+        gap: 0.75rem;
+    }
+
+    .users-toolbar .form-control,
+    .users-toolbar .form-select {
+        min-height: 42px;
+    }
+
+    @media (max-width: 991.98px) {
+        .admin-page {
+            height: auto;
+            overflow: visible;
+        }
+
+        .admin-sidebar {
+            height: auto;
+        }
+
+        .admin-menu-nav {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .admin-menu-btn {
+            width: auto;
+            border-radius: 999px;
+            background: #f5f8ff;
+            color: #24416b;
+            border-color: #d9e2f2;
+        }
+
+        .admin-content {
+            height: auto;
+            overflow: visible;
+            padding-right: 0;
+        }
+
+        .users-table-wrap {
+            max-height: none;
+        }
+
+        .actions-cell {
+            min-width: 170px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4 mt-4 admin-page">
+    <h1 class="mb-3">Admin Dashboard</h1>
+
+    <div class="row g-4 admin-layout">
+        <div class="col-12">
+            <div class="tab-content admin-content">
+                <div class="tab-pane fade show active" id="users-management-pane" role="tabpanel" aria-labelledby="gestion-user-tab">
+                    <div class="alert alert-info">
+                        <strong>Users Management</strong> - All user statistics and management data are available below.
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-primary-subtle text-primary">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="kpi-value">{{ stats.totalUsers }}</div>
+                                <div class="kpi-label">Utilisateurs Totaux</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-success-subtle text-success">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="kpi-value">{{ stats.activeClients }}</div>
+                                <div class="kpi-label">Clients Actifs</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-warning-subtle text-warning">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="kpi-value">{{ stats.administrators }}</div>
+                                <div class="kpi-label">Administrateurs</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-info-subtle text-info">
+                                    <i class="fas fa-signal"></i>
+                                </div>
+                                <div class="kpi-value">{{ stats.activeUsers }}</div>
+                                <div class="kpi-label">Sessions Actives</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-info-subtle text-info">
+                                    <i class="fas fa-right-left"></i>
+                                </div>
+                                <div class="kpi-value">{{ transferStats.normalTransfers }}</div>
+                                <div class="kpi-label">Transferts Normaux</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-secondary-subtle text-secondary">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="kpi-value">{{ transferStats.programmedTransfers }}</div>
+                                <div class="kpi-label">Transferts Programmés</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-danger-subtle text-danger">
+                                    <i class="fas fa-percent"></i>
+                                </div>
+                                <div class="kpi-value">{{ transferStats.totalFees|number_format(2, ',', ' ') }}</div>
+                                <div class="kpi-label">Frais Collectés</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="kpi-card">
+                                <div class="kpi-icon bg-success-subtle text-success">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <div class="kpi-value">{{ transferStats.discountedTransfers }}</div>
+                                <div class="kpi-label">Transferts à 1%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-lg-7 mb-3 mb-lg-0">
+                            <div class="card chart-card">
+                                <div class="card-header">Statistics Overview (Bar)</div>
+                                <div class="card-body">
+                                    <div class="chart-wrap">
+                                        <canvas id="usersBarChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="card chart-card">
+                                <div class="card-header">Users Distribution (Circular)</div>
+                                <div class="card-body">
+                                    <div class="chart-wrap">
+                                        <canvas id="usersDoughnutChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="card mb-4 users-board">
+                        <div class="users-board-header d-flex justify-content-between align-items-center">
+                            <h5 class="users-board-title">All Users</h5>
+                            <span class="users-count-badge">{{ stats.totalUsers }} users</span>
+                        </div>
+                        <div class="card-body border-bottom">
+                            <form id="usersFilterForm" class="row users-toolbar align-items-end">
+                                <div class="col-lg-5 col-md-12">
+                                    <label class="form-label mb-1" for="usersSearchInput">Dynamic Search</label>
+                                    <input id="usersSearchInput" type="search" class="form-control" placeholder="Search name, email, role, status...">
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <label class="form-label mb-1" for="usersSortSelect">Sort By</label>
+                                    <select id="usersSortSelect" class="form-select">
+                                        <option value="id">ID</option>
+                                        <option value="name">Full Name</option>
+                                        <option value="email">Email</option>
+                                        <option value="role">Role</option>
+                                        <option value="status">Status</option>
+                                        <option value="created">Created</option>
+                                        <option value="updated">Updated</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-2 col-md-6">
+                                    <label class="form-label mb-1" for="usersSortDirection">Order</label>
+                                    <select id="usersSortDirection" class="form-select">
+                                        <option value="asc">ASC</option>
+                                        <option value="desc" selected>DESC</option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-2 col-md-12 d-grid">
+                                    <button id="usersResetFilters" type="button" class="btn btn-outline-secondary">Reset</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive users-table-wrap">
+                                <table class="table users-table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Photo</th>
+                                            <th>Full Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Created</th>
+                                            <th>Updated</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        {% for user in users %}
+                                            {% set userFullName = (user.fullName is defined and user.fullName) ? user.fullName : ((user.prenom|default('') ~ ' ' ~ user.nom|default(''))|trim) %}
+                                            {% set userDisplayName = userFullName ?: user.email|default('') %}
+                                            {% set userProfilePhoto = user.profilePhoto is defined ? user.profilePhoto : (user.profile_photo is defined ? user.profile_photo : null) %}
+                                            {% set userActive = user.isActive is defined ? user.isActive : (user.is_active is defined ? user.is_active : 1) %}
+                                            {% set userCreated = user.createdAt is defined ? user.createdAt : (user.created_at is defined ? user.created_at : null) %}
+                                            {% set userUpdated = user.updatedAt is defined ? user.updatedAt : (user.updated_at is defined ? user.updated_at : null) %}
+                                            <tr
+                                                data-id="{{ user.id }}"
+                                                data-name="{{ userDisplayName|lower }}"
+                                                data-email="{{ user.email|lower }}"
+                                                data-role="{{ user.role|lower }}"
+                                                data-status="{{ userActive ? 'active' : 'inactive' }}"
+                                                data-created="{{ userCreated ? userCreated|date('U') : 0 }}"
+                                                data-updated="{{ userUpdated ? userUpdated|date('U') : 0 }}"
+                                                data-search="{{ (userDisplayName ~ ' ' ~ user.email ~ ' ' ~ user.role ~ ' ' ~ (userActive ? 'active' : 'inactive'))|lower }}"
+                                            >
+                                                <td><span class="user-id-pill">{{ user.id }}</span></td>
+                                                <td>
+                                                    {% if userProfilePhoto %}
+                                                        <img
+                                                            src="{{ userProfilePhoto starts with 'http://' or userProfilePhoto starts with 'https://' or userProfilePhoto starts with '/' ? userProfilePhoto : asset(userProfilePhoto) }}"
+                                                            alt="{{ userDisplayName }}"
+                                                            class="avatar-chip"
+                                                        >
+                                                    {% else %}
+                                                        <div class="avatar-fallback">
+                                                            {{ (userDisplayName ?: 'U')|slice(0,1)|upper }}
+                                                        </div>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="name-cell">
+                                                    <div class="name-main">{{ userDisplayName ?: 'No full name' }}</div>
+                                                    <div class="name-sub">ID: {{ user.id }}</div>
+                                                </td>
+                                                <td class="name-sub">{{ user.email }}</td>
+                                                <td>
+                                                    <span class="role-chip {{ user.role|upper == 'ADMIN' ? 'role-admin' : 'role-client' }}">
+                                                        {{ user.role }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if userActive %}
+                                                        <span class="status-chip status-active">Active</span>
+                                                    {% else %}
+                                                        <span class="status-chip status-inactive">Inactive</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="date-cell">{{ userCreated ? userCreated|date('Y-m-d H:i') : '-' }}</td>
+                                                <td class="date-cell">{{ userUpdated ? userUpdated|date('Y-m-d H:i') : '-' }}</td>
+                                                <td class="actions-cell">
+                                                    <a class="btn btn-sm btn-outline-info me-1" href="{{ path('admin_wallet_user_wallets', {id: user.id}) }}">Wallets</a>
+                                                    <button
+                                                        class="btn btn-sm btn-outline-primary"
+                                                        type="button"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#editUserModal-{{ user.id }}"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    {% if app.user and app.user.id == user.id %}
+                                                        <button class="btn btn-sm btn-outline-secondary ms-1" type="button" disabled>Delete</button>
+                                                    {% else %}
+                                                        <form class="action-inline-form" method="post" action="{{ path('legacy_admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Delete this user?');">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token('admin_delete_user_' ~ user.id) }}">
+                                                            <button class="btn btn-sm btn-outline-danger ms-1" type="submit">Delete</button>
+                                                        </form>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% else %}
+                                            <tr id="usersServerEmptyRow">
+                                                <td colspan="9" class="text-center py-4">No users found.</td>
+                                            </tr>
+                                        {% endfor %}
+                                        <tr id="usersNoResultsRow" style="display: none;">
+                                            <td colspan="9" class="text-center py-4">No users match your filters.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% for user in users %}
+                        <div class="modal fade" id="editUserModal-{{ user.id }}" tabindex="-1" aria-labelledby="editUserModalLabel-{{ user.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editUserModalLabel-{{ user.id }}">Edit User #{{ user.id }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="post" action="{{ path('legacy_admin_user_update', {id: user.id}) }}">
+                                        <div class="modal-body">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('admin_edit_user_' ~ user.id) }}">
+
+                                            <div class="mb-3">
+                                                <label class="form-label" for="full_name_{{ user.id }}">Full Name</label>
+                                                {% set userFullName = (user.fullName is defined and user.fullName) ? user.fullName : ((user.prenom|default('') ~ ' ' ~ user.nom|default(''))|trim) %}
+                                                <input class="form-control" id="full_name_{{ user.id }}" name="full_name" type="text" value="{{ userFullName ?: '' }}">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label" for="email_{{ user.id }}">Email</label>
+                                                <input class="form-control" id="email_{{ user.id }}" name="email" type="email" value="{{ user.email }}" required>
+                                            </div>
+
+                                            <div class="form-check form-switch">
+                                                {% set userActive = user.isActive is defined ? user.isActive : (user.is_active is defined ? user.is_active : 1) %}
+                                                <input class="form-check-input" type="checkbox" role="switch" id="is_active_{{ user.id }}" name="is_active" value="1" {{ userActive ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="is_active_{{ user.id }}">Active account</label>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+                <div class="tab-pane fade" id="gestion-compte-pane" role="tabpanel" aria-labelledby="gestion-compte-tab">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">gestion_compte</h5>
+                            <span class="badge bg-primary">Profile</span>
+                        </div>
+                        <div class="card-body">
+                            {% set adminCreated = app.user.createdAt is defined ? app.user.createdAt : (app.user.created_at is defined ? app.user.created_at : null) %}
+                            {% set adminActive = app.user.isActive is defined ? app.user.isActive : (app.user.is_active is defined ? app.user.is_active : true) %}
+                            <p>
+                                <strong>Administrator:</strong> {{ (app.user.fullName is defined and app.user.fullName) ? app.user.fullName : ((app.user.prenom|default('') ~ ' ' ~ app.user.nom|default(''))|trim ?: app.user.email) }}<br>
+                                <strong>Email:</strong> {{ app.user.email }}<br>
+                                <strong>Member Since:</strong> {{ adminCreated ? adminCreated|date('M d, Y') : '-' }}<br>
+                                <strong>Account Status:</strong>
+                                {% if adminActive %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="gestion-depense-pane" role="tabpanel" aria-labelledby="gestion-depense-tab">
+                    <div class="card">
+                        <div class="card-header"><h5 class="card-title mb-0">gestion_depense</h5></div>
+                        <div class="card-body">
+                            <p class="mb-0">Section de gestion des depenses.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="gestion-document-pane" role="tabpanel" aria-labelledby="gestion-document-tab">
+                    <div class="card">
+                        <div class="card-header"><h5 class="card-title mb-0">gestion_document</h5></div>
+                        <div class="card-body">
+                            <p class="mb-0">Section de gestion des documents.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="gestion-service-produit-pane" role="tabpanel" aria-labelledby="gestion-service-produit-tab">
+                    <div class="card">
+                        <div class="card-header"><h5 class="card-title mb-0">gestion_service_et_produit</h5></div>
+                        <div class="card-body">
+                            <p class="mb-0">Section de gestion des services et produits.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="gestion-portefeuille-pane" role="tabpanel" aria-labelledby="gestion-portefeuille-tab">
+                    <div class="card">
+                        <div class="card-header"><h5 class="card-title mb-0">gestion-portefeuille</h5></div>
+                        <div class="card-body">
+                            <p class="mb-3">Section de gestion du portefeuille.</p>
+                            <a href="{{ path('admin_wallet_users') }}" class="btn btn-primary">Ouvrir le module admin portefeuilles</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function () {
+            const stats = {
+                totalUsers: {{ stats.totalUsers }},
+                activeUsers: {{ stats.activeUsers }},
+                activeClients: {{ stats.activeClients }},
+                administrators: {{ stats.administrators }}
+            };
+
+            const inactiveUsers = Math.max(stats.totalUsers - stats.activeUsers, 0);
+            const clients = Math.max(stats.totalUsers - stats.administrators, 0);
+
+            const barCanvas = document.getElementById('usersBarChart');
+            if (barCanvas) {
+                new Chart(barCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Active Users', 'Inactive Users', 'Active Clients', 'Administrators'],
+                        datasets: [{
+                            label: 'Users',
+                            data: [stats.activeUsers, inactiveUsers, stats.activeClients, stats.administrators],
+                            backgroundColor: ['#2f6fed', '#f36a6a', '#18a979', '#f0ad4e'],
+                            borderRadius: 8,
+                            maxBarThickness: 54
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            const doughnutCanvas = document.getElementById('usersDoughnutChart');
+            if (doughnutCanvas) {
+                new Chart(doughnutCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Clients', 'Administrators'],
+                        datasets: [{
+                            data: [clients, stats.administrators],
+                            backgroundColor: ['#2383e2', '#f0ad4e'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '62%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            const usersTableBody = document.getElementById('usersTableBody');
+            const usersSearchInput = document.getElementById('usersSearchInput');
+            const usersSortSelect = document.getElementById('usersSortSelect');
+            const usersSortDirection = document.getElementById('usersSortDirection');
+            const usersResetFilters = document.getElementById('usersResetFilters');
+            const usersNoResultsRow = document.getElementById('usersNoResultsRow');
+            const usersServerEmptyRow = document.getElementById('usersServerEmptyRow');
+
+            if (usersTableBody && usersSearchInput && usersSortSelect && usersSortDirection && usersResetFilters) {
+                const getRows = () => Array.from(usersTableBody.querySelectorAll('tr'))
+                    .filter((row) => row.id !== 'usersNoResultsRow' && row.id !== 'usersServerEmptyRow');
+
+                const compareValues = (a, b, isNumeric, direction) => {
+                    const dir = direction === 'asc' ? 1 : -1;
+                    if (isNumeric) {
+                        return (Number(a) - Number(b)) * dir;
+                    }
+                    return String(a).localeCompare(String(b)) * dir;
+                };
+
+                const applyUsersFilters = () => {
+                    const rows = getRows();
+                    const query = usersSearchInput.value.trim().toLowerCase();
+                    const sortBy = usersSortSelect.value;
+                    const direction = usersSortDirection.value;
+
+                    const filtered = rows.filter((row) => {
+                        const haystack = row.dataset.search || '';
+                        const match = query === '' || haystack.includes(query);
+                        row.style.display = match ? '' : 'none';
+                        return match;
+                    });
+
+                    const keyMap = {
+                        id: { key: 'id', numeric: true },
+                        name: { key: 'name', numeric: false },
+                        email: { key: 'email', numeric: false },
+                        role: { key: 'role', numeric: false },
+                        status: { key: 'status', numeric: false },
+                        created: { key: 'created', numeric: true },
+                        updated: { key: 'updated', numeric: true }
+                    };
+
+                    const sortConfig = keyMap[sortBy] || keyMap.id;
+                    filtered.sort((a, b) => compareValues(a.dataset[sortConfig.key], b.dataset[sortConfig.key], sortConfig.numeric, direction));
+                    filtered.forEach((row) => usersTableBody.appendChild(row));
+
+                    if (usersNoResultsRow) {
+                        usersNoResultsRow.style.display = filtered.length === 0 && rows.length > 0 ? '' : 'none';
+                    }
+                    if (usersServerEmptyRow) {
+                        usersServerEmptyRow.style.display = rows.length === 0 ? '' : 'none';
+                    }
+                };
+
+                usersSearchInput.addEventListener('input', applyUsersFilters);
+                usersSortSelect.addEventListener('change', applyUsersFilters);
+                usersSortDirection.addEventListener('change', applyUsersFilters);
+                usersResetFilters.addEventListener('click', () => {
+                    usersSearchInput.value = '';
+                    usersSortSelect.value = 'id';
+                    usersSortDirection.value = 'desc';
+                    applyUsersFilters();
+                });
+
+                applyUsersFilters();
+            }
+        })();
+    </script>
+{% endblock %}

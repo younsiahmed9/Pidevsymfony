@@ -1,0 +1,27 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dossier: {{ dossier.nomDossier }} - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="d-flex gap-2 mb-4">
+            <a href="{{ path('dossier_document_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+            <a href="{{ path('dossier_document_edit', {id: dossier.id}) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Modifier</a>
+            {% include 'frontoffice/dossier_document/_delete_form.html.twig' with {action: path('dossier_document_delete', {id: dossier.id}), dossier: dossier} %}
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold mb-3">{{ dossier.nomDossier }}</h2>
+                <p class="text-muted mb-4">{{ dossier.description ?: 'Aucune description' }}</p>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="text-muted small">Créé le</label><div class="fw-semibold">{{ dossier.createdAt ? dossier.createdAt|date('d/m/Y H:i') : '-' }}</div></div>
+                    <div class="col-md-6"><label class="text-muted small">Mis à jour</label><div class="fw-semibold">{{ dossier.updatedAt ? dossier.updatedAt|date('d/m/Y H:i') : '-' }}</div></div>
+                    <div class="col-12"><label class="text-muted small">Documents associés</label><div class="fw-semibold">{{ dossier.documents|length }}</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

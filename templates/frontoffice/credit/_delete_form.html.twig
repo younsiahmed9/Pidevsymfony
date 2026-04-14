@@ -1,0 +1,6 @@
+<form method="post" action="{{ path('credit_delete', {'id': credit.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette demande de crédit ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ credit.id) }}">
+    <button class="btn btn-outline-danger btn-sm rounded-pill px-3">
+        <i class="fas fa-times me-1"></i> Annuler la demande
+    </button>
+</form>

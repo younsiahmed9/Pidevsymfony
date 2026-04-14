@@ -1,0 +1,160 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Ouverture de Compte - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb bg-transparent p-0 small text-uppercase fw-bold">
+                        <li class="breadcrumb-item"><a href="{{ path('compte_index') }}" class="text-decoration-none text-muted">Mes Comptes</a></li>
+                        <li class="breadcrumb-item active text-primary" aria-current="page">Nouveau Compte</li>
+                    </ol>
+                </nav>
+
+                <!-- Card -->
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary text-white py-4 px-5">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3 me-4">
+                                <i class="fas fa-university fa-2x"></i>
+                            </div>
+                            <div>
+                                <h2 class="h3 mb-1 fw-bold">Ouvrir un compte</h2>
+                                <p class="mb-0 text-white-50">Saisissez les informations pour votre nouveau compte bancaire.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-5 bg-white">
+                        {{ include('frontoffice/compte/_form.html.twig') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block javascripts %}
+    <script>
+        (function () {
+            var form = document.querySelector('.account-create-form');
+            if (!form) {
+                return;
+            }
+
+            var validateUrl = form.getAttribute('data-validate-url');
+            var pendingTimer = null;
+
+            var setFieldState = function (name, messages) {
+                var input = form.querySelector('[name="' + name + '"]');
+                var errorBox = form.querySelector('[data-error-for="' + name + '"]');
+                if (!input || !errorBox) {
+                    return;
+                }
+
+                var hasError = messages && messages.length;
+                input.classList.toggle('is-invalid', hasError);
+                input.classList.toggle('is-valid', !hasError);
+                errorBox.innerHTML = hasError ? messages.map(function (message) {
+                    return '<div>' + message + '</div>';
+                }).join('') : '';
+            };
+
+            var clearAllStates = function () {
+                ['numero_compte', 'type_compte', 'solde', 'taux_interet', 'plafond_decouvert'].forEach(function (name) {
+                    setFieldState(name, []);
+                });
+                var generalBox = form.querySelector('[data-error-for="general"]');
+                if (generalBox) {
+                    generalBox.innerHTML = '';
+                }
+            };
+
+            var isFormCompletelyEmpty = function () {
+                var numero = (form.querySelector('[name="numero_compte"]') || {}).value || '';
+                var typeCompte = (form.querySelector('[name="type_compte"]') || {}).value || '';
+                var solde = (form.querySelector('[name="solde"]') || {}).value || '';
+                var tauxInteret = (form.querySelector('[name="taux_interet"]') || {}).value || '';
+                var plafond = (form.querySelector('[name="plafond_decouvert"]') || {}).value || '';
+
+                return [numero, typeCompte, solde, tauxInteret, plafond].every(function (value) {
+                    return String(value).trim() === '';
+                });
+            };
+
+            var runValidation = function () {
+                if (!validateUrl) {
+                    return;
+                }
+
+                clearAllStates();
+
+                if (isFormCompletelyEmpty()) {
+                    var generalBox = form.querySelector('[data-error-for="general"]');
+                    if (generalBox) {
+                        generalBox.innerHTML = '<div>Tous les champs sont vides. Veuillez remplir au moins les informations obligatoires.</div>';
+                    }
+                    return;
+                }
+
+                var formData = new FormData(form);
+                var submitButton = form.querySelector('button[type="submit"]');
+
+                if (submitButton) {
+                    submitButton.disabled = true;
+                }
+
+                fetch(validateUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                }).then(function (response) {
+                    return response.json().then(function (payload) {
+                        return { ok: response.ok, payload: payload };
+                    });
+                }).then(function (result) {
+                    if (result.payload && result.payload.errors) {
+                        Object.keys(result.payload.errors).forEach(function (field) {
+                            setFieldState(field, result.payload.errors[field]);
+                        });
+                    }
+                }).catch(function () {
+                    // Silent fallback: server-side validation still applies on submit.
+                }).finally(function () {
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                    }
+                });
+            };
+
+            form.addEventListener('input', function () {
+                window.clearTimeout(pendingTimer);
+                pendingTimer = window.setTimeout(runValidation, 250);
+            });
+
+            form.addEventListener('blur', function (event) {
+                if (event.target && event.target.name) {
+                    runValidation();
+                }
+            }, true);
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                runValidation();
+                window.setTimeout(function () {
+                    if (!form.querySelector('.is-invalid') && !isFormCompletelyEmpty()) {
+                        form.submit();
+                    }
+                }, 150);
+            });
+
+            runValidation();
+        })();
+    </script>
+{% endblock %}
+{% endblock %}

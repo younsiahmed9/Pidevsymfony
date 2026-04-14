@@ -1,0 +1,60 @@
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.user_id, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.user_id, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.user_id) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.nomService, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.nomService, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Abonnement Internet, Nettoyage...'}}) }}
+            {{ form_errors(form.nomService) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.tarif, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.tarif, {'attr': {'class': 'form-control', 'placeholder': '0.00'}}) }}
+            {{ form_errors(form.tarif) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.typeService, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.typeService, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Télécom, Maintenance...'}}) }}
+            {{ form_errors(form.typeService) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.frequence, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.frequence, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.frequence) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.statut, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.statut) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.dateDebut, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dateDebut) }}
+        </div>
+
+        <div class="col-md-6 mb-3">
+            {{ form_label(form.dateFin, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
+            {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dateFin) }}
+        </div>
+    </div>
+
+    <div class="mt-4 pt-3 border-top">
+        <button type="submit" class="btn btn-primary px-4 shadow-sm">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer') }}
+        </button>
+        <a href="{{ path('admin_service_index') }}" class="btn btn-secondary px-4 shadow-sm">
+            <i class="fas fa-times me-2"></i>Annuler
+        </a>
+    </div>
+{{ form_end(form) }}

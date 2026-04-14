@@ -1,0 +1,157 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Gestion des Services - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    {% set totalTarif = 0 %}
+    {% for s in services %}
+        {% set totalTarif = totalTarif + (s.tarif|default(0)) %}
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-concierge-bell me-2 text-primary"></i>Gestion des Services</h1>
+        <a href="{{ path('admin_service_new') }}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50 me-1"></i> Nouveau Service
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Services</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ services|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Services Actifs</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ services|filter(s => s.statut == 'actif')|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Chiffre d'Affaires Est.</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalTarif|number_format(2, ',', ' ') }} TND</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">📋 Liste des Services</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" width="100%" cellspacing="0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom du Service</th>
+                            <th>Utilisateur</th>
+                            <th>Tarif</th>
+                            <th>Type</th>
+                            <th>Fréquence</th>
+                            <th>Statut</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in services %}
+                            <tr>
+                                <td>#{{ service.id }}</td>
+                                <td><span class="fw-bold text-dark">{{ service.nomService }}</span></td>
+                                <td>
+                                    <div class="small">
+                                        <i class="fas fa-user me-1 text-muted"></i> {{ service.user_prenom }} {{ service.user_nom }}<br>
+                                        <i class="fas fa-envelope me-1 text-muted"></i> {{ service.user_email }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-soft-primary text-primary border border-primary px-3">
+                                        {{ service.tarif|number_format(2, ',', ' ') }} TND
+                                    </span>
+                                </td>
+                                <td><span class="text-muted small">{{ service.typeService }}</span></td>
+                                <td><span class="badge bg-light text-dark">{{ service.frequence|capitalize }}</span></td>
+                                <td>
+                                    {% set badge_class = service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') %}
+                                    <span class="badge rounded-pill bg-{{ badge_class }}">
+                                        {{ service.statut|capitalize }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group shadow-sm" role="group">
+                                        <a href="{{ path('admin_service_show', {id: service.id}) }}" class="btn btn-sm btn-outline-primary" title="Voir">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ path('admin_service_edit', {id: service.id}) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('admin_service_delete', {id: service.id}) }}" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce service ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ service.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <div class="text-muted mb-3">
+                                        <i class="fas fa-concierge-bell fa-3x mb-3 text-light"></i><br>
+                                        Aucun service trouvé dans la base de données.
+                                    </div>
+                                    <a href="{{ path('admin_service_new') }}" class="btn btn-primary btn-sm rounded-pill px-4">
+                                        Créer le premier service
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-primary { background-color: rgba(78, 115, 223, 0.1); }
+    .border-left-primary { border-left: .25rem solid #4e73df !important; }
+    .border-left-success { border-left: .25rem solid #1cc88a !important; }
+    .border-left-info { border-left: .25rem solid #36b9cc !important; }
+</style>
+{% endblock %}

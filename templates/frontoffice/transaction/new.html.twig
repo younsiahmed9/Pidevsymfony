@@ -1,0 +1,288 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Nouvelle Transaction - FinTrack{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .transaction-form-ui .form-select,
+        .transaction-form-ui .form-control {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+
+        .transaction-form-ui .form-select:focus,
+        .transaction-form-ui .form-control:focus {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+
+        .transaction-form-ui .form-select option {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <!-- Bouton retour -->
+                <a href="{{ path('front_transaction_index') }}" class="text-muted text-decoration-none d-inline-block mb-3">
+                    <i class="fas fa-arrow-left me-1"></i> Retour aux transactions
+                </a>
+
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h3 class="h4 fw-bold mb-0">Effectuer un Transfert</h3>
+                        <p class="text-muted small">Transfert entre vos comptes ou vers un tiers.</p>
+                    </div>
+                    
+                    <div class="card-body p-4 pt-2">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation transaction-form-ui', 'novalidate': 'novalidate'}}) }}
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.type, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.type) }}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.carte_source, 'Carte Source', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.carte_source, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.carte_source) }}</div>
+                                </div>
+                                <div class="col-md-6 mb-4 form-group">
+                                    <p class="text-muted small mb-2">Vers une carte</p>
+                                    {{ form_label(form.carte_dest, 'Interne (Vos cartes)', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.carte_dest, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.carte_dest) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.carte_dest_externe, 'Externe (Autres utilisateurs)', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.carte_dest_externe, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.carte_dest_externe) }}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.montant, 'Montant', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.montant, {'attr': {'class': 'form-control shadow-none', 'placeholder': '0.00'}}) }}
+                                    </div>
+                                    <div class="text-danger small mt-1">{{ form_errors(form.montant) }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4 form-group">
+                                    {{ form_label(form.devise, 'Devise', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                    {{ form_widget(form.devise, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                    <div class="text-danger small mt-1">{{ form_errors(form.devise) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.description, 'Description / Motif', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control shadow-none', 'rows': '2', 'placeholder': 'Remboursement resto...'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.description) }}</div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="button" class="btn btn-primary btn-lg" id="verifyBeforeSubmit">
+                                    <i class="fas fa-check me-2"></i>Vérifier & Valider
+                                </button>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Verification Modal -->
+<div class="modal fade" id="verificationModal" tabindex="-1" aria-modal="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="fas fa-shield-alt me-2"></i>Vérification des Services
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="verificationContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary mb-2" role="status">
+                            <span class="visually-hidden">Vérification...</span>
+                        </div>
+                        <p>Vérification des services en cours...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="verifyCloseBtn">Fermer</button>
+                <button type="button" class="btn btn-primary" id="proceedSubmitBtn" style="display:none;">
+                    <i class="fas fa-arrow-right me-1"></i>Procéder au Transfert
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded fired - initializing verification');
+    
+    // Get elements with null checks
+    const verifyBtn = document.getElementById('verifyBeforeSubmit');
+    const form = document.querySelector('form.transaction-form-ui');
+    const modalEl = document.getElementById('verificationModal');
+    const proceedBtn = document.getElementById('proceedSubmitBtn');
+    const verificationContent = document.getElementById('verificationContent');
+    
+    console.log('Element status:', {
+        verifyBtn: !!verifyBtn,
+        form: !!form,
+        modalEl: !!modalEl,
+        proceedBtn: !!proceedBtn,
+        verificationContent: !!verificationContent
+    });
+    
+    // Early exit if critical elements missing
+    if (!verifyBtn || !form || !modalEl || !proceedBtn) {
+        console.error('Missing required elements in the page');
+        return;
+    }
+    
+    // Initialize Bootstrap modal
+    const verificationModal = new bootstrap.Modal(modalEl);
+    console.log('Bootstrap Modal initialized');
+    
+    // Verify button click handler
+    verifyBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        console.log('Verify button clicked');
+        
+        verificationModal.show();
+        console.log('Modal displayed');
+        
+        verificationContent.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary mb-2" role="status">
+                    <span class="visually-hidden">Vérification...</span>
+                </div>
+                <p>Vérification des services en cours...</p>
+            </div>
+        `;
+        
+        proceedBtn.style.display = 'none';
+        
+        try {
+            console.log('Fetching verification data...');
+            const response = await fetch('{{ path("front_transaction_verify_apis") }}');
+            console.log('Response status:', response.status);
+            
+            const data = await response.json();
+            console.log('Verification data received:', data);
+            
+            if (data.error) {
+                verificationContent.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>Erreur d'authentification
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div class="mb-3">
+                    <small class="text-muted">Vérification effectuée à ${data.timestamp}</small>
+                </div>
+            `;
+            
+            html += renderCheckItem(
+                'Géolocalisation',
+                'fa-globe',
+                data.geolocation
+            );
+            
+            html += renderCheckItem(
+                'Conversion de Devises',
+                'fa-exchange-alt',
+                data.currency
+            );
+            
+            html += renderCheckItem(
+                'Confirmations Email',
+                'fa-envelope',
+                data.email
+            );
+            
+            verificationContent.innerHTML = html;
+            proceedBtn.style.display = 'inline-block';
+            console.log('Modal content updated with verification results');
+            
+        } catch (error) {
+            console.error('Verification error:', error);
+            verificationContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>Erreur lors de la vérification: ${error.message}
+                </div>
+            `;
+        }
+    });
+    
+    // Proceed button click handler
+    proceedBtn.addEventListener('click', function() {
+        console.log('Proceed button clicked - submitting form');
+        verificationModal.hide();
+        form.submit();
+    });
+    
+    console.log('Verification script initialization complete');
+});
+
+function renderCheckItem(name, icon, data) {
+    const statusClass = data.status === 'success' ? 'text-success' : 
+                       data.status === 'warning' ? 'text-warning' : 'text-danger';
+    const icon2 = data.status === 'success' ? 'fa-check-circle' : 
+                  data.status === 'warning' ? 'fa-exclamation-circle' : 'fa-times-circle';
+    
+    return `
+        <div class="card mb-3 border-0 bg-light">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-start">
+                    <div class="me-3">
+                        <i class="fas ${icon2} ${statusClass} fs-4"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">
+                            <i class="fas ${icon} me-2"></i>${name}
+                        </h6>
+                        <p class="mb-1">
+                            <strong>${data.message}</strong>
+                        </p>
+                        <small class="text-muted">${data.details}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+</script>
+
+<style>
+.modal-content {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+</style>
+
+{% endblock %}

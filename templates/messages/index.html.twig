@@ -1,0 +1,327 @@
+{% extends adminMode|default(false) ? 'backoffice/base.html.twig' : 'frontoffice/base.html.twig' %}
+
+{% block title %}Messagerie - FinTrack{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .messenger-shell {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.12);
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            background: #ffffff;
+        }
+
+
+        .messenger-sidebar {
+            background: linear-gradient(180deg, #f8fbff 0%, #f3f7fd 100%);
+            border-right: 1px solid rgba(148, 163, 184, 0.2);
+            min-height: 64vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messenger-contacts-list {
+            overflow-y: auto;
+            padding-right: 0.15rem;
+            max-height: calc(64vh - 120px);
+        }
+
+        .messenger-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .messenger-brand img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+        }
+
+        .messenger-header-logo {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            opacity: 0.9;
+        }
+
+        .messenger-contact {
+            border-radius: 14px !important;
+            padding: 0.7rem 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .messenger-contact:hover {
+            transform: translateX(2px);
+            background: rgba(59, 130, 246, 0.09);
+        }
+
+        .messenger-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(59, 130, 246, 0.24);
+            flex-shrink: 0;
+        }
+
+        .messenger-avatar-fallback {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1d4ed8;
+            background: rgba(59, 130, 246, 0.18);
+            border: 2px solid rgba(59, 130, 246, 0.24);
+            flex-shrink: 0;
+        }
+
+        .messenger-thread {
+            height: min(52vh, 520px);
+            overflow-y: auto;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(59, 130, 246, 0.07) 0 24%, transparent 25%),
+                radial-gradient(circle at 88% 80%, rgba(16, 185, 129, 0.07) 0 20%, transparent 21%),
+                #f8fafc;
+        }
+
+        .messenger-main {
+            background: #f6f8fb;
+        }
+
+        .messenger-compose {
+            background: #ffffff;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .messenger-input {
+            height: 46px !important;
+            min-height: 46px !important;
+            max-height: 180px;
+            resize: none;
+            overflow-y: hidden;
+        }
+
+        .messenger-ai-btn {
+            border: 0;
+            background: #eef2ff;
+            color: #3730a3;
+            min-width: 56px;
+        }
+
+        .messenger-ai-btn:hover {
+            background: #e0e7ff;
+            color: #312e81;
+        }
+
+        .messenger-send-btn {
+            border: 0 !important;
+            box-shadow: none !important;
+            min-width: 56px;
+        }
+
+        .messenger-send-btn:focus,
+        .messenger-send-btn:active {
+            border: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .messenger-bubble {
+            max-width: 78%;
+            border-radius: 18px;
+            padding: 0.55rem 0.85rem;
+        }
+
+        .messenger-bubble.mine {
+            background: linear-gradient(135deg, #2f7cf8 0%, #1b5fd6 100%);
+            color: #ffffff;
+        }
+
+        .messenger-bubble.theirs {
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            color: #0f172a;
+        }
+
+        @media (max-width: 991px) {
+            .messenger-sidebar {
+                min-height: auto;
+                border-right: 0;
+                border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            }
+
+            .messenger-contacts-list {
+                max-height: 280px;
+            }
+
+            .messenger-thread {
+                height: 50vh;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block footer %}
+    {% if not adminMode|default(false) %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+<section class="section {{ adminMode|default(false) ? 'py-3' : 'py-5' }}">
+    <div class="{{ adminMode|default(false) ? 'container-fluid px-4' : 'container' }}"
+         data-messaging-root="1"
+         data-thread-url-template="{{ path('app_messages_thread', {id: '__CONTACT_ID__'}) }}"
+         data-unread-url="{{ path('app_messages_unread_counts') }}"
+         data-rewrite-url="{{ path('app_messages_rewrite') }}"
+         data-poll-interval="2500"
+         data-current-user-id="{{ app.user ? app.user.id : '' }}"
+         data-websocket-url="{{ app.request.isSecure() ? 'wss' : 'ws' }}://{{ app.request.server.get('HTTP_HOST')|split(':')[0] }}:8081?userId={{ app.user ? app.user.id : '' }}"
+         data-selected-contact-id="{{ selectedContact ? selectedContact.id : '' }}">
+        <div class="row g-0 messenger-shell">
+            <div class="col-lg-4 messenger-sidebar p-3 p-md-4">
+                <div class="messenger-brand mb-3">
+                    <img src="{{ asset('images/logo.png') }}" alt="FinTrack logo">
+                    <div>
+                        <h5 class="mb-0 fw-bold">FinTrack Messenger</h5>
+                        <small class="text-muted">Conversations</small>
+                    </div>
+                </div>
+
+                <p class="text-muted small mb-3">
+                    {% if app.user.role == 'CLIENT' %}
+                        Vous pouvez contacter les administrateurs.
+                    {% else %}
+                        Vous pouvez contacter les clients et les administrateurs.
+                    {% endif %}
+                </p>
+
+                {% if contacts is not empty %}
+                    <div class="list-group list-group-flush messenger-contacts-list">
+                        {% for contact in contacts %}
+                            {% set unread = unreadCounts[contact.id]|default(0) %}
+                            {% set lastMessage = lastMessages[contact.id]|default(null) %}
+                            {% set name = contact.fullName ?: contact.email %}
+                            {% set initial = name|slice(0,1)|upper %}
+                            {% set previewRaw = lastMessage ? (lastMessage.mine ? 'Vous: ' ~ lastMessage.body : lastMessage.body) : 'Aucun message pour le moment.' %}
+                            {% set preview = previewRaw|length > 62 ? previewRaw|slice(0, 62) ~ '...' : previewRaw %}
+                            <a href="{{ path(messagesRouteName|default('app_messages'), {with: contact.id}) }}"
+                               class="list-group-item list-group-item-action border-0 mb-1 messenger-contact {{ selectedContact and selectedContact.id == contact.id ? 'active' : '' }}"
+                               data-contact-id="{{ contact.id }}">
+                                <div class="d-flex align-items-center justify-content-between gap-2">
+                                    <div class="d-flex align-items-center gap-2 min-w-0">
+                                        {% if contact.profilePhoto %}
+                                            <img src="{{ asset(contact.profilePhoto) }}" alt="Avatar" class="messenger-avatar">
+                                        {% else %}
+                                            <span class="messenger-avatar-fallback">{{ initial }}</span>
+                                        {% endif %}
+                                        <div class="min-w-0">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="fw-semibold text-truncate">{{ name }}</div>
+                                                <small class="{{ selectedContact and selectedContact.id == contact.id ? 'text-white-50' : 'text-muted' }}" data-contact-time="{{ contact.id }}">{{ lastMessage ? lastMessage.createdAt : '' }}</small>
+                                            </div>
+                                            <small class="d-block text-truncate {{ selectedContact and selectedContact.id == contact.id ? 'text-white-50' : 'text-muted' }}" data-contact-preview="{{ contact.id }}">{{ preview }}</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge rounded-pill {{ selectedContact and selectedContact.id == contact.id ? 'bg-light text-primary' : 'bg-primary' }} {{ unread > 0 ? '' : 'd-none' }}"
+                                          data-unread-badge="{{ contact.id }}">{{ unread }}</span>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-muted">Aucun contact disponible.</div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-8 messenger-main">
+                {% if selectedContact %}
+                    {% set selectedName = selectedContact.fullName ?: selectedContact.email %}
+                    {% set selectedInitial = selectedName|slice(0,1)|upper %}
+
+                    <div class="d-flex align-items-center justify-content-between px-3 px-md-4 py-3 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="{{ asset('images/logo.png') }}" alt="FinTrack logo" class="messenger-header-logo me-1">
+                            {% if selectedContact.profilePhoto %}
+                                <img src="{{ asset(selectedContact.profilePhoto) }}" alt="Avatar" class="messenger-avatar">
+                            {% else %}
+                                <span class="messenger-avatar-fallback">{{ selectedInitial }}</span>
+                            {% endif %}
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ selectedName }}</h6>
+                                <small class="text-muted">{{ selectedContact.role }}</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-refresh-thread>
+                            <i class="fas fa-rotate-right me-1"></i>Actualiser
+                        </button>
+                    </div>
+
+                    <div class="messenger-thread px-3 px-md-4 pt-3" data-messages-thread>
+                        {% for message in conversation %}
+                            {% set mine = message.sender.id == app.user.id %}
+                            <div class="d-flex mb-3 {{ mine ? 'justify-content-end' : 'justify-content-start' }}" data-message-id="{{ message.id }}">
+                                <div class="messenger-bubble {{ mine ? 'mine' : 'theirs' }}">
+                                    <div class="small" style="white-space: pre-wrap;">{{ message.body }}</div>
+                                    <div class="text-end mt-1">
+                                        <small class="{{ mine ? 'text-white-50' : 'text-muted' }}">{{ message.createdAt|date('d/m/Y H:i') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted py-5" data-empty-thread>
+                                <div class="mb-2"><i class="far fa-message me-1"></i>Aucun message pour le moment.</div>
+                                <small>Commencez la conversation ci-dessous.</small>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="messenger-compose p-3 p-md-4">
+                        <form method="post"
+                              action="{{ path('app_messages_send') }}"
+                              class="d-flex gap-2 align-items-end"
+                              data-message-form>
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('messages_send') }}">
+                            <input type="hidden" name="_rewrite_csrf_token" value="{{ csrf_token('messages_rewrite') }}" data-rewrite-csrf>
+                            <input type="hidden" name="recipient_id" value="{{ selectedContact.id }}" data-recipient-id>
+                            <textarea name="body"
+                                      class="form-control shadow-none messenger-input"
+                                      rows="2"
+                                      maxlength="2000"
+                                      placeholder="Ecrire votre message..."
+                                      data-message-input
+                                      required></textarea>
+                            <button class="btn px-3 messenger-ai-btn" type="button" data-message-rewrite aria-label="Reecrire avec IA">
+                                <span aria-hidden="true">✨</span>
+                            </button>
+                            <button class="btn btn-primary px-3 messenger-send-btn" type="submit" data-message-submit>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </form>
+                        <div class="small text-danger mt-2 d-none" data-message-error></div>
+                    </div>
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center text-center" style="min-height: 72vh;">
+                        <div>
+                            <img src="{{ asset('images/logo.png') }}" alt="FinTrack logo" style="width: 58px; height: 58px; object-fit: contain;">
+                            <h5 class="mb-2 mt-3">Selectionnez un contact</h5>
+                            <p class="text-muted mb-0">Choisissez un utilisateur a gauche pour ouvrir la conversation.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('frontoffice/js/messages-live.js') }}"></script>
+{% endblock %}

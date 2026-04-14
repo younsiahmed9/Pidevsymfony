@@ -1,0 +1,60 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Inscription - FinTrack{% endblock %}
+
+{% block body %}
+<section class="section pt-5 pb-5 bg-tertiary" style="min-height: 80vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow border-0 rounded-4 p-4 p-md-5 bg-white">
+                    <div class="text-center mb-4">
+                        <h2 class="h3 fw-bold">Créer un compte</h2>
+                        <p class="text-muted">Rejoignez FinTrack dès aujourd'hui</p>
+                    </div>
+
+                    {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.prenom, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Jean'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(registrationForm.prenom) }}</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Dupont'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(registrationForm.nom) }}</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-group">
+                            {{ form_label(registrationForm.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'votre@email.com'}}) }}
+                            <div class="text-danger small mt-1">{{ form_errors(registrationForm.email) }}</div>
+                        </div>
+
+                        <div class="mb-3 form-group">
+                            {{ form_label(registrationForm.plainPassword.first, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control shadow-none', 'placeholder': '••••••••'}}) }}
+                            <div class="text-danger small mt-1">{{ form_errors(registrationForm.plainPassword.first) }}</div>
+                        </div>
+
+                        <div class="mb-4 form-group">
+                            {{ form_label(registrationForm.plainPassword.second, 'Confirmer le mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control shadow-none', 'placeholder': '••••••••'}}) }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">S'inscrire</button>
+
+                    {{ form_end(registrationForm) }}
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0 text-muted">Vous avez déjà un compte ? <a href="{{ path('app_login') }}" class="text-primary text-decoration-none fw-bold">Se connecter</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

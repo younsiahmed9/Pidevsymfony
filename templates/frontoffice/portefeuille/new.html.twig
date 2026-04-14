@@ -1,0 +1,72 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Nouveau Portefeuille - FinTrack{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .portefeuille-form-ui .form-select,
+        .portefeuille-form-ui .form-control {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+
+        .portefeuille-form-ui .form-select:focus,
+        .portefeuille-form-ui .form-control:focus {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+
+        .portefeuille-form-ui .form-select option {
+            color: #212529 !important;
+            background-color: #ffffff !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<section class="section py-5 bg-tertiary">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <!-- Bouton retour -->
+                <a href="{{ path('front_portefeuille_index') }}" class="text-muted text-decoration-none d-inline-block mb-3">
+                    <i class="fas fa-arrow-left me-1"></i> Retour aux portefeuilles
+                </a>
+
+                <div class="card shadow border-0 rounded-4">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h3 class="h4 fw-bold mb-0">Créer un portefeuille</h3>
+                        <p class="text-muted small">Configurez un nouvel espace pour gérer vos fonds.</p>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation portefeuille-form-ui', 'novalidate': 'novalidate'}}) }}
+                            
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.nom, 'Nom du portefeuille', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.nom, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Ex: Vacances, Pro, Logement...'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.nom) }}</div>
+                                <div class="form-text">Donnez un nom explicite pour identifier facilement ce portefeuille.</div>
+                            </div>
+
+                            <div class="mb-4 form-group">
+                                {{ form_label(form.devise_principale, 'Devise principale', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(form.devise_principale, {'attr': {'class': 'form-select shadow-none'}}) }}
+                                <div class="text-danger small mt-1">{{ form_errors(form.devise_principale) }}</div>
+                            </div>
+
+                            <div class="d-grid mt-5">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-check-circle me-2"></i>Créer le portefeuille
+                                </button>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

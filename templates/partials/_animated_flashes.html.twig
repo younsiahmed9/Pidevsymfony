@@ -1,0 +1,88 @@
+{% if app is defined %}
+    {% set allFlashes = app.flashes %}
+    {% if allFlashes is not empty %}
+        <div class="php-alert-stack container mt-3">
+            {% for label, messages in allFlashes %}
+                {% for message in messages %}
+                    {% set alertClass = label in ['error', 'danger', 'form_error'] ? 'danger' : (label in ['success', 'form_success'] ? 'success' : (label == 'warning' ? 'warning' : 'info')) %}
+                    {% set icon = alertClass == 'danger' ? 'fa-circle-exclamation' : (alertClass == 'success' ? 'fa-circle-check' : (alertClass == 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-info')) %}
+                    <div class="alert alert-{{ alertClass }} php-alert-item d-flex align-items-start justify-content-between gap-2" role="alert" data-auto-dismiss="true">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fa-solid {{ icon }} mt-1"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="btn-close" data-dismiss-alert="true" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        <style>
+            .php-alert-stack {
+                position: relative;
+                z-index: 1090;
+            }
+
+            .php-alert-item {
+                border: 0;
+                border-left: 4px solid currentColor;
+                border-radius: 12px;
+                box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+                animation: phpAlertIn 0.45s ease both;
+                margin-bottom: 0.7rem;
+                overflow: hidden;
+            }
+
+            .php-alert-item.is-hiding {
+                animation: phpAlertOut 0.35s ease forwards;
+            }
+
+            @keyframes phpAlertIn {
+                from {
+                    transform: translateY(-12px) scale(0.98);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0) scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes phpAlertOut {
+                from {
+                    transform: translateY(0) scale(1);
+                    opacity: 1;
+                    max-height: 140px;
+                    margin-bottom: 0.7rem;
+                }
+                to {
+                    transform: translateY(-8px) scale(0.98);
+                    opacity: 0;
+                    max-height: 0;
+                    margin-bottom: 0;
+                }
+            }
+        </style>
+
+        <script>
+            (function () {
+                const alerts = document.querySelectorAll('.php-alert-item[data-auto-dismiss="true"]');
+                const hideAlert = (el) => {
+                    if (!el || el.classList.contains('is-hiding')) {
+                        return;
+                    }
+                    el.classList.add('is-hiding');
+                    window.setTimeout(() => el.remove(), 360);
+                };
+
+                alerts.forEach((alertEl) => {
+                    const closeBtn = alertEl.querySelector('[data-dismiss-alert="true"]');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => hideAlert(alertEl));
+                    }
+                    window.setTimeout(() => hideAlert(alertEl), 6500);
+                });
+            })();
+        </script>
+    {% endif %}
+{% endif %}

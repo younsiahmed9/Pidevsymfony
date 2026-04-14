@@ -1,0 +1,68 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Vérification Email - FinTrack{% endblock %}
+
+{% block body %}
+<section class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-11 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                <div class="auth-card">
+                    <div class="auth-card-body text-center">
+                        <div class="auth-header">
+                            <div class="mb-3">
+                                <i class="fas fa-envelope-open-text fa-3x text-primary"></i>
+                            </div>
+                            <h2 class="auth-title">Vérifiez votre email</h2>
+                            <p class="auth-subtitle">Un code de vérification a été envoyé à <strong>{{ pendingEmail }}</strong></p>
+                        </div>
+
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} border-0 rounded-3 small mb-4">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+
+                        <form method="post" action="{{ path('app_register_verify_code') }}">
+                            <div class="mb-4 text-start">
+                                <label for="verification_code" class="form-label">Code à 6 chiffres</label>
+                                <input
+                                    type="text"
+                                    id="verification_code"
+                                    name="verification_code"
+                                    class="form-control form-control-lg shadow-none text-center letter-spacing-lg"
+                                    maxlength="6"
+                                    pattern="[0-9]{6}"
+                                    autocomplete="one-time-code"
+                                    inputmode="numeric"
+                                    placeholder="000000"
+                                    required
+                                    style="font-size: 1.5rem; letter-spacing: 0.5rem;"
+                                >
+                                <p class="text-muted small mt-2 text-center">
+                                    Le code expire dans environ <strong>{{ minutesLeft }} minute(s)</strong>.
+                                </p>
+                            </div>
+                            
+                            <button class="btn btn-auth w-100 mb-3" type="submit">
+                                Vérifier et continuer
+                            </button>
+                            
+                            <div class="auth-footer">
+                                <p class="mb-0">Pas reçu ? <a href="{{ path('app_register') }}" class="auth-link">Recommencer l'inscription</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="{{ path('app_home') }}" class="text-muted text-decoration-none small">
+                        <i class="fas fa-arrow-left me-1"></i> Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

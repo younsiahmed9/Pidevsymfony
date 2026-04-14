@@ -1,0 +1,91 @@
+<form method="POST" novalidate>
+    {% set depenseData = depense|default({}) %}
+    {% set formErrors = formErrors|default({}) %}
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="categorie" class="form-label fw-bold text-muted small text-uppercase">Catégorie</label>
+                <input type="text" id="categorie" name="categorie" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ depenseData.categorie|default('') }}" placeholder="Ex: Alimentation, Transport, Loyer..." required>
+                <div class="form-text">Quelle est la nature de cette dépense ?</div>
+                {% for error in formErrors.categorie|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="montant" class="form-label fw-bold text-muted small text-uppercase">Montant (TND)</label>
+                <div class="input-group">
+                    <span class="input-group-text border-0 bg-light"><i class="fas fa-coins text-danger"></i></span>
+                    <input type="number" id="montant" name="montant" class="form-control form-control-lg border-0 bg-light shadow-none" step="0.01" value="{{ depenseData.montant|default('') }}" placeholder="0.00" required>
+                </div>
+                <div class="form-text">Le montant dépensé.</div>
+                {% for error in formErrors.montant|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="date_depense" class="form-label fw-bold text-muted small text-uppercase">Date de la dépense</label>
+                <input type="date" id="date_depense" name="date_depense" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ depenseData.date_depense|default('now'|date('Y-m-d')) }}" required>
+                {% for error in formErrors.date_depense|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="id_budget" class="form-label fw-bold text-muted small text-uppercase">Budget associé</label>
+                <select id="id_budget" name="id_budget" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="">-- Choisir un budget --</option>
+                    {% for budget in budgets %}
+                        <option value="{{ budget.id_budget }}" {{ depenseData.id_budget is defined and depenseData.id_budget == budget.id_budget ? 'selected' : '' }}>
+                            {{ budget.nom_budget }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">La dépense doit être rattachée à un budget existant.</div>
+                {% for error in formErrors.id_budget|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="mode_paiement" class="form-label fw-bold text-muted small text-uppercase">Mode de paiement</label>
+                <select id="mode_paiement" name="mode_paiement" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="virement" {{ depenseData.mode_paiement|default('virement') == 'virement' ? 'selected' : '' }}>Virement</option>
+                    <option value="espece" {{ depenseData.mode_paiement|default('virement') == 'espece' ? 'selected' : '' }}>Espèces</option>
+                    <option value="carte" {{ depenseData.mode_paiement|default('virement') == 'carte' ? 'selected' : '' }}>Carte Bancaire</option>
+                </select>
+                {% for error in formErrors.mode_paiement|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="description" class="form-label fw-bold text-muted small text-uppercase">Description (Optionnel)</label>
+                <textarea id="description" name="description" class="form-control border-0 bg-light shadow-none" rows="3" placeholder="Détails supplémentaires...">{{ depenseData.description|default('') }}</textarea>
+                {% for error in formErrors.description|default([]) %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 pt-4 border-top d-flex gap-3">
+        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm">
+            <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer la dépense') }}
+        </button>
+        <a href="{{ path('depense_index') }}" class="btn btn-light btn-lg px-4 rounded-pill">
+            Annuler
+        </a>
+    </div>
+</form>
