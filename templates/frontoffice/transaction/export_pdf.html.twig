@@ -55,7 +55,7 @@
 <body>
     <h1>FinTrack - Export des transactions</h1>
     <div class="meta">
-        Utilisateur: {{ user.prenom }} {{ user.nom }} ({{ user.email }})<br>
+        Utilisateur: {{ user.fullName }} ({{ user.email }})<br>
         Généré le: {{ generatedAt|date('d/m/Y H:i') }}
     </div>
 

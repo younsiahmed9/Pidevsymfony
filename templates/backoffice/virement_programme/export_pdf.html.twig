@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Export Virements Programmés</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1f2937; }
+        h1 { margin-bottom: 6px; }
+        .meta { margin-bottom: 12px; color: #6b7280; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #d1d5db; padding: 6px; }
+        th { background: #f3f4f6; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>FinTrack - Export Virements Programmés</h1>
+    <div class="meta">Date de génération: {{ generatedAt|date('d/m/Y H:i:s') }}</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Utilisateur</th>
+                <th>Montant</th>
+                <th>Devise</th>
+                <th>Destinataire</th>
+                <th>Fréquence</th>
+                <th>Prochaine exécution</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for virement in virements %}
+            <tr>
+                <td>{{ virement.id }}</td>
+                <td>{{ virement.user ? (virement.user.fullName ?: virement.user.email) : '-' }}</td>
+                <td>{{ virement.montant|number_format(2, ',', ' ') }}</td>
+                <td>{{ virement.devise }}</td>
+                <td>{{ virement.destinataire }}</td>
+                <td>{{ virement.frequence }}</td>
+                <td>{{ virement.prochaineExecution ? virement.prochaineExecution|date('Y-m-d H:i') : '-' }}</td>
+                <td>{{ virement.statut }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8">Aucune donnée.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

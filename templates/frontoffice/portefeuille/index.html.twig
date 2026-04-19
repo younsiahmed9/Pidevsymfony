@@ -52,6 +52,11 @@
                                                     {{ portefeuille.solde_total|number_format(2, ',', ' ') }} {{ portefeuille.devise_principale }}
                                                 </td>
                                                 <td class="text-end pe-4">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1" 
+                                                            onclick="showQrCode('{{ path('front_qrcode_wallet', {id: portefeuille.id}) }}', '{{ portefeuille.nom }}')"
+                                                            title="Afficher QR Code">
+                                                        <i class="fas fa-qrcode"></i>
+                                                    </button>
                                                     <a href="{{ path('front_portefeuille_show', {'id': portefeuille.id}) }}" class="btn btn-sm btn-outline-info me-1" title="Voir les détails">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
@@ -62,12 +67,7 @@
                                                         <i class="fas fa-credit-card"></i>
                                                     </a>
                                                     
-                                                    <form method="post" action="{{ path('front_portefeuille_delete', {'id': portefeuille.id}) }}" class="d-inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce portefeuille ? Cette action est irréversible.');">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ portefeuille.id) }}">
-                                                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </button>
-                                                    </form>
+                                                    {% include 'frontoffice/portefeuille/_delete_form.html.twig' with { portefeuille: portefeuille } %}
                                                 </td>
                                             </tr>
                                         {% endfor %}
@@ -88,4 +88,46 @@
         </div>
     </div>
 </section>
+
+<!-- Modal QR Code -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title small fw-bold" id="qrCodeTitle">QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pt-2">
+                <div id="qrCodeContainer" class="mb-3">
+                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                </div>
+                <p class="text-muted small mb-0">Scannez pour partager ou payer</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function showQrCode(url, title) {
+            const modal = new bootstrap.Modal(document.getElementById('qrCodeModal'));
+            const container = document.getElementById('qrCodeContainer');
+            const titleEl = document.getElementById('qrCodeTitle');
+            
+            titleEl.textContent = 'QR Code - ' + title;
+            container.innerHTML = '<div class="spinner-border text-primary spinner-border-sm" role="status"></div>';
+            
+            modal.show();
+            
+            const img = new Image();
+            img.src = url;
+            img.className = 'img-fluid rounded shadow-sm';
+            img.onload = function() {
+                container.innerHTML = '';
+                container.appendChild(img);
+            };
+        }
+    </script>
 {% endblock %}

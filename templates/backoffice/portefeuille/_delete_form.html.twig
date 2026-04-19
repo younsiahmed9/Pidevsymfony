@@ -1,0 +1,6 @@
+<form method="post" action="{{ path('admin_portefeuille_delete', {'id': portefeuille.id}) }}" class="d-inline-block" onsubmit="return confirm('Confirmer la suppression de ce portefeuille ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ portefeuille.id) }}">
+    <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+        <i class="fas fa-trash"></i>
+    </button>
+</form>

@@ -394,28 +394,51 @@ final class CarteController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->isCsrfTokenValid('delete' . $id, $request->getPayload()->getString('_token'))) {
-            $carte = $entityManager->getConnection()->fetchAssociative(
-                'SELECT c.id, c.portefeuille_id
-                 FROM carte_virtuelle c
-                 INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-                 WHERE c.id = :id AND p.user_id = :uid',
-                ['id' => $id, 'uid' => $user->getId()]
-            );
+        if (!$this->isCsrfTokenValid('delete' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Jeton CSRF invalide.');
 
-            $entityManager->getConnection()->executeStatement(
-                'DELETE c FROM carte_virtuelle c
-                 INNER JOIN portefeuille p ON p.id = c.portefeuille_id
-                 WHERE c.id = :id AND p.user_id = :uid',
-                ['id' => $id, 'uid' => $user->getId()]
-            );
-
-            if ($carte) {
-                return $this->redirectToRoute('front_portefeuille_show', ['id' => (int) $carte['portefeuille_id']]);
-            }
+            return $this->redirectToRoute('front_carte_index');
         }
 
-        return $this->redirectToRoute('front_carte_index');
+        $connection = $entityManager->getConnection();
+        $carte = $connection->fetchAssociative(
+            'SELECT c.id, c.portefeuille_id
+             FROM carte_virtuelle c
+             INNER JOIN portefeuille p ON p.id = c.portefeuille_id
+             WHERE c.id = :id AND p.user_id = :uid',
+            ['id' => $id, 'uid' => $user->getId()]
+        );
+
+        if (!$carte) {
+            $this->addFlash('warning', 'Carte introuvable.');
+
+            return $this->redirectToRoute('front_carte_index');
+        }
+
+        $transactionLinks = (int) $connection->fetchOne(
+            'SELECT COUNT(*) FROM transaction WHERE carte_source_id = :id OR carte_dest_id = :id',
+            ['id' => $id]
+        );
+
+        $scheduledLinks = (int) $connection->fetchOne(
+            'SELECT COUNT(*) FROM virement_programme WHERE carte_source_id = :id OR carte_dest_id = :id',
+            ['id' => $id]
+        );
+
+        if ($transactionLinks > 0 || $scheduledLinks > 0) {
+            $this->addFlash('warning', 'Impossible de supprimer cette carte car elle est liée à des transactions ou des virements programmés.');
+
+            return $this->redirectToRoute('front_portefeuille_show', ['id' => (int) $carte['portefeuille_id']]);
+        }
+
+        $connection->executeStatement(
+            'DELETE FROM carte_virtuelle WHERE id = :id',
+            ['id' => $id]
+        );
+
+        $this->addFlash('success', 'Carte supprimée avec succès.');
+
+        return $this->redirectToRoute('front_portefeuille_show', ['id' => (int) $carte['portefeuille_id']]);
     }
 
     private function generateCardNumber(): string

@@ -71,10 +71,7 @@
 				{% endif %}
 				<div class="navbar-actions ms-auto">
 					{% if app.user %}
-						{% set displayName = app.user.fullName is defined and app.user.fullName ? app.user.fullName : ((app.user.prenom|default('') ~ ' ' ~ app.user.nom|default(''))|trim) %}
-						{% if not displayName %}
-							{% set displayName = app.user.email|default(app.user.userIdentifier|default('User')) %}
-						{% endif %}
+						{% set displayName = app.user.fullName|default(app.user.email)|default('Utilisateur') %}
 						<span class="text-dark">{{ displayName }}</span>
 						<a href="{{ is_granted('ROLE_ADMIN') ? path('app_admin_messages') : path('app_messages') }}" class="btn btn-outline-primary">Messages</a>
 						{% if is_granted('ROLE_ADMIN') %}

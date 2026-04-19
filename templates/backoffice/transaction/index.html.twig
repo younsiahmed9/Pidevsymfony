@@ -1,0 +1,53 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Admin - Transactions{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-3 py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0">Transactions</h1>
+        <a href="{{ path('admin_transaction_export_pdf') }}" class="btn btn-danger btn-sm">
+            <i class="fas fa-file-pdf me-1"></i> Exporter PDF
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Montant</th>
+                    <th>Devise</th>
+                    <th>Statut</th>
+                    <th>Source</th>
+                    <th>Destination</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.id }}</td>
+                        <td>{{ transaction.date ? transaction.date|date('Y-m-d H:i') : '-' }}</td>
+                        <td>{{ transaction.type }}</td>
+                        <td>{{ transaction.montant|number_format(2, ',', ' ') }}</td>
+                        <td>{{ transaction.devise }}</td>
+                        <td>{{ transaction.statut }}</td>
+                        <td>{{ transaction.carteSource ? ('****' ~ transaction.carteSource.numeroCarte|slice(-4)) : '-' }}</td>
+                        <td>{{ transaction.carteDest ? ('****' ~ transaction.carteDest.numeroCarte|slice(-4)) : '-' }}</td>
+                        <td>
+                            <a href="{{ path('admin_transaction_show', {'id': transaction.id}) }}" class="btn btn-sm btn-outline-primary">Voir</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="9" class="text-center py-4">Aucune transaction trouvée.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

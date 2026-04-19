@@ -15,6 +15,150 @@
             </a>
         </div>
 
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                                <i class="fas fa-list text-primary"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">Total Services</div>
+                                <div class="h4 fw-bold mb-0">{{ stats.total }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-3 me-3">
+                                <i class="fas fa-check-circle text-success"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">Services Actifs</div>
+                                <div class="h4 fw-bold mb-0">{{ stats.actifs }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info bg-opacity-10 p-3 rounded-3 me-3">
+                                <i class="fas fa-dollar-sign text-info"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">Revenu Total</div>
+                                <div class="h4 fw-bold mb-0">{{ stats.revenu_total|number_format(2, ',', ' ') }} TND</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 p-3 rounded-3 me-3">
+                                <i class="fas fa-chart-line text-warning"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">Tarif Moyen</div>
+                                <div class="h4 fw-bold mb-0">{{ stats.tarif_moyen|number_format(2, ',', ' ') }} TND</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="card border-0 shadow-sm rounded-3 mb-5">
+            <div class="card-body p-4">
+                <h5 class="card-title fw-bold mb-4">
+                    <i class="fas fa-filter me-2"></i>Filtres et Recherche
+                </h5>
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label fw-semibold">Recherche</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ filters.search }}" placeholder="Nom, type, fréquence...">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="statut" class="form-label fw-semibold">Statut</label>
+                        <select class="form-select" id="statut" name="statut">
+                            <option value="">Tous</option>
+                            <option value="actif" {{ filters.statut == 'actif' ? 'selected' : '' }}>Actif</option>
+                            <option value="inactif" {{ filters.statut == 'inactif' ? 'selected' : '' }}>Inactif</option>
+                            <option value="suspendu" {{ filters.statut == 'suspendu' ? 'selected' : '' }}>Suspendu</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="typeService" class="form-label fw-semibold">Type</label>
+                        <select class="form-select" id="typeService" name="typeService">
+                            <option value="">Tous</option>
+                            {% for type in typesServices %}
+                                <option value="{{ type.type_service }}" {{ filters.typeService == type.type_service ? 'selected' : '' }}>
+                                    {{ type.type_service|capitalize }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="frequence" class="form-label fw-semibold">Fréquence</label>
+                        <select class="form-select" id="frequence" name="frequence">
+                            <option value="">Toutes</option>
+                            {% for freq in frequences %}
+                                <option value="{{ freq.frequence }}" {{ filters.frequence == freq.frequence ? 'selected' : '' }}>
+                                    {{ freq.frequence|capitalize }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="sortBy" class="form-label fw-semibold">Tri</label>
+                        <div class="input-group">
+                            <select class="form-select" id="sortBy" name="sortBy">
+                                <option value="id_service" {{ filters.sortBy == 'id_service' ? 'selected' : '' }}>ID</option>
+                                <option value="nom_service" {{ filters.sortBy == 'nom_service' ? 'selected' : '' }}>Nom</option>
+                                <option value="tarif" {{ filters.sortBy == 'tarif' ? 'selected' : '' }}>Tarif</option>
+                                <option value="type_service" {{ filters.sortBy == 'type_service' ? 'selected' : '' }}>Type</option>
+                                <option value="frequence" {{ filters.sortBy == 'frequence' ? 'selected' : '' }}>Fréquence</option>
+                                <option value="statut" {{ filters.sortBy == 'statut' ? 'selected' : '' }}>Statut</option>
+                                <option value="date_debut" {{ filters.sortBy == 'date_debut' ? 'selected' : '' }}>Date début</option>
+                            </select>
+                            <select class="form-select" name="sortOrder" style="max-width: 100px;">
+                                <option value="ASC" {{ filters.sortOrder == 'ASC' ? 'selected' : '' }}>
+                                    <i class="fas fa-sort-up"></i> Asc
+                                </option>
+                                <option value="DESC" {{ filters.sortOrder == 'DESC' ? 'selected' : '' }}>
+                                    <i class="fas fa-sort-down"></i> Desc
+                                </option>
+                            </select>
+                            <button class="btn btn-primary" type="submit">Appliquer</button>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <a href="{{ path('service_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo me-1"></i>Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="row g-4">
             {% for service in services %}
                 <div class="col-md-6 col-lg-4">
@@ -83,10 +227,32 @@
 <style>
     .transition-hover {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #6c757d !important;
+        background-color: #f8f9fa !important;
     }
     .transition-hover:hover {
         transform: translateY(-5px);
-        box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.15) !important;
+        border-color: #495057 !important;
+        background-color: #e9ecef !important;
+    }
+    .transition-hover .text-muted {
+        color: #495057 !important;
+        font-weight: 500;
+    }
+    .transition-hover .fw-bold {
+        color: #212529 !important;
+    }
+    .transition-hover .border-top {
+        border-color: #6c757d !important;
+    }
+    .transition-hover .bg-light {
+        background-color: #e9ecef !important;
+        color: #212529 !important;
+        border-color: #6c757d !important;
+    }
+    .text-light {
+        color: #6c757d !important;
     }
 </style>
 {% endblock %}

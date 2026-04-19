@@ -4,9 +4,26 @@
 
 {% block body %}
 <div class="container-fluid mt-4">
-    {% set totalValeur = 0 %}
-    {% for p in produits %}
-        {% set totalValeur = totalValeur + (p.montant|default(0)) %}
+    {# Messages flash globaux #}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('warning') %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     {% endfor %}
 
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -24,7 +41,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Produits</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ produits|length }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-boxes fa-2x text-gray-300"></i>
@@ -33,6 +50,134 @@
                 </div>
             </div>
         </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Disponibles</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.disponibles }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Indisponibles</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.indisponibles }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Valeur Totale</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.valeur_totale|number_format(2, ',', ' ') }} TND</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter me-2"></i>Filtres et Recherche
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Recherche</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ filters.search }}" placeholder="Nom, code, type...">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select class="form-select" id="statut" name="statut">
+                        <option value="">Tous</option>
+                        <option value="disponible" {{ filters.statut == 'disponible' ? 'selected' : '' }}>Disponible</option>
+                        <option value="indisponible" {{ filters.statut == 'indisponible' ? 'selected' : '' }}>Indisponible</option>
+                        <option value="archive" {{ filters.statut == 'archive' ? 'selected' : '' }}>Archivé</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="typeProduit" class="form-label">Type</label>
+                    <select class="form-select" id="typeProduit" name="typeProduit">
+                        <option value="">Tous</option>
+                        {% for type in typesProduits %}
+                            <option value="{{ type.type_produit }}" {{ filters.typeProduit == type.type_produit ? 'selected' : '' }}>
+                                {{ type.type_produit|capitalize }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="user_id" class="form-label">Utilisateur</label>
+                    <select class="form-select" id="user_id" name="user_id">
+                        <option value="">Tous</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {{ filters.user_id == user.id ? 'selected' : '' }}>
+                                {{ user.prenom }} {{ user.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="sortBy" class="form-label">Tri</label>
+                    <div class="input-group">
+                        <select class="form-select" id="sortBy" name="sortBy">
+                            <option value="id_produit" {{ filters.sortBy == 'id_produit' ? 'selected' : '' }}>ID</option>
+                            <option value="nom_produit" {{ filters.sortBy == 'nom_produit' ? 'selected' : '' }}>Nom</option>
+                            <option value="montant" {{ filters.sortBy == 'montant' ? 'selected' : '' }}>Montant</option>
+                            <option value="code_unique" {{ filters.sortBy == 'code_unique' ? 'selected' : '' }}>Code</option>
+                            <option value="type_produit" {{ filters.sortBy == 'type_produit' ? 'selected' : '' }}>Type</option>
+                            <option value="statut" {{ filters.sortBy == 'statut' ? 'selected' : '' }}>Statut</option>
+                            <option value="date_creation" {{ filters.sortBy == 'date_creation' ? 'selected' : '' }}>Date</option>
+                        </select>
+                        <select class="form-select" name="sortOrder" style="max-width: 100px;">
+                            <option value="ASC" {{ filters.sortOrder == 'ASC' ? 'selected' : '' }}>
+                                <i class="fas fa-sort-up"></i> Asc
+                            </option>
+                            <option value="DESC" {{ filters.sortOrder == 'DESC' ? 'selected' : '' }}>
+                                <i class="fas fa-sort-down"></i> Desc
+                            </option>
+                        </select>
+                        <button class="btn btn-primary" type="submit">Appliquer</button>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <a href="{{ path('admin_produit_index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-1"></i>Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
@@ -56,7 +201,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Valeur Totale</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalValeur|number_format(2, ',', ' ') }} TND</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.valeur_totale|number_format(2, ',', ' ') }} TND</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>

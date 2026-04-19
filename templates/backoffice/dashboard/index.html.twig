@@ -490,7 +490,7 @@
                                     </thead>
                                     <tbody id="usersTableBody">
                                         {% for user in users %}
-                                            {% set userFullName = (user.fullName is defined and user.fullName) ? user.fullName : ((user.prenom|default('') ~ ' ' ~ user.nom|default(''))|trim) %}
+                                            {% set userFullName = user.fullName|default(user.email) %}
                                             {% set userDisplayName = userFullName ?: user.email|default('') %}
                                             {% set userProfilePhoto = user.profilePhoto is defined ? user.profilePhoto : (user.profile_photo is defined ? user.profile_photo : null) %}
                                             {% set userActive = user.isActive is defined ? user.isActive : (user.is_active is defined ? user.is_active : 1) %}
@@ -587,7 +587,7 @@
 
                                             <div class="mb-3">
                                                 <label class="form-label" for="full_name_{{ user.id }}">Full Name</label>
-                                                {% set userFullName = (user.fullName is defined and user.fullName) ? user.fullName : ((user.prenom|default('') ~ ' ' ~ user.nom|default(''))|trim) %}
+                                                {% set userFullName = user.fullName|default(user.email) %}
                                                 <input class="form-control" id="full_name_{{ user.id }}" name="full_name" type="text" value="{{ userFullName ?: '' }}">
                                             </div>
 
@@ -624,7 +624,7 @@
                             {% set adminCreated = app.user.createdAt is defined ? app.user.createdAt : (app.user.created_at is defined ? app.user.created_at : null) %}
                             {% set adminActive = app.user.isActive is defined ? app.user.isActive : (app.user.is_active is defined ? app.user.is_active : true) %}
                             <p>
-                                <strong>Administrator:</strong> {{ (app.user.fullName is defined and app.user.fullName) ? app.user.fullName : ((app.user.prenom|default('') ~ ' ' ~ app.user.nom|default(''))|trim ?: app.user.email) }}<br>
+                                <strong>Administrator:</strong> {{ app.user.fullName|default(app.user.email)|default('Admin') }}<br>
                                 <strong>Email:</strong> {{ app.user.email }}<br>
                                 <strong>Member Since:</strong> {{ adminCreated ? adminCreated|date('M d, Y') : '-' }}<br>
                                 <strong>Account Status:</strong>

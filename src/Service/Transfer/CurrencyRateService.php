@@ -137,7 +137,7 @@ final class CurrencyRateService
     private function fetchRateFromProvider(string $from, string $to): float
     {
         if ($this->fcsApiKey === '') {
-            throw new \RuntimeException('FCS API key is not configured.');
+            return $this->fetchRateFromFallback($from, $to);
         }
 
         $pairSlash = $from . '/' . $to;
@@ -149,23 +149,51 @@ final class CurrencyRateService
         ];
 
         foreach ($urls as $url) {
-            $response = $this->httpClient->request('GET', $url, [
+            try {
+                $response = $this->httpClient->request('GET', $url, [
+                    'timeout' => 8,
+                ]);
+
+                if ($response->getStatusCode() !== 200) {
+                    continue;
+                }
+
+                $data = $response->toArray(false);
+                $rate = $this->extractRate($data);
+
+                if ($rate !== null && $rate > 0) {
+                    return $rate;
+                }
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        return $this->fetchRateFromFallback($from, $to);
+    }
+
+    private function fetchRateFromFallback(string $from, string $to): float
+    {
+        try {
+            $response = $this->httpClient->request('GET', 'https://open.er-api.com/v6/latest/' . $from, [
                 'timeout' => 8,
             ]);
 
             if ($response->getStatusCode() !== 200) {
-                continue;
+                throw new \RuntimeException('Fallback API failed with status ' . $response->getStatusCode());
             }
 
             $data = $response->toArray(false);
-            $rate = $this->extractRate($data);
+            $rates = $data['rates'] ?? null;
 
-            if ($rate !== null && $rate > 0) {
-                return $rate;
+            if (is_array($rates) && isset($rates[$to]) && is_numeric($rates[$to])) {
+                return (float) $rates[$to];
             }
+        } catch (\Throwable $e) {
+            throw new \RuntimeException(sprintf('Unable to fetch FX rate for %s/%s from both FCS and Fallback API. Error: %s', $from, $to, $e->getMessage()));
         }
 
-        throw new \RuntimeException(sprintf('Unable to fetch FX rate for %s/%s from FCS API.', $from, $to));
+        throw new \RuntimeException(sprintf('Unable to fetch FX rate for %s/%s from both FCS and Fallback API.', $from, $to));
     }
 
     private function extractRate(array $data): ?float

@@ -5,8 +5,8 @@
             <select id="user_id" name="user_id" class="form-select" required>
                 <option value="">-- Sélectionner un utilisateur --</option>
                 {% for user in users %}
-                    <option value="{{ user.id }}" {{ facture and facture.user_id == user.id ? 'selected' : '' }}>
-                        {{ user.prenom }} {{ user.nom }} ({{ user.email }})
+                    <option value="{{ user.id }}" {{ facture is defined and facture.user_id == user.id ? 'selected' : '' }}>
+                        {{ user.fullName|default(user.email) }} ({{ user.email }})
                     </option>
                 {% endfor %}
             </select>
@@ -14,42 +14,73 @@
 
         <div class="col-md-6 mb-3">
             <label for="numeroFacture" class="form-label fw-bold">Numéro de Facture</label>
-            <input type="text" id="numeroFacture" name="numeroFacture" class="form-control" value="{{ facture.numeroFacture|default('') }}" placeholder="Ex: FAC-2026-001 (Auto si vide)">
+            <input type="text" id="numeroFacture" name="numeroFacture" class="form-control {{ formErrors.numeroFacture is defined ? 'is-invalid' : '' }}" value="{{ facture is defined ? facture.numeroFacture : '' }}" placeholder="Ex: FAC-2026-001 (Auto si vide)" pattern="^[A-Za-z0-9\-]{3,40}$" title="Le numéro de facture doit contenir 3 à 40 caractères alphanumériques (lettres, chiffres, tirets)">
+                {% for error in formErrors.numeroFacture|default([]) %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
         </div>
 
         <div class="col-md-6 mb-3">
-            <label for="montant" class="form-label fw-bold">Montant (TND)</label>
-            <input type="number" id="montant" name="montant" class="form-control" step="0.01" value="{{ facture.montant|default('') }}" placeholder="0.00" required>
+            <label for="montant" class="form-label fw-bold">Montant (TND) <small class="text-muted">- Calculé automatiquement</small></label>
+            <input type="number" id="montant" name="montant" class="form-control {{ formErrors.montant is defined ? 'is-invalid' : '' }}" step="0.01" min="0.01" max="999999.99" value="{{ facture is defined ? facture.montant : '' }}" placeholder="0.00" required title="Le montant doit être un nombre positif entre 0.01 et 999999.99 TND">
+                {% for error in formErrors.montant|default([]) %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
         </div>
 
         <div class="col-md-6 mb-3">
             <label for="statut" class="form-label fw-bold">Statut de paiement</label>
-            <select id="statut" name="statut" class="form-select" required>
-                <option value="non_payee" {{ facture and facture.statut == 'non_payee' ? 'selected' : '' }}>Non Payée</option>
-                <option value="payee" {{ facture and facture.statut == 'payee' ? 'selected' : '' }}>Payée</option>
-                <option value="en_retard" {{ facture and facture.statut == 'en_retard' ? 'selected' : '' }}>En Retard</option>
-                <option value="annulee" {{ facture and facture.statut == 'annulee' ? 'selected' : '' }}>Annulée</option>
+            <select id="statut" name="statut" class="form-select {{ formErrors.statut is defined ? 'is-invalid' : '' }}" required>
+                <option value="non_payee" {{ facture is defined and facture.statut == 'non_payee' ? 'selected' : '' }}>Non Payée</option>
+                <option value="payee" {{ facture is defined and facture.statut == 'payee' ? 'selected' : '' }}>Payée</option>
+                <option value="en_retard" {{ facture is defined and facture.statut == 'en_retard' ? 'selected' : '' }}>En Retard</option>
+                <option value="annulee" {{ facture is defined and facture.statut == 'annulee' ? 'selected' : '' }}>Annulée</option>
             </select>
+            {% for error in formErrors.statut|default([]) %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
         </div>
 
         <div class="col-md-6 mb-3">
             <label for="dateFacture" class="form-label fw-bold">Date de Facturation</label>
-            <input type="date" id="dateFacture" name="dateFacture" class="form-control" value="{{ facture.dateFacture|default('now'|date('Y-m-d')) }}" required>
+            <input type="date" id="dateFacture" name="dateFacture" class="form-control {{ formErrors.dateFacture is defined ? 'is-invalid' : '' }}" value="{{ facture is defined ? facture.dateFacture : 'now'|date('Y-m-d') }}" required max="{{ 'now'|date('Y-m-d') }}" title="La date de facturation ne peut pas être postérieure à aujourd'hui">
+                {% for error in formErrors.dateFacture|default([]) %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
         </div>
 
         <div class="col-md-6 mb-3">
             <label for="dateEcheance" class="form-label fw-bold">Date d'Échéance</label>
-            <input type="date" id="dateEcheance" name="dateEcheance" class="form-control" value="{{ facture.dateEcheance|default('') }}">
+            <input type="date" id="dateEcheance" name="dateEcheance" class="form-control {{ formErrors.dateEcheance is defined ? 'is-invalid' : '' }}" value="{{ facture is defined ? facture.dateEcheance : '' }}" title="La date d'échéance doit être postérieure ou égale à la date de facturation">
+                {% for error in formErrors.dateEcheance|default([]) %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
         </div>
 
         <div class="col-md-6 mb-3">
             <label for="service" class="form-label fw-bold">Service lié (Optionnel)</label>
-            <input type="text" id="service" name="service" class="form-control" value="{{ facture.service|default('') }}" placeholder="Ex: Abonnement Internet">
+            <select id="service" name="service" class="form-select {{ formErrors.service is defined ? 'is-invalid' : '' }}">
+                <option value="" data-prix="0">Aucun service</option>
+                {% for service in services|default([]) %}
+                    <option value="{{ service.id }}" data-prix="{{ service.tarif }}" {{ facture is defined and facture.service == service.id ? 'selected' : '' }}>{{ service.nomService }} - {{ service.tarif|number_format(2, ',', ' ') }} TND</option>
+                {% endfor %}
+            </select>
+            {% for error in formErrors.service|default([]) %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
         </div>
 
         <div class="col-md-6 mb-3">
             <label for="produit" class="form-label fw-bold">Produit lié (Optionnel)</label>
-            <input type="text" id="produit" name="produit" class="form-control" value="{{ facture.produit|default('') }}" placeholder="Ex: Ordinateur Dell">
+            <select id="produit" name="produit" class="form-select {{ formErrors.produit is defined ? 'is-invalid' : '' }}">
+                <option value="" data-prix="0">Aucun produit</option>
+                {% for produit in produits|default([]) %}
+                    <option value="{{ produit.id }}" data-prix="{{ produit.montant }}" {{ facture is defined and facture.produit == produit.id ? 'selected' : '' }}>{{ produit.nomProduit }} - {{ produit.montant|number_format(2, ',', ' ') }} TND</option>
+                {% endfor %}
+            </select>
+            {% for error in formErrors.produit|default([]) %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
         </div>
     </div>
 
@@ -62,3 +93,55 @@
         </a>
     </div>
 </form>
+
+<script>
+(function() {
+    const serviceSelect = document.getElementById('service');
+    const produitSelect = document.getElementById('produit');
+    const montantInput = document.getElementById('montant');
+    
+    function calculerMontant() {
+        let montant = 0;
+        
+        // Récupérer le prix du service sélectionné
+        const serviceOption = serviceSelect.options[serviceSelect.selectedIndex];
+        if (serviceOption && serviceOption.dataset.prix) {
+            montant += parseFloat(serviceOption.dataset.prix);
+        }
+        
+        // Récupérer le prix du produit sélectionné
+        const produitOption = produitSelect.options[produitSelect.selectedIndex];
+        if (produitOption && produitOption.dataset.prix) {
+            montant += parseFloat(produitOption.dataset.prix);
+        }
+        
+        // Mettre à jour le champ montant
+        montantInput.value = montant.toFixed(2);
+        
+        // Ajouter un indicateur visuel si le montant est calculé automatiquement
+        if (montant > 0) {
+            montantInput.style.backgroundColor = '#e8f5e8';
+            montantInput.style.borderColor = '#28a745';
+        } else {
+            montantInput.style.backgroundColor = '';
+            montantInput.style.borderColor = '';
+        }
+    }
+    
+    // Écouter les changements sur les sélecteurs
+    serviceSelect.addEventListener('change', calculerMontant);
+    produitSelect.addEventListener('change', calculerMontant);
+    
+    // Calculer au chargement si des valeurs sont pré-sélectionnées
+    window.addEventListener('load', function() {
+        calculerMontant();
+    });
+    
+    // Permettre la modification manuelle du montant
+    montantInput.addEventListener('input', function() {
+        // Réinitialiser les styles si l'utilisateur modifie manuellement
+        this.style.backgroundColor = '';
+        this.style.borderColor = '';
+    });
+})();
+</script>

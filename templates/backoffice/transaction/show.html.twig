@@ -1,0 +1,42 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Admin - Détail Transaction{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-3 py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h4 mb-0">Transaction #{{ transaction.id }}</h1>
+        <a href="{{ path('admin_transaction_index') }}" class="btn btn-outline-light btn-sm">Retour</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Montant</dt>
+                        <dd class="col-sm-8">{{ transaction.montant|number_format(2, ',', ' ') }} {{ transaction.devise }}</dd>
+                        <dt class="col-sm-4">Date</dt>
+                        <dd class="col-sm-8">{{ transaction.date ? transaction.date|date('Y-m-d H:i:s') : '-' }}</dd>
+                        <dt class="col-sm-4">Type</dt>
+                        <dd class="col-sm-8">{{ transaction.type }}</dd>
+                        <dt class="col-sm-4">Statut</dt>
+                        <dd class="col-sm-8">{{ transaction.statut }}</dd>
+                        <dt class="col-sm-4">Description</dt>
+                        <dd class="col-sm-8">{{ transaction.description ?: '-' }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h2 class="h6 mb-3">QR Code</h2>
+                    <img src="{{ qrCodeDataUri }}" alt="QR transaction {{ transaction.id }}" class="img-fluid border rounded p-2 bg-white">
+                    <p class="small text-muted mt-3 mb-0">Contenu: ID, montant, date, statut.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

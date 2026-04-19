@@ -6,7 +6,7 @@
                 <option value="">-- Sélectionner un utilisateur --</option>
                 {% for user in users %}
                     <option value="{{ user.id }}" {{ budget and budget.user_id == user.id ? 'selected' : '' }}>
-                        {{ user.prenom }} {{ user.nom }} ({{ user.email }})
+                        {{ user.fullName|default(user.email) }} ({{ user.email }})
                     </option>
                 {% endfor %}
             </select>

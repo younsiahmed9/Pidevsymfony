@@ -4,11 +4,6 @@
 
 {% block body %}
 <div class="container-fluid mt-4">
-    {% set totalTarif = 0 %}
-    {% for s in services %}
-        {% set totalTarif = totalTarif + (s.tarif|default(0)) %}
-    {% endfor %}
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-concierge-bell me-2 text-primary"></i>Gestion des Services</h1>
         <a href="{{ path('admin_service_new') }}" class="btn btn-primary shadow-sm">
@@ -24,7 +19,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Services</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ services|length }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-list fa-2x text-gray-300"></i>
@@ -33,14 +28,13 @@
                 </div>
             </div>
         </div>
-
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Services Actifs</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ services|filter(s => s.statut == 'actif')|length }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.actifs }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-check-circle fa-2x text-gray-300"></i>
@@ -49,6 +43,119 @@
                 </div>
             </div>
         </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Revenu Total</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenu_total|number_format(2, ',', ' ') }} TND</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tarif Moyen</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.tarif_moyen|number_format(2, ',', ' ') }} TND</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter me-2"></i>Filtres et Recherche
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Recherche</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ filters.search }}" placeholder="Nom, type, fréquence...">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <label for="statut" class="form-label">Statut</label>
+                    <select class="form-select" id="statut" name="statut">
+                        <option value="">Tous</option>
+                        <option value="actif" {{ filters.statut == 'actif' ? 'selected' : '' }}>Actif</option>
+                        <option value="inactif" {{ filters.statut == 'inactif' ? 'selected' : '' }}>Inactif</option>
+                        <option value="suspendu" {{ filters.statut == 'suspendu' ? 'selected' : '' }}>Suspendu</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="typeService" class="form-label">Type</label>
+                    <select class="form-select" id="typeService" name="typeService">
+                        <option value="">Tous</option>
+                        {% for type in typesServices %}
+                            <option value="{{ type.type_service }}" {{ filters.typeService == type.type_service ? 'selected' : '' }}>
+                                {{ type.type_service|capitalize }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="frequence" class="form-label">Fréquence</label>
+                    <select class="form-select" id="frequence" name="frequence">
+                        <option value="">Toutes</option>
+                        {% for freq in frequences %}
+                            <option value="{{ freq.frequence }}" {{ filters.frequence == freq.frequence ? 'selected' : '' }}>
+                                {{ freq.frequence|capitalize }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="sortBy" class="form-label">Tri</label>
+                    <div class="input-group">
+                        <select class="form-select" id="sortBy" name="sortBy">
+                            <option value="id_service" {{ filters.sortBy == 'id_service' ? 'selected' : '' }}>ID</option>
+                            <option value="nom_service" {{ filters.sortBy == 'nom_service' ? 'selected' : '' }}>Nom</option>
+                            <option value="tarif" {{ filters.sortBy == 'tarif' ? 'selected' : '' }}>Tarif</option>
+                            <option value="type_service" {{ filters.sortBy == 'type_service' ? 'selected' : '' }}>Type</option>
+                            <option value="frequence" {{ filters.sortBy == 'frequence' ? 'selected' : '' }}>Fréquence</option>
+                            <option value="statut" {{ filters.sortBy == 'statut' ? 'selected' : '' }}>Statut</option>
+                            <option value="date_debut" {{ filters.sortBy == 'date_debut' ? 'selected' : '' }}>Date début</option>
+                        </select>
+                        <select class="form-select" name="sortOrder" style="max-width: 100px;">
+                            <option value="ASC" {{ filters.sortOrder == 'ASC' ? 'selected' : '' }}>
+                                <i class="fas fa-sort-up"></i> Asc
+                            </option>
+                            <option value="DESC" {{ filters.sortOrder == 'DESC' ? 'selected' : '' }}>
+                                <i class="fas fa-sort-down"></i> Desc
+                            </option>
+                        </select>
+                        <button class="btn btn-primary" type="submit">Appliquer</button>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <a href="{{ path('admin_service_index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-redo me-1"></i>Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
@@ -56,7 +163,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Chiffre d'Affaires Est.</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalTarif|number_format(2, ',', ' ') }} TND</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.revenu_total|number_format(2, ',', ' ') }} TND</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>

@@ -83,12 +83,7 @@
                                                         </button>
                                                     </form>
 
-                                                    <form method="post" action="{{ path('front_carte_delete', {'id': carte.id}) }}" class="d-inline-block" onsubmit="return confirm('Supprimer définitivement cette carte ?');">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ carte.id) }}">
-                                                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
+                                                    {% include 'frontoffice/carte/_delete_form.html.twig' with { carte: carte } %}
                                                 </td>
                                             </tr>
                                         {% endfor %}

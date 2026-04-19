@@ -15,43 +15,118 @@
             </a>
         </div>
 
-        <!-- Summary Statistics -->
+        <!-- Stats Cards -->
         <div class="row g-4 mb-5">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
                     <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mx-auto mb-3">
                         <i class="fas fa-file-invoice text-primary fa-2x"></i>
                     </div>
                     <h6 class="text-muted small text-uppercase fw-bold">Total Factures</h6>
-                    <p class="h3 fw-bold text-dark mb-0">{{ factures|length }}</p>
+                    <p class="h3 fw-bold text-dark mb-0">{{ stats.total }}</p>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
                     <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mx-auto mb-3">
                         <i class="fas fa-check-double text-success fa-2x"></i>
                     </div>
-                    <h6 class="text-muted small text-uppercase fw-bold">Factures Payées</h6>
-                    <p class="h3 fw-bold text-dark mb-0">{{ factures|filter(f => f.statut == 'payee')|length }}</p>
+                    <h6 class="text-muted small text-uppercase fw-bold">Payées</h6>
+                    <p class="h3 fw-bold text-dark mb-0">{{ stats.payees }}</p>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
-                    <div class="bg-danger bg-opacity-10 p-3 rounded-circle d-inline-block mx-auto mb-3">
-                        <i class="fas fa-clock text-danger fa-2x"></i>
+                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle d-inline-block mx-auto mb-3">
+                        <i class="fas fa-exclamation-triangle text-warning fa-2x"></i>
                     </div>
-                    <h6 class="text-muted small text-uppercase fw-bold">À Payer</h6>
-                    <p class="h3 fw-bold text-dark mb-0">{{ factures|filter(f => f.statut == 'non_payee')|length }}</p>
+                    <h6 class="text-muted small text-uppercase fw-bold">Non Payées</h6>
+                    <p class="h3 fw-bold text-dark mb-0">{{ stats.non_payees }}</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
+                    <div class="bg-info bg-opacity-10 p-3 rounded-circle d-inline-block mx-auto mb-3">
+                        <i class="fas fa-dollar-sign text-info fa-2x"></i>
+                    </div>
+                    <h6 class="text-muted small text-uppercase fw-bold">Montant Total</h6>
+                    <p class="h3 fw-bold text-dark mb-0">{{ stats.montant_total|number_format(2, ',', ' ') }} TND</p>
                 </div>
             </div>
         </div>
 
-        <!-- Factures Table -->
+        <!-- Filters Section -->
+        <div class="card border-0 shadow-sm rounded-3 mb-5">
+            <div class="card-body p-4">
+                <h5 class="card-title fw-bold mb-4">
+                    <i class="fas fa-filter me-2"></i>Filtres et Recherche
+                </h5>
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label fw-semibold">Recherche</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ filters.search }}" placeholder="Numéro, service, produit...">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="statut" class="form-label fw-semibold">Statut</label>
+                        <select class="form-select" id="statut" name="statut">
+                            <option value="">Tous</option>
+                            <option value="payee" {{ filters.statut == 'payee' ? 'selected' : '' }}>Payée</option>
+                            <option value="non_payee" {{ filters.statut == 'non_payee' ? 'selected' : '' }}>Non Payée</option>
+                            <option value="en_retard" {{ filters.statut == 'en_retard' ? 'selected' : '' }}>En Retard</option>
+                            <option value="annulee" {{ filters.statut == 'annulee' ? 'selected' : '' }}>Annulée</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Période</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" id="dateFrom" name="dateFrom" 
+                                   value="{{ filters.dateFrom }}" placeholder="Du">
+                            <input type="date" class="form-control" id="dateTo" name="dateTo" 
+                                   value="{{ filters.dateTo }}" placeholder="Au">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="sortBy" class="form-label fw-semibold">Tri</label>
+                        <div class="input-group">
+                            <select class="form-select" id="sortBy" name="sortBy">
+                                <option value="id_facture" {{ filters.sortBy == 'id_facture' ? 'selected' : '' }}>ID</option>
+                                <option value="numero_facture" {{ filters.sortBy == 'numero_facture' ? 'selected' : '' }}>Numéro</option>
+                                <option value="montant" {{ filters.sortBy == 'montant' ? 'selected' : '' }}>Montant</option>
+                                <option value="date_facture" {{ filters.sortBy == 'date_facture' ? 'selected' : '' }}>Date</option>
+                                <option value="statut" {{ filters.sortBy == 'statut' ? 'selected' : '' }}>Statut</option>
+                            </select>
+                            <select class="form-select" name="sortOrder" style="max-width: 100px;">
+                                <option value="ASC" {{ filters.sortOrder == 'ASC' ? 'selected' : '' }}>
+                                    <i class="fas fa-sort-up"></i>
+                                </option>
+                                <option value="DESC" {{ filters.sortOrder == 'DESC' ? 'selected' : '' }}>
+                                    <i class="fas fa-sort-down"></i>
+                                </option>
+                            </select>
+                            <button class="btn btn-primary" type="submit">Appliquer</button>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <a href="{{ path('facture_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo me-1"></i>Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Factures Cards -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
                 <h5 class="fw-bold mb-0">Historique de facturation</h5>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body p-4">
                 {% if factures is empty %}
                     <div class="text-center py-5">
                         <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
@@ -62,59 +137,61 @@
                         <a href="{{ path('facture_new') }}" class="btn btn-primary rounded-pill px-5">Créer une facture</a>
                     </div>
                 {% else %}
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-4 border-0">Référence</th>
-                                    <th class="border-0 text-center">Date</th>
-                                    <th class="border-0 text-center">Échéance</th>
-                                    <th class="border-0 text-end">Montant</th>
-                                    <th class="border-0 text-center">Statut</th>
-                                    <th class="border-0 text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for facture in factures %}
-                                    <tr class="pointer-event" onclick="window.location='{{ path('facture_show', {id: facture.id}) }}'">
-                                        <td class="ps-4">
-                                            <div class="fw-bold text-dark">{{ facture.numeroFacture }}</div>
-                                            <div class="small text-muted">
-                                                {% if facture.serviceNom %}
-                                                    Service: {{ facture.serviceNom }}
-                                                {% elseif facture.produitNom %}
-                                                    Produit: {{ facture.produitNom }}
-                                                {% else %}
-                                                    Transaction diverse
-                                                {% endif %}
+                    <div class="row g-4">
+                        {% for facture in factures %}
+                            <div class="col-lg-4 col-md-6">
+                                <div class="card border-0 shadow-sm h-100 facture-card" onclick="window.location='{{ path('facture_show', {id: facture.id}) }}'">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold text-dark mb-1">{{ facture.numeroFacture }}</h6>
+                                                <div class="small text-muted">
+                                                    {% if facture.serviceNom %}
+                                                        <i class="fas fa-cogs me-1"></i> {{ facture.serviceNom }}
+                                                    {% elseif facture.produitNom %}
+                                                        <i class="fas fa-box me-1"></i> {{ facture.produitNom }}
+                                                    {% else %}
+                                                        <i class="fas fa-exchange-alt me-1"></i> Transaction diverse
+                                                    {% endif %}
+                                                </div>
                                             </div>
-                                        </td>
-                                        <td class="text-center">{{ facture.dateFacture|date('d/m/Y') }}</td>
-                                        <td class="text-center">{{ facture.dateEcheance ? facture.dateEcheance|date('d/m/Y') : '-' }}</td>
-                                        <td class="text-end fw-bold text-primary pe-4">
-                                            {{ facture.montant|number_format(2, ',', ' ') }} TND
-                                        </td>
-                                        <td class="text-center">
                                             {% set badge_class = facture.statut == 'payee' ? 'success' : (facture.statut == 'non_payee' ? 'danger' : 'warning') %}
-                                            <span class="badge rounded-pill bg-{{ badge_class }} px-3">
+                                            <span class="badge rounded-pill bg-{{ badge_class }} px-3 py-2">
                                                 {{ facture.statut|capitalize|replace({'_': ' '}) }}
                                             </span>
-                                        </td>
-                                        <td class="text-center">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted small">Date facture</span>
+                                                <span class="fw-semibold">{{ facture.dateFacture|date('d/m/Y') }}</span>
+                                            </div>
+                                            {% if facture.dateEcheance %}
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="text-muted small">Échéance</span>
+                                                    <span class="fw-semibold">{{ facture.dateEcheance|date('d/m/Y') }}</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                            <div class="h5 fw-bold text-primary mb-0">
+                                                {{ facture.montant|number_format(2, ',', ' ') }} TND
+                                            </div>
                                             <div class="dropdown">
-                                                <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" onclick="event.stopPropagation()">
-                                                    <i class="fas fa-ellipsis-v"></i>
+                                                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" type="button" data-bs-toggle="dropdown" onclick="event.stopPropagation()">
+                                                    <i class="fas fa-ellipsis-h"></i>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
                                                     <li><a class="dropdown-item" href="{{ path('facture_show', {id: facture.id}) }}"><i class="fas fa-eye me-2 text-primary"></i> Voir</a></li>
                                                     <li><a class="dropdown-item" href="{{ path('facture_edit', {id: facture.id}) }}"><i class="fas fa-edit me-2 text-warning"></i> Modifier</a></li>
                                                 </ul>
                                             </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 {% endif %}
             </div>
@@ -125,5 +202,27 @@
 <style>
     .pointer-event { cursor: pointer; transition: background-color 0.2s; }
     .pointer-event:hover { background-color: #f8fafc; }
+    .facture-card { 
+        cursor: pointer; 
+        transition: all 0.3s ease; 
+        border: 1px solid #6c757d !important; 
+        background-color: #f8f9fa !important;
+    }
+    .facture-card:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important; 
+        border-color: #495057 !important;
+        background-color: #e9ecef !important;
+    }
+    .facture-card .text-muted { 
+        color: #495057 !important; 
+        font-weight: 500;
+    }
+    .facture-card .fw-semibold {
+        color: #212529 !important;
+    }
+    .facture-card .border-top {
+        border-color: #6c757d !important;
+    }
 </style>
 {% endblock %}

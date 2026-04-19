@@ -11,6 +11,11 @@ parameters:
     brevo_api_key: '%env(string:BREVO_API_KEY)%'
     brevo_sender_email: '%env(string:BREVO_SENDER_EMAIL)%'
     brevo_sender_name: '%env(string:BREVO_SENDER_NAME)%'
+    scheduled_transfer_engine: '%env(string:SCHEDULED_TRANSFER_ENGINE)%'
+    n8n_scheduled_transfer_webhook: '%env(string:N8N_SCHEDULED_TRANSFER_WEBHOOK)%'
+    scheduled_transfer_internal_token: '%env(string:SCHEDULED_TRANSFER_INTERNAL_TOKEN)%'
+    n8n_scheduled_transfer_timeout: '%env(int:N8N_SCHEDULED_TRANSFER_TIMEOUT)%'
+    symfony_base_url: '%env(string:SYMFONY_BASE_URL)%'
 
 services:
     # default configuration for services in *this* file
@@ -44,3 +49,23 @@ services:
             $brevoApiKey: '%brevo_api_key%'
             $senderEmail: '%brevo_sender_email%'
             $senderName: '%brevo_sender_name%'
+
+    App\Service\Transfer\ScheduledTransferEngineResolver:
+        arguments:
+            $configuredEngine: '%scheduled_transfer_engine%'
+
+    App\Service\Transfer\ScheduledTransferEngineConfigManager:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
+    App\Service\Transfer\N8nScheduledTransferDispatcher:
+        arguments:
+            $webhookUrl: '%n8n_scheduled_transfer_webhook%'
+            $internalToken: '%scheduled_transfer_internal_token%'
+            $timeoutSeconds: '%n8n_scheduled_transfer_timeout%'
+            $symfonyBaseUrl: '%symfony_base_url%'
+
+    App\Controller\Integration\N8nScheduledTransferController:
+        arguments:
+            $internalToken: '%scheduled_transfer_internal_token%'
+            $symfonyBaseUrl: '%symfony_base_url%'

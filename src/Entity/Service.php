@@ -6,6 +6,7 @@ use App\Repository\ServiceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ServiceRepository::class)]
 #[ORM\Table(name: 'service')]
@@ -21,24 +22,38 @@ class Service
     private ?User $user = null;
 
     #[ORM\Column(name: 'nom_service', length: 255)]
+    #[Assert\NotBlank(message: 'Le nom est obligatoire')]
+    #[Assert\Length(min: 3, max: 100, minMessage: 'Minimum 3 caractères', maxMessage: 'Maximum 100 caractères')]
     private ?string $nomService = null;
 
     #[ORM\Column(type: 'decimal', precision: 15, scale: 2)]
+    #[Assert\NotBlank(message: 'Tarif obligatoire')]
+    #[Assert\Positive(message: 'Tarif doit être positif')]
     private ?string $tarif = null;
 
     #[ORM\Column(name: 'type_service', length: 100, nullable: true)]
+    #[Assert\NotBlank(message: 'Le type est obligatoire')]
+    #[Assert\Choice(choices: ['ponctuel', 'abonnement'], message: 'Type invalide')]
     private ?string $typeService = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\Choice(choices: ['mensuel', 'annuel', 'unique'], message: 'Fréquence invalide')]
     private ?string $frequence = null;
 
     #[ORM\Column(name: 'date_debut', type: 'date_mutable')]
+    #[Assert\Type(type: '\DateTimeInterface', message: 'Date invalide')]
     private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(name: 'date_fin', type: 'date_mutable', nullable: true)]
+    #[Assert\Type(type: '\DateTimeInterface', message: 'Date invalide')]
+    #[Assert\Expression(
+        "this.getDateFin() == null or this.getDateFin() >= this.getDateDebut()",
+        message: 'La date de fin doit être après la date de début'
+    )]
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column(length: 20)]
+    #[Assert\Choice(choices: ['actif', 'inactif', 'suspendu'], message: 'Statut invalide')]
     private string $statut = 'actif';
 
     /** @var Collection<int, Facture> */

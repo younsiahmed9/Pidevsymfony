@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Export Cartes Virtuelles</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1f2937; }
+        h1 { margin-bottom: 6px; }
+        .meta { margin-bottom: 12px; color: #6b7280; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #d1d5db; padding: 6px; }
+        th { background: #f3f4f6; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>FinTrack - Export Cartes Virtuelles</h1>
+    <div class="meta">Date de génération: {{ generatedAt|date('d/m/Y H:i:s') }}</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Carte</th>
+                <th>Type</th>
+                <th>Portefeuille</th>
+                <th>Devise</th>
+                <th>Solde</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for carte in cartes %}
+            <tr>
+                <td>{{ carte.id }}</td>
+                <td>**** **** **** {{ carte.numeroCarte|slice(-4) }}</td>
+                <td>{{ carte.type }}</td>
+                <td>{{ carte.portefeuille ? carte.portefeuille.nom : '-' }}</td>
+                <td>{{ carte.devise }}</td>
+                <td>{{ carte.solde|number_format(2, ',', ' ') }}</td>
+                <td>{{ carte.isIsActive ? 'Active' : 'Inactive' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7">Aucune donnée.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

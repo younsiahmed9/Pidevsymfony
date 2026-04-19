@@ -3,17 +3,23 @@
 namespace App\Controller\FrontOffice;
 
 use App\Entity\User;
+use App\Entity\Facture;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+use Symfony\Component\Form\Exception\TransformationFailedException;
 
 #[Route('/facture', name: 'facture_')]
 final class FactureController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): Response
+    public function index(Request $request, EntityManagerInterface $entityManager): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -24,28 +30,104 @@ final class FactureController extends AbstractController
 
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $factures = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT f.id_facture AS id,
-                    f.montant,
-                    f.date_facture AS dateFacture,
-                    f.date_echeance AS dateEcheance,
-                    f.id_service AS service,
-                    f.id_produit AS produit,
-                    f.statut,
-                    f.numero_facture AS numeroFacture,
-                    f.user_id,
-                    s.nom_service AS serviceNom,
-                    p.nom_produit AS produitNom
-             FROM facture f
-             LEFT JOIN service s ON s.id_service = f.id_service
-             LEFT JOIN produit p ON p.id_produit = f.id_produit
-             WHERE f.user_id = :user_id
-             ORDER BY f.id_facture DESC',
-            ['user_id' => $user->getId()]
-        );
+        // Paramètres de recherche, filtre et tri
+        $search = $request->query->get('search', '');
+        $statut = $request->query->get('statut', '');
+        $sortBy = $request->query->get('sortBy', 'id_facture');
+        $sortOrder = $request->query->get('sortOrder', 'DESC');
+        $dateFrom = $request->query->get('dateFrom', '');
+        $dateTo = $request->query->get('dateTo', '');
+
+        // Construction de la requête SQL
+        $sql = 'SELECT f.id_facture AS id,
+                       f.montant,
+                       f.date_facture AS dateFacture,
+                       f.date_echeance AS dateEcheance,
+                       f.id_service AS service,
+                       f.id_produit AS produit,
+                       f.statut,
+                       f.numero_facture AS numeroFacture,
+                       f.user_id,
+                       s.nom_service AS serviceNom,
+                       p.nom_produit AS produitNom
+                FROM facture f
+                LEFT JOIN service s ON s.id_service = f.id_service
+                LEFT JOIN produit p ON p.id_produit = f.id_produit
+                WHERE f.user_id = :user_id';
+        
+        $params = ['user_id' => $user->getId()];
+
+        // Filtre de recherche
+        if (!empty($search)) {
+            $sql .= ' AND (f.numero_facture LIKE :search OR s.nom_service LIKE :search OR p.nom_produit LIKE :search)';
+            $params['search'] = '%' . $search . '%';
+        }
+
+        // Filtre par statut
+        if (!empty($statut)) {
+            $sql .= ' AND f.statut = :statut';
+            $params['statut'] = $statut;
+        }
+
+        // Filtre par période
+        if (!empty($dateFrom)) {
+            $sql .= ' AND f.date_facture >= :dateFrom';
+            $params['dateFrom'] = $dateFrom;
+        }
+        if (!empty($dateTo)) {
+            $sql .= ' AND f.date_facture <= :dateTo';
+            $params['dateTo'] = $dateTo;
+        }
+
+        // Tri
+        $allowedSortFields = ['id_facture', 'numero_facture', 'montant', 'date_facture', 'date_echeance', 'statut'];
+        $sortBy = in_array($sortBy, $allowedSortFields) ? $sortBy : 'id_facture';
+        $sortOrder = in_array(strtoupper($sortOrder), ['ASC', 'DESC']) ? strtoupper($sortOrder) : 'DESC';
+        
+        $sql .= ' ORDER BY f.' . $sortBy . ' ' . $sortOrder;
+
+        $factures = $entityManager->getConnection()->fetchAllAssociative($sql, $params);
+
+        // Statistiques pour l'utilisateur
+        $statsSql = 'SELECT 
+                        COUNT(*) as total,
+                        COUNT(CASE WHEN statut = \'payee\' THEN 1 END) as payees,
+                        COUNT(CASE WHEN statut = \'non_payee\' THEN 1 END) as non_payees,
+                        COUNT(CASE WHEN statut = \'en_retard\' THEN 1 END) as en_retard,
+                        COUNT(CASE WHEN statut = \'annulee\' THEN 1 END) as annulees,
+                        SUM(CASE WHEN montant > 0 THEN CAST(montant AS DECIMAL(10,2)) ELSE 0 END) as montant_total,
+                        AVG(CASE WHEN montant > 0 THEN CAST(montant AS DECIMAL(10,2)) ELSE NULL END) as montant_moyen,
+                        COUNT(CASE WHEN id_service IS NOT NULL THEN 1 END) as factures_service,
+                        COUNT(CASE WHEN id_produit IS NOT NULL THEN 1 END) as factures_produit
+                     FROM facture 
+                     WHERE user_id = :user_id';
+        
+        $statsParams = ['user_id' => $user->getId()];
+        if (!empty($dateFrom) || !empty($dateTo)) {
+            $statsSql .= ' AND 1=1';
+            if (!empty($dateFrom)) {
+                $statsSql .= ' AND date_facture >= :dateFrom';
+                $statsParams['dateFrom'] = $dateFrom;
+            }
+            if (!empty($dateTo)) {
+                $statsSql .= ' AND date_facture <= :dateTo';
+                $statsParams['dateTo'] = $dateTo;
+            }
+        }
+        
+        $stats = $entityManager->getConnection()->fetchAllAssociative($statsSql, $statsParams)[0];
 
         return $this->render('frontoffice/facture/index.html.twig', [
             'factures' => $factures,
+            'stats' => $stats,
+            'filters' => [
+                'search' => $search,
+                'statut' => $statut,
+                'sortBy' => $sortBy,
+                'sortOrder' => $sortOrder,
+                'dateFrom' => $dateFrom,
+                'dateTo' => $dateTo,
+            ],
         ]);
     }
 
@@ -62,7 +144,7 @@ final class FactureController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $services = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id_service AS id, nom_service AS nomService
+            'SELECT id_service AS id, nom_service AS nomService, tarif
              FROM service
              WHERE user_id = :user_id
              ORDER BY nom_service ASC',
@@ -70,7 +152,7 @@ final class FactureController extends AbstractController
         );
 
         $produits = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id_produit AS id, nom_produit AS nomProduit
+            'SELECT id_produit AS id, nom_produit AS nomProduit, montant
              FROM produit
              WHERE user_id = :user_id
              ORDER BY nom_produit ASC',
@@ -141,7 +223,7 @@ final class FactureController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $services = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id_service AS id, nom_service AS nomService
+            'SELECT id_service AS id, nom_service AS nomService, tarif
              FROM service
              WHERE user_id = :user_id
              ORDER BY nom_service ASC',
@@ -149,7 +231,7 @@ final class FactureController extends AbstractController
         );
 
         $produits = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT id_produit AS id, nom_produit AS nomProduit
+            'SELECT id_produit AS id, nom_produit AS nomProduit, montant
              FROM produit
              WHERE user_id = :user_id
              ORDER BY nom_produit ASC',
@@ -180,35 +262,69 @@ final class FactureController extends AbstractController
         $formErrors = [];
 
         if ($request->isMethod('POST')) {
-            $factureFormData = [
-                'id' => (string) ($facture['id'] ?? $id),
-                'numeroFacture' => trim((string) $request->request->get('numeroFacture', $factureFormData['numeroFacture'])),
-                'montant' => trim((string) $request->request->get('montant', '')),
-                'dateFacture' => trim((string) $request->request->get('dateFacture', $factureFormData['dateFacture'])),
-                'dateEcheance' => trim((string) $request->request->get('dateEcheance', '')),
-                'service' => trim((string) $request->request->get('service', '')),
-                'produit' => trim((string) $request->request->get('produit', '')),
-                'statut' => trim((string) $request->request->get('statut', 'non_payee')),
-            ];
+            try {
+                $factureFormData = [
+                    'id' => (string) ($facture['id'] ?? $id),
+                    'numeroFacture' => trim((string) $request->request->get('numeroFacture', $factureFormData['numeroFacture'])),
+                    'montant' => trim((string) $request->request->get('montant', '')),
+                    'dateFacture' => trim((string) $request->request->get('dateFacture', $factureFormData['dateFacture'])),
+                    'dateEcheance' => trim((string) $request->request->get('dateEcheance', '')),
+                    'service' => trim((string) $request->request->get('service', '')),
+                    'produit' => trim((string) $request->request->get('produit', '')),
+                    'statut' => trim((string) $request->request->get('statut', 'non_payee')),
+                ];
 
-            $formErrors = $this->validateFactureInput($factureFormData, $entityManager, (int) $user->getId(), $id);
+                $formErrors = $this->validateFactureInput($factureFormData, $entityManager, (int) $user->getId(), $id);
 
-            if ($formErrors === []) {
-                $entityManager->getConnection()->update('facture', [
-                    'montant' => number_format((float) str_replace(',', '.', $factureFormData['montant']), 2, '.', ''),
-                    'date_facture' => $factureFormData['dateFacture'],
-                    'date_echeance' => $factureFormData['dateEcheance'] !== '' ? $factureFormData['dateEcheance'] : $factureFormData['dateFacture'],
-                    'id_service' => $factureFormData['service'] !== '' ? (int) $factureFormData['service'] : null,
-                    'id_produit' => $factureFormData['produit'] !== '' ? (int) $factureFormData['produit'] : null,
-                    'statut' => $factureFormData['statut'],
-                    'numero_facture' => $factureFormData['numeroFacture'] !== '' ? $factureFormData['numeroFacture'] : $facture['numeroFacture'],
-                ], ['id_facture' => $id, 'user_id' => $user->getId()]);
+                if ($formErrors === []) {
+                    // Validation supplémentaire avec l'entité
+                    $factureEntity = new Facture();
+                    $factureEntity->setMontant($factureFormData['montant']);
+                    $factureEntity->setDateFacture(new \DateTime($factureFormData['dateFacture']));
+                    $factureEntity->setDateEcheance($factureFormData['dateEcheance'] !== '' ? new \DateTime($factureFormData['dateEcheance']) : null);
+                    $factureEntity->setStatut($factureFormData['statut']);
+                    $factureEntity->setNumeroFacture($factureFormData['numeroFacture']);
+                    // Note: service et produit sont gérés séparément car ils nécessitent les entités correspondantes
 
-                $this->addFlash('success', 'Facture mise à jour avec succès.');
-                return $this->redirectToRoute('facture_index');
+                    // Valider l'entité
+                    $validator = $this->container->get('validator');
+                    $violations = $validator->validate($factureEntity);
+                    
+                    if (count($violations) > 0) {
+                        throw new ValidationFailedException($factureEntity, $violations);
+                    }
+
+                    $entityManager->getConnection()->update('facture', [
+                        'montant' => number_format((float) str_replace(',', '.', $factureFormData['montant']), 2, '.', ''),
+                        'date_facture' => $factureFormData['dateFacture'],
+                        'date_echeance' => $factureFormData['dateEcheance'] !== '' ? $factureFormData['dateEcheance'] : $factureFormData['dateFacture'],
+                        'id_service' => $factureFormData['service'] !== '' ? (int) $factureFormData['service'] : null,
+                        'id_produit' => $factureFormData['produit'] !== '' ? (int) $factureFormData['produit'] : null,
+                        'statut' => $factureFormData['statut'],
+                        'numero_facture' => $factureFormData['numeroFacture'],
+                    ], ['id_facture' => $id, 'user_id' => $user->getId()]);
+
+                    $this->addFlash('success', 'Facture mise à jour avec succès.');
+                    return $this->redirectToRoute('facture_index');
+                }
+
+                $this->addFlash('danger', 'Veuillez corriger les erreurs du formulaire.');
+
+            } catch (UniqueConstraintViolationException $e) {
+                $this->addFlash('error', 'Erreur : Le numéro de facture existe déjà');
+            } catch (ForeignKeyConstraintViolationException $e) {
+                $this->addFlash('error', 'Erreur : Contrainte de clé étrangère violée');
+            } catch (EntityNotFoundException $e) {
+                $this->addFlash('error', 'Erreur : ' . $e->getMessage());
+            } catch (ValidationFailedException $e) {
+                $errors = [];
+                foreach ($e->getViolations() as $violation) {
+                    $errors[] = $violation->getMessage();
+                }
+                $this->addFlash('error', implode(', ', $errors));
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue : ' . $e->getMessage());
             }
-
-            $this->addFlash('danger', 'Veuillez corriger les erreurs du formulaire.');
         }
 
         return $this->render('frontoffice/facture/edit.html.twig', [

@@ -15,6 +15,9 @@
             <a href="{{ path('front_virement_new') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-calendar me-2"></i>Transfert programmé
             </a>
+            <a href="{{ path('front_virement_new') }}" class="btn btn-outline-info">
+                <i class="fas fa-robot me-2"></i>Transfert programmer avec n8n
+            </a>
         </div>
 
         <!-- Cards Selection -->
@@ -121,27 +124,27 @@
                     }
 
                     const row = (currency, firstLabel, firstValue, secondLabel, secondValue) => `
-                        <tr>
-                            <td class="fw-bold">${currency}</td>
-                            <td>${firstLabel} ${firstValue}</td>
-                            <td>${secondLabel} ${secondValue}</td>
+                        <tr class="text-black">
+                            <td class="fw-bold text-black">${currency}</td>
+                            <td class="text-black">${firstLabel} ${firstValue}</td>
+                            <td class="text-black">${secondLabel} ${secondValue}</td>
                         </tr>`;
 
                     bodyEl.innerHTML = `
-                        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2 text-black">
                             <div>
-                                <strong>Tableau live</strong>
+                                <strong class="text-black">Tableau live</strong>
                                 <div class="text-muted small">Mis à jour à ${data.updatedAt}</div>
                             </div>
                             <span class="badge bg-success">API de change</span>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-bordered align-middle mb-0">
+                            <table class="table table-bordered align-middle mb-0 text-black">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Devise</th>
-                                        <th>Taux 1 unité vers</th>
-                                        <th>Taux 1 unité vers</th>
+                                        <th class="text-black">Devise</th>
+                                        <th class="text-black">Taux 1 unité vers</th>
+                                        <th class="text-black">Taux 1 unité vers</th>
                                     </tr>
                                 </thead>
                                 <tbody>

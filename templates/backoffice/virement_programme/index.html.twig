@@ -1,0 +1,123 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Admin - Virements Programmés{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-3 py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h1 class="h4 mb-0">Virements Programmés</h1>
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_virement_programme_export_pdf') }}" class="btn btn-danger btn-sm">
+                <i class="fas fa-file-pdf me-1"></i> Exporter PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <div class="text-muted small">Moteur actif</div>
+                <div class="h5 mb-0">
+                    <span class="badge {{ engine == 'n8n' ? 'text-bg-primary' : 'text-bg-success' }}">{{ engine|upper }}</span>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <form method="post" action="{{ path('admin_virement_programme_switch_engine', {engine: 'symfony'}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('switch_engine_symfony') }}">
+                    <button type="submit" class="btn btn-sm {{ engine == 'symfony' ? 'btn-success' : 'btn-outline-success' }}">Basculer Symfony</button>
+                </form>
+                <form method="post" action="{{ path('admin_virement_programme_switch_engine', {engine: 'n8n'}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('switch_engine_n8n') }}">
+                    <button type="submit" class="btn btn-sm {{ engine == 'n8n' ? 'btn-primary' : 'btn-outline-primary' }}">Basculer n8n</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Utilisateur</th>
+                    <th>Montant</th>
+                    <th>Devise</th>
+                    <th>Destinataire</th>
+                    <th>Fréquence</th>
+                    <th>Prochaine exécution</th>
+                    <th>Statut</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for virement in virements %}
+                    <tr>
+                        <td>{{ virement.id }}</td>
+                        <td>{{ virement.user ? (virement.user.fullName ?: virement.user.email) : '-' }}</td>
+                        <td>{{ virement.montant|number_format(2, ',', ' ') }}</td>
+                        <td>{{ virement.devise }}</td>
+                        <td>{{ virement.destinataire }}</td>
+                        <td>{{ virement.frequence }}</td>
+                        <td>{{ virement.prochaineExecution ? virement.prochaineExecution|date('Y-m-d H:i') : '-' }}</td>
+                        <td>{{ virement.statut }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="8" class="text-center py-4">Aucun virement programmé trouvé.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><strong>Logs Symfony</strong></div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                        <tr><th>ID</th><th>VP</th><th>Status</th><th>Exécuté</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for log in symfonyLogs %}
+                            <tr>
+                                <td>{{ log.id }}</td>
+                                <td>#{{ log.virement_programme_id }}</td>
+                                <td>{{ log.status }}</td>
+                                <td>{{ log.executed_at ? log.executed_at|date('Y-m-d H:i:s') : '-' }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="4" class="text-center py-3">Aucun log.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><strong>Logs n8n</strong></div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                        <tr><th>ID</th><th>VP</th><th>Status</th><th>Exécuté</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for log in n8nLogs %}
+                            <tr>
+                                <td>{{ log.id }}</td>
+                                <td>#{{ log.virement_programme_id }}</td>
+                                <td>{{ log.status }}</td>
+                                <td>{{ log.executed_at ? log.executed_at|date('Y-m-d H:i:s') : '-' }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="4" class="text-center py-3">Aucun log n8n.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

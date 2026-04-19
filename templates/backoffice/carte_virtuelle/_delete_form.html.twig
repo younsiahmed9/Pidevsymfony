@@ -1,0 +1,6 @@
+<form method="post" action="{{ path('admin_carte_virtuelle_delete', {'id': carte.id}) }}" class="d-inline-block" onsubmit="return confirm('Confirmer la suppression de cette carte virtuelle ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ carte.id) }}">
+    <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+        <i class="fas fa-trash"></i>
+    </button>
+</form>

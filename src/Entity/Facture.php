@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\FactureRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: FactureRepository::class)]
 #[ORM\Table(name: 'facture')]
@@ -19,12 +20,22 @@ class Facture
     private ?User $user = null;
 
     #[ORM\Column(type: 'decimal', precision: 15, scale: 2)]
+    #[Assert\NotBlank(message: 'Montant obligatoire')]
+    #[Assert\Positive(message: 'Montant positif')]
     private ?string $montant = null;
 
     #[ORM\Column(name: 'date_facture', type: 'date_mutable')]
+    #[Assert\NotBlank(message: 'Date de facture obligatoire')]
+    #[Assert\Type(type: '\DateTimeInterface', message: 'Date invalide')]
+    #[Assert\LessThanOrEqual(value: 'today', message: 'La date de facture ne peut pas être postérieure à aujourd\'hui')]
     private ?\DateTimeInterface $dateFacture = null;
 
     #[ORM\Column(name: 'date_echeance', type: 'date_mutable', nullable: true)]
+    #[Assert\Type(type: '\DateTimeInterface', message: 'Date invalide')]
+    #[Assert\Expression(
+        "this.getDateEcheance() == null or this.getDateEcheance() >= this.getDateFacture()",
+        message: 'La date d\'échéance doit être postérieure ou égale à la date de facture'
+    )]
     private ?\DateTimeInterface $dateEcheance = null;
 
     #[ORM\ManyToOne(targetEntity: Service::class, inversedBy: 'factures')]
@@ -36,10 +47,18 @@ class Facture
     private ?Produit $produit = null;
 
     #[ORM\Column(length: 20)]
+    #[Assert\Choice(choices: ['non_payee', 'payee', 'en_retard', 'annulee'], message: 'Statut invalide')]
     private string $statut = 'non_payee';
 
     #[ORM\Column(name: 'numero_facture', length: 50, nullable: true)]
+    #[Assert\Regex(pattern: '/^[A-Za-z0-9\-]{3,40}$/', message: 'Format invalide (3-40 caractères alphanumériques)')]
     private ?string $numeroFacture = null;
+
+    #[Assert\Expression(
+        "(this.getProduit() !== null and this.getService() === null) or (this.getService() !== null and this.getProduit() === null)",
+        message: "Veuillez sélectionner un produit OU un service (pas les deux, pas aucun)"
+    )]
+    private $produitServiceConstraint;
 
     public function __construct()
     {

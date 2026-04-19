@@ -6,7 +6,7 @@
             <div class="form-group">
                 <label for="numeroFacture" class="form-label fw-bold text-muted small text-uppercase">Référence de la facture</label>
                 <input type="text" id="numeroFacture" name="numeroFacture" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ factureData.numeroFacture|default('') }}" placeholder="Ex: FAC-2026-001">
-                <div class="form-text">Laissez vide pour une génération automatique.</div>
+                <div class="form-text">Laissez vide pour une génération automatique. Le montant sera calculé automatiquement selon le service/produit sélectionné.</div>
                 {% for error in formErrors.numeroFacture|default([]) %}
                     <div class="text-danger small mt-1">{{ error }}</div>
                 {% endfor %}
@@ -64,9 +64,9 @@
             <div class="form-group">
                 <label for="service" class="form-label fw-bold text-muted small text-uppercase">Service associé (Optionnel)</label>
                 <select id="service" name="service" class="form-select form-select-lg border-0 bg-light shadow-none">
-                    <option value="">Aucun service</option>
+                    <option value="" data-prix="0">Aucun service</option>
                     {% for service in services|default([]) %}
-                        <option value="{{ service.id }}" {{ factureData.service|default('') == service.id ? 'selected' : '' }}>{{ service.nomService }}</option>
+                        <option value="{{ service.id }}" data-prix="{{ service.tarif }}" {{ factureData.service|default('') == service.id ? 'selected' : '' }}>{{ service.nomService }} - {{ service.tarif|number_format(2, ',', ' ') }} TND</option>
                     {% endfor %}
                 </select>
                 {% for error in formErrors.service|default([]) %}
@@ -79,9 +79,9 @@
             <div class="form-group">
                 <label for="produit" class="form-label fw-bold text-muted small text-uppercase">Produit associé (Optionnel)</label>
                 <select id="produit" name="produit" class="form-select form-select-lg border-0 bg-light shadow-none">
-                    <option value="">Aucun produit</option>
+                    <option value="" data-prix="0">Aucun produit</option>
                     {% for produit in produits|default([]) %}
-                        <option value="{{ produit.id }}" {{ factureData.produit|default('') == produit.id ? 'selected' : '' }}>{{ produit.nomProduit }}</option>
+                        <option value="{{ produit.id }}" data-prix="{{ produit.montant }}" {{ factureData.produit|default('') == produit.id ? 'selected' : '' }}>{{ produit.nomProduit }} - {{ produit.montant|number_format(2, ',', ' ') }} TND</option>
                     {% endfor %}
                 </select>
                 {% for error in formErrors.produit|default([]) %}
@@ -100,3 +100,55 @@
         </a>
     </div>
 </form>
+
+<script>
+(function() {
+    const serviceSelect = document.getElementById('service');
+    const produitSelect = document.getElementById('produit');
+    const montantInput = document.getElementById('montant');
+    
+    function calculerMontant() {
+        let montant = 0;
+        
+        // Récupérer le prix du service sélectionné
+        const serviceOption = serviceSelect.options[serviceSelect.selectedIndex];
+        if (serviceOption && serviceOption.dataset.prix) {
+            montant += parseFloat(serviceOption.dataset.prix);
+        }
+        
+        // Récupérer le prix du produit sélectionné
+        const produitOption = produitSelect.options[produitSelect.selectedIndex];
+        if (produitOption && produitOption.dataset.prix) {
+            montant += parseFloat(produitOption.dataset.prix);
+        }
+        
+        // Mettre à jour le champ montant
+        montantInput.value = montant.toFixed(2);
+        
+        // Ajouter un indicateur visuel si le montant est calculé automatiquement
+        if (montant > 0) {
+            montantInput.style.backgroundColor = '#e8f5e8';
+            montantInput.style.borderColor = '#28a745';
+        } else {
+            montantInput.style.backgroundColor = '';
+            montantInput.style.borderColor = '';
+        }
+    }
+    
+    // Écouter les changements sur les sélecteurs
+    serviceSelect.addEventListener('change', calculerMontant);
+    produitSelect.addEventListener('change', calculerMontant);
+    
+    // Calculer au chargement si des valeurs sont pré-sélectionnées
+    window.addEventListener('load', function() {
+        calculerMontant();
+    });
+    
+    // Permettre la modification manuelle du montant
+    montantInput.addEventListener('input', function() {
+        // Réinitialiser les styles si l'utilisateur modifie manuellement
+        this.style.backgroundColor = '';
+        this.style.borderColor = '';
+    });
+})();
+</script>

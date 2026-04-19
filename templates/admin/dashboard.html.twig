@@ -931,7 +931,7 @@
                         </div>
                         <div class="card-body">
                             <p>
-                                <strong>Administrator:</strong> {{ (app.user.fullName is defined and app.user.fullName) ? app.user.fullName : ((app.user.prenom|default('') ~ ' ' ~ app.user.nom|default(''))|trim ?: app.user.email) }}<br>
+                                <strong>Administrator:</strong> {{ app.user.fullName|default(app.user.email)|default('Admin') }}<br>
                                 <strong>Email:</strong> {{ app.user.email }}<br>
                                 <strong>Member Since:</strong> {{ app.user.createdAt | date('M d, Y') }}<br>
                                 <strong>Account Status:</strong>

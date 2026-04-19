@@ -35,13 +35,13 @@
                 </a>
             </li>
             <li>
-                <a href="{{ path('admin_dashboard') }}#gestion-portefeuille-pane" class="nav-link {{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
+                <a href="{{ path('admin_transaction_index') }}" class="nav-link {{ currentRoute starts with 'admin_transaction_' ? 'active' : '' }}">
                     <i class="fas fa-exchange-alt"></i>
                     <span>Transactions</span>
                 </a>
             </li>
             <li>
-                <a href="{{ path('admin_dashboard') }}#gestion-portefeuille-pane" class="nav-link {{ currentRoute in ['admin_dashboard', 'admin_index'] ? 'active' : '' }}">
+                <a href="{{ path('admin_virement_programme_index') }}" class="nav-link {{ currentRoute starts with 'admin_virement_programme_' ? 'active' : '' }}">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Virements</span>
                 </a>

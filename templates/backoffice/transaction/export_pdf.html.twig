@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Export Transactions</title>
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1f2937; }
+        h1 { margin-bottom: 6px; }
+        .meta { margin-bottom: 12px; color: #6b7280; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #d1d5db; padding: 6px; }
+        th { background: #f3f4f6; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>FinTrack - Export Transactions</h1>
+    <div class="meta">Date de génération: {{ generatedAt|date('d/m/Y H:i:s') }}</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Montant</th>
+                <th>Devise</th>
+                <th>Statut</th>
+                <th>Source</th>
+                <th>Destination</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.id }}</td>
+                <td>{{ transaction.date ? transaction.date|date('Y-m-d H:i') : '-' }}</td>
+                <td>{{ transaction.type }}</td>
+                <td>{{ transaction.montant|number_format(2, ',', ' ') }}</td>
+                <td>{{ transaction.devise }}</td>
+                <td>{{ transaction.statut }}</td>
+                <td>{{ transaction.carteSource ? ('****' ~ transaction.carteSource.numeroCarte|slice(-4)) : '-' }}</td>
+                <td>{{ transaction.carteDest ? ('****' ~ transaction.carteDest.numeroCarte|slice(-4)) : '-' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8">Aucune donnée.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

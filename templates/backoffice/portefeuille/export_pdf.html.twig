@@ -2,95 +2,47 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Export Portefeuilles - FinTrack</title>
+    <title>Export Portefeuilles</title>
     <style>
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 11px;
-            color: #1e293b;
-            margin: 16px;
-        }
-        h1 {
-            margin: 0 0 8px;
-            font-size: 20px;
-            color: #1d4ed8;
-        }
-        .meta {
-            margin-bottom: 12px;
-            color: #475569;
-        }
-        .filters {
-            margin-bottom: 12px;
-            padding: 10px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #cbd5e1;
-            padding: 6px;
-            vertical-align: top;
-        }
-        th {
-            background: #eff6ff;
-            color: #1e3a8a;
-            text-align: left;
-        }
-        .empty {
-            margin-top: 16px;
-            padding: 12px;
-            border: 1px dashed #94a3b8;
-            background: #f8fafc;
-        }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1f2937; }
+        h1 { margin-bottom: 6px; }
+        .meta { margin-bottom: 12px; color: #6b7280; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #d1d5db; padding: 6px; }
+        th { background: #f3f4f6; text-align: left; }
     </style>
 </head>
 <body>
     <h1>FinTrack - Export Portefeuilles</h1>
-    <div class="meta">
-        Genere le: {{ generatedAt|date('d/m/Y H:i') }}
-    </div>
+    <div class="meta">Date de génération: {{ generatedAt|date('d/m/Y H:i:s') }}</div>
 
-    <div class="filters">
-        <strong>Filtres appliques:</strong><br>
-        Recherche: {{ filters.q != '' ? filters.q : '-' }} |
-        Tri: {{ filters.sort }} {{ filters.direction|upper }}
-    </div>
-
-    {% if portefeuilles is empty %}
-        <div class="empty">Aucun portefeuille trouve pour ces criteres.</div>
-    {% else %}
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nom</th>
-                    <th>Proprietaire</th>
-                    <th>Email</th>
-                    <th>Solde</th>
-                    <th>Devise</th>
-                    <th>Cree le</th>
-                    <th>Mis a jour</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for portefeuille in portefeuilles %}
-                    <tr>
-                        <td>{{ portefeuille.id }}</td>
-                        <td>{{ portefeuille.nom }}</td>
-                        <td>{{ (portefeuille.owner_prenom ~ ' ' ~ portefeuille.owner_nom)|trim }}</td>
-                        <td>{{ portefeuille.owner_email }}</td>
-                        <td>{{ portefeuille.solde_total|number_format(2, ',', ' ') }}</td>
-                        <td>{{ portefeuille.devise_principale }}</td>
-                        <td>{{ portefeuille.created_at ? portefeuille.created_at|date('d/m/Y H:i') : '-' }}</td>
-                        <td>{{ portefeuille.updated_at ? portefeuille.updated_at|date('d/m/Y H:i') : '-' }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Utilisateur</th>
+                <th>Email</th>
+                <th>Devise</th>
+                <th>Solde</th>
+                <th>Créé le</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for portefeuille in portefeuilles %}
+            <tr>
+                <td>{{ portefeuille.id }}</td>
+                <td>{{ portefeuille.nom }}</td>
+                <td>{{ portefeuille.user ? (portefeuille.user.fullName ?: '-') : '-' }}</td>
+                <td>{{ portefeuille.user ? portefeuille.user.email : '-' }}</td>
+                <td>{{ portefeuille.devisePrincipale }}</td>
+                <td>{{ portefeuille.soldeTotal|number_format(2, ',', ' ') }}</td>
+                <td>{{ portefeuille.createdAt ? portefeuille.createdAt|date('Y-m-d H:i') : '-' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7">Aucune donnée.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>

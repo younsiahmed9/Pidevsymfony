@@ -1,5 +1,5 @@
 <header class="topbar">
-    {% set adminName = app.user ? ((app.user.fullName is defined and app.user.fullName) ? app.user.fullName : ((app.user.prenom|default('') ~ ' ' ~ app.user.nom|default(''))|trim ?: app.user.email)) : 'Admin User' %}
+    {% set adminName = app.user.fullName|default(app.user.email)|default('Administrateur') %}
     <div class="d-flex align-items-center gap-2">
         <span class="badge bg-primary">BackOffice</span>
         <span class="text-muted small">Gestion & supervision</span>
