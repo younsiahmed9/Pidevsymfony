@@ -1,0 +1,63 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Nouveau Document - Admin FinTrack{% endblock %}
+{% block page_title %}Nouveau Document{% endblock %}
+{% block page_subtitle %}Ajouter un nouveau document{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ path('admin_document_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="form-card">
+            <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations du document</h6>
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+            <div class="row g-3">
+                <div class="col-md-6">
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">{{ form_label(form.titre, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.titre) }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">{{ form_label(form.typeDocument, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.typeDocument, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.typeDocument) }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">{{ form_label(form.statut, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.statut) }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">{{ form_label(form.categorie, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.categorie) }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">{{ form_label(form.dossier, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.dossier, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.dossier) }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">{{ form_label(form.dateDocument, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.dateDocument, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.dateDocument) }}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">{{ form_label(form.dateEcheance, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.dateEcheance, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.dateEcheance) }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="mb-3">
+                        {{ form_label(form.fichier, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}
+                        {{ form_widget(form.fichier, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.fichier) }}
+                        <div class="form-text">Formats acceptés: PDF, DOC, DOCX, JPG, PNG (max 10Mo)</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">{{ form_label(form.tags, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.tags, {'attr': {'class': 'form-control', 'placeholder': 'tag1, tag2, ...'}}) }}{{ form_errors(form.tags) }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="mb-3">{{ form_label(form.description, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}{{ form_errors(form.description) }}</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Créer le document</button>
+                <a href="{{ path('admin_document_index') }}" class="btn btn-outline-secondary">Annuler</a>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

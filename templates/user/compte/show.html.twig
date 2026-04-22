@@ -1,0 +1,92 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Compte {{ compte.numeroCompte }} - FinTrack{% endblock %}
+{% block page_title %}Détail du Compte{% endblock %}
+{% block page_subtitle %}{{ compte.numeroCompte }}{% endblock %}
+
+{% block content %}
+<div class="d-flex gap-2 mb-4">
+    <a href="{{ path('user_compte_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+    <a href="{{ path('user_compte_edit', {id: compte.id}) }}" class="btn btn-primary-custom"><i class="fas fa-edit"></i> Modifier</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="form-card">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                <div style="width:52px;height:52px;border-radius:14px;background:{{ compte.typeCompte == 'epargne' ? '#dcfce7' : '#dbeafe' }};display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-{{ compte.typeCompte == 'epargne' ? 'piggy-bank' : 'university' }}" style="color:{{ compte.typeCompte == 'epargne' ? '#16a34a' : '#1d4ed8' }};font-size:1.3rem;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0" style="color:#1e293b;">{{ compte.numeroCompte }}</h5>
+                    <span class="text-muted small">{{ compte.typeCompte == 'epargne' ? 'Compte Épargne' : 'Compte Courant' }}</span>
+                </div>
+                <div class="ms-auto">
+                    <span class="badge {{ compte.etat == 'actif' ? 'bg-success' : (compte.etat == 'bloque' ? 'bg-danger' : 'bg-secondary') }} text-white px-3 py-1 rounded-pill small fw-bold">
+                        {{ compte.etat|upper }}
+                    </span>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="text-muted small d-block">Solde actuel</label>
+                    <span class="fw-bold fs-4" style="color:#1e40af;">{{ compte.solde|number_format(2, ',', ' ') }} DT</span>
+                </div>
+                <div class="col-md-6">
+                    <label class="text-muted small d-block">Date de création</label>
+                    <span class="fw-semibold">{{ compte.dateCreation|date('d/m/Y') }}</span>
+                </div>
+                {% if compte.typeCompte == 'epargne' and compte.tauxInteret %}
+                <div class="col-md-6">
+                    <label class="text-muted small d-block">Taux d'intérêt</label>
+                    <span class="fw-semibold text-success">{{ compte.tauxInteret }}%</span>
+                </div>
+                {% endif %}
+                {% if compte.typeCompte == 'courant' and compte.plafondDecouvert %}
+                <div class="col-md-6">
+                    <label class="text-muted small d-block">Plafond de découvert</label>
+                    <span class="fw-semibold text-warning">{{ compte.plafondDecouvert|number_format(2, ',', ' ') }} DT</span>
+                </div>
+                {% endif %}
+                <div class="col-md-6">
+                    <label class="text-muted small d-block">Propriétaire</label>
+                    <span class="fw-semibold">{{ compte.utilisateur }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        {% if compte.credits|length > 0 %}
+        <div class="form-card mb-3">
+            <h6 class="fw-semibold mb-3">Crédits liés ({{ compte.credits|length }})</h6>
+            {% for credit in compte.credits %}
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <div>
+                    <div class="small fw-medium">{{ credit.montant|number_format(2, ',', ' ') }} DT</div>
+                    <div class="small text-muted">{{ credit.dureeMois }} mois · {{ credit.tauxInteret }}%</div>
+                </div>
+                <span class="badge {{ credit.status == 'approuve' ? 'bg-success' : (credit.status == 'refuse' ? 'bg-danger' : 'bg-warning text-dark') }} small">
+                    {{ credit.status|replace({'_': ' '}) }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="form-card">
+            <h6 class="fw-semibold mb-3">Actions</h6>
+            <div class="d-grid gap-2">
+                <a href="{{ path('user_compte_edit', {id: compte.id}) }}" class="btn btn-sm btn-primary-custom">
+                    <i class="fas fa-edit me-1"></i> Modifier
+                </a>
+                <form action="{{ path('user_compte_delete', {id: compte.id}) }}" method="post" onsubmit="return confirm('Supprimer ce compte ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ compte.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger w-100" style="border-radius:8px;">
+                        <i class="fas fa-trash me-1"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

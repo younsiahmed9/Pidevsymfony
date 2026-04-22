@@ -1,0 +1,356 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Apr 10, 2026 at 02:04 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `fintrack`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `categorie`
+--
+
+CREATE TABLE `categorie` (
+  `id_categorie` int(11) NOT NULL,
+  `nom_categorie` varchar(100) NOT NULL,
+  `description` longtext DEFAULT NULL,
+  `icon` varchar(50) DEFAULT NULL,
+  `couleur` varchar(7) DEFAULT NULL,
+  `created_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `compte`
+--
+
+CREATE TABLE `compte` (
+  `id_compte` int(11) NOT NULL,
+  `id_utilisateur` bigint(20) NOT NULL,
+  `numero_compte` varchar(50) NOT NULL,
+  `type_compte` varchar(50) NOT NULL,
+  `solde` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `taux_interet` decimal(5,2) DEFAULT NULL,
+  `plafond_decouvert` decimal(15,2) DEFAULT NULL,
+  `date_creation` date NOT NULL,
+  `etat` varchar(20) NOT NULL DEFAULT 'actif'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `credit`
+--
+
+CREATE TABLE `credit` (
+  `id_credit` int(11) NOT NULL,
+  `id_compte` int(11) NOT NULL,
+  `montant` decimal(15,2) NOT NULL,
+  `taux_interet` decimal(5,2) NOT NULL,
+  `duree_mois` int(11) NOT NULL,
+  `mensualite` decimal(15,2) DEFAULT NULL,
+  `date_debut` date NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'en_attente'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `doctrine_migration_versions`
+--
+
+CREATE TABLE `doctrine_migration_versions` (
+  `version` varchar(191) NOT NULL,
+  `executed_at` datetime DEFAULT NULL,
+  `execution_time` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `doctrine_migration_versions`
+--
+
+INSERT INTO `doctrine_migration_versions` (`version`, `executed_at`, `execution_time`) VALUES
+('DoctrineMigrations\\Version20260405183804', '2026-04-09 23:51:42', 100),
+('DoctrineMigrations\\Version20260409000001', '2026-04-09 23:51:42', 100);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `document`
+--
+
+CREATE TABLE `document` (
+  `id_document` int(11) NOT NULL,
+  `id_utilisateur` bigint(20) NOT NULL,
+  `id_categorie` int(11) DEFAULT NULL,
+  `id_dossier` int(11) DEFAULT NULL,
+  `titre` varchar(255) NOT NULL,
+  `type_document` varchar(100) NOT NULL,
+  `chemin_fichier` varchar(500) NOT NULL,
+  `taille_fichier` int(11) DEFAULT NULL,
+  `date_document` date DEFAULT NULL,
+  `date_echeance` date DEFAULT NULL,
+  `statut` enum('valide','expire','a_renouveler','archive') NOT NULL DEFAULT 'valide',
+  `description` text DEFAULT NULL,
+  `tags` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `dossier_document`
+--
+
+CREATE TABLE `dossier_document` (
+  `id_dossier` int(11) NOT NULL,
+  `id_utilisateur` bigint(20) NOT NULL,
+  `nom_dossier` varchar(255) NOT NULL,
+  `description` longtext DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `echeance`
+--
+
+CREATE TABLE `echeance` (
+  `id_echeance` int(11) NOT NULL,
+  `id_document` int(11) NOT NULL,
+  `id_utilisateur` bigint(20) NOT NULL,
+  `titre` varchar(255) NOT NULL,
+  `date_echeance` date NOT NULL,
+  `date_rappel` date DEFAULT NULL,
+  `statut` enum('pending','notified','completed','overdue') NOT NULL DEFAULT 'pending',
+  `description` longtext DEFAULT NULL,
+  `montant` decimal(15,2) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `messenger_messages`
+--
+
+CREATE TABLE `messenger_messages` (
+  `id` bigint(20) NOT NULL,
+  `body` longtext NOT NULL,
+  `headers` longtext NOT NULL,
+  `queue_name` varchar(190) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `available_at` datetime NOT NULL,
+  `delivered_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `utilisateur`
+--
+
+CREATE TABLE `utilisateur` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `nom` varchar(100) NOT NULL,
+  `prenom` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','user') NOT NULL DEFAULT 'user',
+  `solde` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `utilisateur`
+--
+
+INSERT INTO `utilisateur` (`id`, `email`, `nom`, `prenom`, `password`, `role`, `solde`, `created_at`, `updated_at`) VALUES
+(1, 'admin@fintrack.tn', 'Admin', 'Super', '$2y$13$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 0.00, '2026-04-09 23:51:43', '2026-04-09 23:51:43');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `categorie`
+--
+ALTER TABLE `categorie`
+  ADD PRIMARY KEY (`id_categorie`),
+  ADD UNIQUE KEY `uq_nom_categorie` (`nom_categorie`);
+
+--
+-- Indexes for table `compte`
+--
+ALTER TABLE `compte`
+  ADD PRIMARY KEY (`id_compte`),
+  ADD UNIQUE KEY `uq_compte_numero` (`numero_compte`),
+  ADD KEY `idx_compte_utilisateur` (`id_utilisateur`);
+
+--
+-- Indexes for table `credit`
+--
+ALTER TABLE `credit`
+  ADD PRIMARY KEY (`id_credit`),
+  ADD KEY `idx_credit_compte` (`id_compte`);
+
+--
+-- Indexes for table `doctrine_migration_versions`
+--
+ALTER TABLE `doctrine_migration_versions`
+  ADD PRIMARY KEY (`version`);
+
+--
+-- Indexes for table `document`
+--
+ALTER TABLE `document`
+  ADD PRIMARY KEY (`id_document`),
+  ADD KEY `idx_document_utilisateur` (`id_utilisateur`),
+  ADD KEY `idx_document_categorie` (`id_categorie`),
+  ADD KEY `idx_document_dossier` (`id_dossier`);
+
+--
+-- Indexes for table `dossier_document`
+--
+ALTER TABLE `dossier_document`
+  ADD PRIMARY KEY (`id_dossier`),
+  ADD KEY `idx_dossier_utilisateur` (`id_utilisateur`);
+
+--
+-- Indexes for table `echeance`
+--
+ALTER TABLE `echeance`
+  ADD PRIMARY KEY (`id_echeance`),
+  ADD KEY `idx_echeance_document` (`id_document`),
+  ADD KEY `idx_echeance_utilisateur` (`id_utilisateur`);
+
+--
+-- Indexes for table `messenger_messages`
+--
+ALTER TABLE `messenger_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_messenger_queue` (`queue_name`,`available_at`,`delivered_at`,`id`);
+
+--
+-- Indexes for table `utilisateur`
+--
+ALTER TABLE `utilisateur`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_utilisateur_email` (`email`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `categorie`
+--
+ALTER TABLE `categorie`
+  MODIFY `id_categorie` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `compte`
+--
+ALTER TABLE `compte`
+  MODIFY `id_compte` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `credit`
+--
+ALTER TABLE `credit`
+  MODIFY `id_credit` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `document`
+--
+ALTER TABLE `document`
+  MODIFY `id_document` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `dossier_document`
+--
+ALTER TABLE `dossier_document`
+  MODIFY `id_dossier` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `echeance`
+--
+ALTER TABLE `echeance`
+  MODIFY `id_echeance` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `messenger_messages`
+--
+ALTER TABLE `messenger_messages`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `utilisateur`
+--
+ALTER TABLE `utilisateur`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `compte`
+--
+ALTER TABLE `compte`
+  ADD CONSTRAINT `fk_compte_utilisateur` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `credit`
+--
+ALTER TABLE `credit`
+  ADD CONSTRAINT `fk_credit_compte` FOREIGN KEY (`id_compte`) REFERENCES `compte` (`id_compte`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `document`
+--
+ALTER TABLE `document`
+  ADD CONSTRAINT `fk_document_categorie` FOREIGN KEY (`id_categorie`) REFERENCES `categorie` (`id_categorie`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_document_dossier` FOREIGN KEY (`id_dossier`) REFERENCES `dossier_document` (`id_dossier`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_document_utilisateur` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `dossier_document`
+--
+ALTER TABLE `dossier_document`
+  ADD CONSTRAINT `fk_dossier_utilisateur` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `echeance`
+--
+ALTER TABLE `echeance`
+  ADD CONSTRAINT `fk_echeance_document` FOREIGN KEY (`id_document`) REFERENCES `document` (`id_document`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_echeance_utilisateur` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

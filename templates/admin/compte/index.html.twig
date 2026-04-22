@@ -1,0 +1,106 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Comptes - Admin FinTrack{% endblock %}
+{% block page_title %}Gestion des Comptes{% endblock %}
+{% block page_subtitle %}{{ comptes|length }} compte(s) trouvé(s){% endblock %}
+
+{% block content %}
+<div class="form-card mb-4">
+    <form method="GET" action="{{ path('admin_compte_index') }}" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small fw-medium">Recherche</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Numéro, utilisateur...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-medium">Type</label>
+            <select name="type" class="form-select">
+                <option value="">Tous les types</option>
+                <option value="courant" {{ type == 'courant' ? 'selected' : '' }}>Courant</option>
+                <option value="epargne" {{ type == 'epargne' ? 'selected' : '' }}>Épargne</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-medium">État</label>
+            <select name="etat" class="form-select">
+                <option value="">Tous les états</option>
+                <option value="actif"  {{ etat == 'actif'  ? 'selected' : '' }}>Actif</option>
+                <option value="bloque" {{ etat == 'bloque' ? 'selected' : '' }}>Bloqué</option>
+                <option value="clos"   {{ etat == 'clos'   ? 'selected' : '' }}>Clos</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-fill" style="background:#f97316;border-color:#f97316;"><i class="fas fa-filter"></i> Filtrer</button>
+            <a href="{{ path('admin_compte_index') }}" class="btn btn-outline-secondary" title="Réinitialiser"><i class="fas fa-times"></i></a>
+        </div>
+    </form>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted small"><i class="fas fa-list me-1"></i> {{ comptes|length }} résultat(s)</span>
+    <a href="{{ path('admin_compte_new') }}" class="btn-primary-custom"><i class="fas fa-plus"></i> Nouveau compte</a>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="px-3">#</th>
+                    <th>Numéro de compte</th>
+                    <th>Utilisateur</th>
+                    <th>Type</th>
+                    <th>Solde</th>
+                    <th>Taux / Plafond</th>
+                    <th>État</th>
+                    <th>Création</th>
+                    <th class="text-end px-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for compte in comptes %}
+                <tr>
+                    <td class="px-3 text-muted">{{ compte.id }}</td>
+                    <td><strong>{{ compte.numeroCompte }}</strong></td>
+                    <td>{{ compte.utilisateur }}</td>
+                    <td class="text-capitalize">{{ compte.typeCompte == 'epargne' ? 'Épargne' : 'Courant' }}</td>
+                    <td class="fw-semibold" style="color:{{ compte.solde < 0 ? '#dc2626' : '#16a34a' }}">
+                        {{ compte.solde|number_format(2, ',', ' ') }} DT
+                    </td>
+                    <td class="small text-muted">
+                        {% if compte.typeCompte == 'epargne' and compte.tauxInteret %}{{ compte.tauxInteret }}%
+                        {% elseif compte.typeCompte == 'courant' and compte.plafondDecouvert %}{{ compte.plafondDecouvert|number_format(2, ',', ' ') }} DT
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        <span class="badge {{ compte.etat == 'actif' ? 'bg-success' : (compte.etat == 'bloque' ? 'bg-danger' : 'bg-secondary') }}">{{ compte.etat|upper }}</span>
+                    </td>
+                    <td>{{ compte.dateCreation|date('d/m/Y') }}</td>
+                    <td class="text-end px-3">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a href="{{ path('admin_compte_show', {id: compte.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye"></i></a>
+                            <a href="{{ path('admin_compte_edit', {id: compte.id}) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            <form action="{{ path('admin_compte_delete', {id: compte.id}) }}" method="post" onsubmit="return confirm('Supprimer ce compte ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ compte.id) }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <i class="fas fa-university fa-3x mb-3 d-block opacity-25"></i>
+                        <div>Aucun compte trouvé</div>
+                        {% if q or type or etat %}
+                        <a href="{{ path('admin_compte_index') }}" class="btn btn-sm btn-outline-secondary mt-2">Effacer les filtres</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

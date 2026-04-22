@@ -1,0 +1,275 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Mon Dashboard - FinTrack{% endblock %}
+{% block page_title %}Mon Dashboard{% endblock %}
+{% block page_subtitle %}Vue d'ensemble de votre situation financière{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.kpi-card { background:#fff; border-radius:16px; padding:1.5rem; border:1px solid #e8edf3; }
+.score-circle { width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800; margin:0 auto .75rem; }
+.stat-bar-track { height:10px; border-radius:20px; background:#f1f5f9; overflow:hidden; margin:.5rem 0; }
+.stat-bar-fill { height:100%; border-radius:20px; }
+.pret-card { background:linear-gradient(135deg,#f97316,#fb923c); border-radius:16px; padding:1.5rem; color:#fff; }
+.repartition-item { display:flex; align-items:center; justify-content:between; padding:.5rem 0; border-bottom:1px solid #f1f5f9; }
+.sim-modal .modal-content { border-radius:24px; border:none; }
+.sim-slider { width:100%; accent-color:#f97316; }
+.sim-result { background:#f0fdf4; border:2px solid #86efac; border-radius:16px; padding:1.5rem; text-align:center; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# Analyse de Confiance header #}
+<div style="background:#fff;border-radius:16px;border:1px solid #e8edf3;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:36px;height:36px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-shield-alt" style="color:#64748b;"></i>
+    </div>
+    <div>
+        <div class="fw-semibold" style="color:#1e293b;font-size:.95rem;">Analyse de Confiance</div>
+        <div class="text-muted small">Vue détaillée de la solvabilité de vos comptes</div>
+    </div>
+    <a href="{{ path('user_compte_index') }}" class="ms-auto btn btn-sm btn-outline-secondary" style="border-radius:8px;font-size:.78rem;">Gérer mes comptes</a>
+</div>
+
+{# 3 KPI cards + "Besoin d'un prêt" #}
+<div class="row g-3 mb-4">
+    {# Score Global #}
+    <div class="col-md-3 col-sm-6">
+        <div class="kpi-card text-center">
+            <div class="text-muted small mb-2 fw-medium">Score Global</div>
+            <div class="score-circle" style="background:{{ score_global >= 70 ? '#dcfce7' : (score_global >= 40 ? '#fef9c3' : '#fee2e2') }};">
+                <span style="color:{{ score_global >= 70 ? '#16a34a' : (score_global >= 40 ? '#ca8a04' : '#dc2626') }};">{{ score_global }}%</span>
+            </div>
+            <div class="small text-muted">{{ score_global >= 70 ? 'Excellente solvabilité' : (score_global >= 40 ? 'Solvabilité correcte' : 'À améliorer') }}</div>
+        </div>
+    </div>
+
+    {# Solde Total #}
+    <div class="col-md-3 col-sm-6">
+        <div class="kpi-card text-center">
+            <div class="text-muted small mb-2 fw-medium">Solde Total</div>
+            <div style="font-size:1.6rem;font-weight:800;color:#0d9488;margin:.5rem 0;">{{ total_solde|number_format(2, ',', ' ') }} DT</div>
+            <div class="small text-muted">{{ comptes|length }} compte(s) actif(s)</div>
+        </div>
+    </div>
+
+    {# Statistiques de Risque #}
+    <div class="col-md-3 col-sm-6">
+        <div class="kpi-card">
+            <div class="text-muted small mb-3 fw-medium">Statistiques de Risque</div>
+            <div class="mb-2">
+                <div class="d-flex justify-content-between small">
+                    <span>Utilisation Crédit</span>
+                    <span class="fw-semibold">{{ utilisation_credit }}%</span>
+                </div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill" style="width:{{ utilisation_credit }}%;background:{{ utilisation_credit > 70 ? '#dc2626' : (utilisation_credit > 40 ? '#f97316' : '#0d9488') }};"></div>
+                </div>
+            </div>
+            <div>
+                <div class="d-flex justify-content-between small">
+                    <span>Fiabilité Paiement</span>
+                    <span class="fw-semibold">{{ fiabilite_paiement }}%</span>
+                </div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill" style="width:{{ fiabilite_paiement }}%;background:{{ fiabilite_paiement >= 70 ? '#16a34a' : (fiabilite_paiement >= 40 ? '#f59e0b' : '#dc2626') }};"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Besoin d'un prêt ? #}
+    <div class="col-md-3 col-sm-6">
+        <div class="pret-card">
+            <div class="fw-bold mb-1" style="font-size:1rem;">Besoin d'un prêt ?</div>
+            <div style="opacity:.85;font-size:.8rem;margin-bottom:.75rem;">Votre score actuel vous permet d'emprunter jusqu'à</div>
+            <div class="fw-bold mb-3" style="font-size:1.6rem;">{{ max_empruntable|number_format(2, ',', ' ') }} DT</div>
+            <button type="button" class="btn btn-sm fw-bold" style="background:#fff;color:#f97316;border-radius:10px;padding:.4rem 1.1rem;font-size:.82rem;border:none;" data-bs-toggle="modal" data-bs-target="#modalSimulateur">
+                Simuler maintenant &rsaquo;
+            </button>
+        </div>
+    </div>
+</div>
+
+{# Alert écheances #}
+{% if upcoming|length > 0 %}
+<div class="alert d-flex align-items-center gap-3 mb-4" style="background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #f59e0b;border-radius:12px;">
+    <i class="fas fa-bell" style="color:#f59e0b;"></i>
+    <div class="small"><strong>Rappel :</strong> {{ upcoming|length }} échéance(s) dans les 30 prochains jours.
+        <a href="{{ path('user_echeance_index') }}" class="ms-2 fw-medium" style="color:#92400e;">Voir →</a>
+    </div>
+</div>
+{% endif %}
+
+{# Main grid #}
+<div class="row g-4">
+    {# Mes comptes + Répartition #}
+    <div class="col-lg-7">
+        <div class="table-card mb-4">
+            <div class="table-header">
+                <h6 class="mb-0 fw-semibold"><i class="fas fa-university me-2" style="color:#0d9488;"></i>Mes Comptes</h6>
+                <a href="{{ path('user_compte_index') }}" class="btn-primary-custom" style="font-size:.78rem;padding:.35rem .9rem;">
+                    <i class="fas fa-plus"></i> Nouveau
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th class="px-3">Numéro</th><th>Type</th><th>Solde</th><th>État</th></tr></thead>
+                    <tbody>
+                        {% for compte in comptes|slice(0, 6) %}
+                        <tr>
+                            <td class="px-3">
+                                <a href="{{ path('user_compte_show', {id: compte.id}) }}" class="text-decoration-none fw-medium small" style="color:#0f172a;">{{ compte.numeroCompte }}</a>
+                            </td>
+                            <td class="small text-capitalize text-muted">{{ compte.typeCompte == 'epargne' ? 'Épargne' : 'Courant' }}</td>
+                            <td class="fw-medium small {{ compte.solde < 0 ? 'text-danger' : 'text-success' }}">{{ compte.solde|number_format(2, ',', ' ') }} DT</td>
+                            <td>
+                                <span class="badge {{ compte.etat == 'actif' ? 'bg-success' : (compte.etat == 'bloque' ? 'bg-danger' : 'bg-secondary') }}" style="font-size:.7rem;">{{ compte.etat|upper }}</span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center py-4 text-muted small">Aucun compte</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if comptes|length > 6 %}
+            <div style="padding:.75rem 1.5rem;border-top:1px solid #f1f5f9;">
+                <a href="{{ path('user_compte_index') }}" class="small text-muted">Voir tous mes comptes <i class="fas fa-arrow-right ms-1"></i></a>
+            </div>
+            {% endif %}
+        </div>
+
+        {# Répartition des Comptes #}
+        <div class="kpi-card">
+            <h6 class="fw-semibold mb-3"><i class="fas fa-chart-pie me-2" style="color:#0d9488;"></i>Répartition des Comptes</h6>
+            {% set nb_actifs  = comptes|filter(c => c.etat == 'actif')|length %}
+            {% set nb_bloques = comptes|filter(c => c.etat == 'bloque')|length %}
+            {% set nb_clos    = comptes|filter(c => c.etat == 'clos')|length %}
+            <div class="d-flex flex-column gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:12px;height:12px;border-radius:50%;background:#16a34a;flex-shrink:0;"></div>
+                    <span class="small flex-grow-1">Actifs</span>
+                    <span class="fw-bold small">{{ nb_actifs }}</span>
+                    <div class="stat-bar-track" style="width:80px;margin:0;">
+                        <div class="stat-bar-fill" style="width:{{ comptes|length > 0 ? (nb_actifs / comptes|length * 100)|round : 0 }}%;background:#16a34a;"></div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:12px;height:12px;border-radius:50%;background:#dc2626;flex-shrink:0;"></div>
+                    <span class="small flex-grow-1">Bloqués</span>
+                    <span class="fw-bold small">{{ nb_bloques }}</span>
+                    <div class="stat-bar-track" style="width:80px;margin:0;">
+                        <div class="stat-bar-fill" style="width:{{ comptes|length > 0 ? (nb_bloques / comptes|length * 100)|round : 0 }}%;background:#dc2626;"></div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:12px;height:12px;border-radius:50%;background:#94a3b8;flex-shrink:0;"></div>
+                    <span class="small flex-grow-1">Clôturés</span>
+                    <span class="fw-bold small">{{ nb_clos }}</span>
+                    <div class="stat-bar-track" style="width:80px;margin:0;">
+                        <div class="stat-bar-fill" style="width:{{ comptes|length > 0 ? (nb_clos / comptes|length * 100)|round : 0 }}%;background:#94a3b8;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Right column #}
+    <div class="col-lg-5 d-flex flex-column gap-4">
+        {# Prochaines échéances #}
+        <div class="table-card">
+            <div class="table-header">
+                <h6 class="mb-0 fw-semibold"><i class="fas fa-calendar-check me-2" style="color:#ca8a04;"></i>Prochaines échéances</h6>
+                <a href="{{ path('user_echeance_new') }}" class="btn-primary-custom" style="font-size:.78rem;padding:.35rem .9rem;"><i class="fas fa-plus"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th class="px-3">Titre</th><th>Date</th><th>Statut</th></tr></thead>
+                    <tbody>
+                        {% for echeance in upcoming|slice(0, 5) %}
+                        <tr>
+                            <td class="px-3 small fw-medium" style="color:#0f172a;">{{ echeance.titre|length > 18 ? echeance.titre|slice(0,18) ~ '…' : echeance.titre }}</td>
+                            <td class="small text-muted">{{ echeance.dateEcheance|date('d/m/Y') }}</td>
+                            <td><span class="badge-status badge-{{ echeance.statut }}">{{ echeance.statut }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="3" class="text-center py-3 text-muted small">Aucune échéance</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Accès rapide #}
+        <div class="form-card">
+            <h6 class="fw-semibold mb-3" style="color:#0f172a;"><i class="fas fa-bolt me-2" style="color:#0d9488;"></i>Accès rapide</h6>
+            <div class="d-grid gap-2">
+                <a href="{{ path('user_document_index') }}" class="btn btn-sm d-flex align-items-center gap-2 text-start" style="background:#f0fdfa;color:#0d9488;border:1px solid #99f6e4;border-radius:8px;padding:.6rem 1rem;">
+                    <i class="fas fa-file-alt"></i><span>Mes documents</span><i class="fas fa-chevron-right ms-auto" style="font-size:.7rem;opacity:.5;"></i>
+                </a>
+                <a href="{{ path('user_credit_index') }}" class="btn btn-sm d-flex align-items-center gap-2 text-start" style="background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;border-radius:8px;padding:.6rem 1rem;">
+                    <i class="fas fa-credit-card"></i><span>Mes crédits</span><i class="fas fa-chevron-right ms-auto" style="font-size:.7rem;opacity:.5;"></i>
+                </a>
+                <a href="{{ path('user_dossier_index') }}" class="btn btn-sm d-flex align-items-center gap-2 text-start" style="background:#fafafa;color:#64748b;border:1px solid #e2e8f0;border-radius:8px;padding:.6rem 1rem;">
+                    <i class="fas fa-folder"></i><span>Mes dossiers</span><i class="fas fa-chevron-right ms-auto" style="font-size:.7rem;opacity:.5;"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Modal Simulateur de Crédit ── #}
+<div class="modal fade sim-modal" id="modalSimulateur" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:24px;border:none;padding:2rem;">
+            <div class="text-center mb-3">
+                <h4 class="fw-bold" style="color:#1e293b;">Simulateur de Crédit</h4>
+                <p class="text-muted small">Ajustez les curseurs pour simuler vos mensualités</p>
+            </div>
+            <div class="mb-4">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="small fw-medium">Montant du prêt</span>
+                    <span class="fw-bold small" id="sim_montant_label">1 000 DT</span>
+                </div>
+                <input type="range" class="sim-slider" id="sim_montant" min="500" max="100000" step="500" value="1000" oninput="updateSim()">
+            </div>
+            <div class="mb-4">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="small fw-medium">Durée (mois)</span>
+                    <span class="fw-bold small" id="sim_duree_label">24 mois</span>
+                </div>
+                <input type="range" class="sim-slider" id="sim_duree" min="6" max="360" step="6" value="24" oninput="updateSim()">
+            </div>
+            <div class="sim-result mb-4">
+                <div class="text-muted small fw-medium mb-1">Mensualité estimée</div>
+                <div class="fw-bold" style="font-size:2rem;color:#16a34a;" id="sim_mensualite">45,23 DT</div>
+                <div class="text-muted small mt-1">Taux indicatif : 8.00% / an</div>
+            </div>
+            <div class="d-flex gap-3">
+                <button type="button" class="btn flex-fill fw-bold" style="background:linear-gradient(90deg,#f97316,#fb923c);color:#fff;border-radius:12px;padding:.65rem;border:none;" data-bs-dismiss="modal">
+                    Fermer la simulation
+                </button>
+                <a href="{{ path('user_credit_new') }}" class="btn btn-outline-secondary flex-fill" style="border-radius:12px;padding:.65rem;font-weight:600;">
+                    Faire une demande
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateSim() {
+    const M  = parseFloat(document.getElementById('sim_montant').value);
+    const N  = parseFloat(document.getElementById('sim_duree').value);
+    const TX = 8.00;
+    const r  = TX / 100 / 12;
+    const mensualite = M * r / (1 - Math.pow(1 + r, -N));
+    document.getElementById('sim_montant_label').textContent = M.toLocaleString('fr-FR') + ' DT';
+    document.getElementById('sim_duree_label').textContent   = N + ' mois';
+    document.getElementById('sim_mensualite').textContent    = mensualite.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' DT';
+}
+document.addEventListener('DOMContentLoaded', updateSim);
+</script>
+{% endblock %}

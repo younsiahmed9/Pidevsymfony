@@ -1,0 +1,93 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Echeances - Admin FinTrack{% endblock %}
+{% block page_title %}Gestion des Echeances{% endblock %}
+{% block page_subtitle %}{{ echeances|length }} echeance(s){% endblock %}
+
+{% block content %}
+{% if nb_overdue > 0 %}
+<div class="alert alert-danger d-flex align-items-center mb-4">
+    <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+    <div><strong>{{ nb_overdue }} echeance(s) en retard !</strong></div>
+    <a href="{{ path('admin_echeance_index', {statut: 'pending'}) }}" class="btn btn-sm btn-danger ms-auto">Voir</a>
+</div>
+{% endif %}
+
+<div class="form-card mb-4">
+    <form method="GET" action="{{ path('admin_echeance_index') }}" class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small fw-medium">Recherche</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Titre, document...">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-medium">Statut</label>
+            <select name="statut" class="form-select">
+                <option value="">Tous</option>
+                <option value="pending" {% if statut == 'pending' %}selected{% endif %}>En attente</option>
+                <option value="notified" {% if statut == 'notified' %}selected{% endif %}>Notifie</option>
+                <option value="completed" {% if statut == 'completed' %}selected{% endif %}>Complete</option>
+                <option value="overdue" {% if statut == 'overdue' %}selected{% endif %}>En retard</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-medium">Du</label>
+            <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-medium">Au</label>
+            <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+        </div>
+        <div class="col-md-3 d-flex gap-2 align-items-end">
+            <button type="submit" class="btn flex-fill" style="background:#f97316;color:#fff;border-color:#f97316;"><i class="fas fa-filter"></i> Filtrer</button>
+            <a href="{{ path('admin_echeance_index') }}" class="btn btn-outline-secondary"><i class="fas fa-times"></i></a>
+        </div>
+    </form>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted small">{{ echeances|length }} resultat(s)</span>
+    <a href="{{ path('admin_echeance_new') }}" class="btn-primary-custom"><i class="fas fa-plus"></i> Nouvelle echeance</a>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="px-3">#</th><th>Titre</th><th>Document</th><th>Utilisateur</th>
+                    <th>Date echeance</th><th>Date rappel</th><th>Montant</th><th>Statut</th>
+                    <th class="text-end px-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for echeance in echeances %}
+                <tr>
+                    <td class="px-3 text-muted">{{ echeance.id }}</td>
+                    <td><strong>{{ echeance.titre }}</strong></td>
+                    <td><i class="fas fa-file-alt me-1 text-muted"></i>{{ echeance.document }}</td>
+                    <td>{{ echeance.utilisateur }}</td>
+                    <td><strong>{{ echeance.dateEcheance|date('d/m/Y') }}</strong></td>
+                    <td>{{ echeance.dateRappel ? echeance.dateRappel|date('d/m/Y') : '-' }}</td>
+                    <td>{{ echeance.montant ? echeance.montant|number_format(2, ',', ' ')~' TND' : '-' }}</td>
+                    <td><span class="badge-status badge-{{ echeance.statut }}">{{ echeance.statut }}</span></td>
+                    <td class="text-end px-3">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a href="{{ path('admin_echeance_show', {id: echeance.id}) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye"></i></a>
+                            <a href="{{ path('admin_echeance_edit', {id: echeance.id}) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                            <form action="{{ path('admin_echeance_delete', {id: echeance.id}) }}" method="post" onsubmit="return confirm('Supprimer ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ echeance.id) }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="9" class="text-center py-5 text-muted"><i class="fas fa-calendar-check fa-3x mb-3 d-block opacity-25"></i>Aucune echeance trouvee</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

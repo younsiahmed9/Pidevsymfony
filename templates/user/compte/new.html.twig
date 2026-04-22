@@ -1,0 +1,27 @@
+{% extends 'user/base.html.twig' %}
+{% block title %}Nouveau Compte - FinTrack{% endblock %}
+{% block page_title %}Nouveau Compte{% endblock %}
+{% block page_subtitle %}Créer un nouveau compte{% endblock %}
+{% block content %}
+<div class="mb-4"><a href="{{ path('user_compte_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a></div>
+<div class="row"><div class="col-md-8">
+    <div class="form-card">
+        <h6 class="fw-semibold mb-4 pb-2 border-bottom">Informations du compte</h6>
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div class="row g-3">
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.numeroCompte, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.numeroCompte, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.numeroCompte) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.typeCompte, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.typeCompte, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.typeCompte) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.devise, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.devise, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.devise) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.statut, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}{{ form_errors(form.statut) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.solde, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.solde, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.solde) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.soldeInitial, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.soldeInitial, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.soldeInitial) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.tauxInteret, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.tauxInteret, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.tauxInteret) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.dateOuverture, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.dateOuverture, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.dateOuverture) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.iban, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.iban, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.iban) }}</div></div>
+            <div class="col-md-6"><div class="mb-3">{{ form_label(form.bic, null, {'label_attr': {'class': 'form-label fw-medium'}}) }}{{ form_widget(form.bic, {'attr': {'class': 'form-control'}}) }}{{ form_errors(form.bic) }}</div></div>
+        </div>
+        <div class="d-flex gap-2 mt-3"><button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Créer</button><a href="{{ path('user_compte_index') }}" class="btn btn-outline-secondary">Annuler</a></div>
+        {{ form_end(form) }}
+    </div>
+</div></div>
+{% endblock %}
