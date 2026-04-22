@@ -4,6 +4,7 @@ namespace App\Controller\BackOffice;
 
 use App\Entity\Document;
 use App\Repository\DocumentRepository;
+use App\Repository\TagRepository;
 use App\Repository\UserRepository;
 use App\Repository\CategorieRepository;
 use App\Repository\DossierRepository;
@@ -25,14 +26,22 @@ class DocumentController extends AbstractController
         $q = $request->query->get('q', '');
         $documents = $documentRepository->search($q);
 
+        // Admin dashboard stats
+        $stats = $documentRepository->getAdminStats();
+
+        // Last 5 documents globally
+        $recentDocs = $documentRepository->findBy([], ['createdAt' => 'DESC'], 5);
+
         return $this->render('backoffice/document/index.html.twig', [
-            'documents' => $documents,
-            'q' => $q,
+            'documents'  => $documents,
+            'q'          => $q,
+            'stats'      => $stats,
+            'recentDocs' => $recentDocs,
         ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, CategorieRepository $categorieRepository, DossierRepository $dossierRepository, SluggerInterface $slugger): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, CategorieRepository $categorieRepository, DossierRepository $dossierRepository, TagRepository $tagRepository, SluggerInterface $slugger, \Symfony\Component\Validator\Validator\ValidatorInterface $validator): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -56,13 +65,17 @@ class DocumentController extends AbstractController
             $document->setTypeDocument($request->request->get('type_document'));
             $document->setStatut($request->request->get('statut'));
             $document->setDescription($request->request->get('description'));
-            $document->setTags($request->request->get('tags'));
+            $this->syncDocumentTags($document, $request->request->get('tags'), $tagRepository);
             
-            $dateDoc = $request->request->get('date_document');
-            if ($dateDoc) $document->setDateDocument(new \DateTime($dateDoc));
-            
-            $dateEch = $request->request->get('date_echeance');
-            if ($dateEch) $document->setDateEcheance(new \DateTime($dateEch));
+            try {
+                $dateDoc = $request->request->get('date_document');
+                if ($dateDoc) $document->setDateDocument(new \DateTime($dateDoc));
+                
+                $dateEch = $request->request->get('date_echeance');
+                if ($dateEch) $document->setDateEcheance(new \DateTime($dateEch));
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'Format de date invalide.');
+            }
 
             $file = $request->files->get('fichier');
             if ($file) {
@@ -70,21 +83,29 @@ class DocumentController extends AbstractController
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
 
+                $fileSize = $file->getSize();
                 $file->move(
                     $this->getParameter('documents_directory'),
                     $newFilename
                 );
                 $document->setCheminFichier($newFilename);
-                $document->setTailleFichier($file->getSize());
+                $document->setTailleFichier($fileSize);
             }
 
             $document->setUpdatedAt(new \DateTime());
 
-            $entityManager->persist($document);
-            $entityManager->flush();
+            $violations = $validator->validate($document);
+            if (count($violations) > 0) {
+                foreach ($violations as $violation) {
+                    $this->addFlash('danger', $violation->getMessage());
+                }
+            } else {
+                $entityManager->persist($document);
+                $entityManager->flush();
 
-            $this->addFlash('success', 'Document ajouté avec succès.');
-            return $this->redirectToRoute('admin_document_index');
+                $this->addFlash('success', 'Document ajouté avec succès.');
+                return $this->redirectToRoute('admin_document_index');
+            }
         }
 
         return $this->render('backoffice/document/new.html.twig', [
@@ -107,7 +128,7 @@ class DocumentController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Document $document, EntityManagerInterface $entityManager, UserRepository $userRepository, CategorieRepository $categorieRepository, DossierRepository $dossierRepository, SluggerInterface $slugger): Response
+    public function edit(Request $request, Document $document, EntityManagerInterface $entityManager, UserRepository $userRepository, CategorieRepository $categorieRepository, DossierRepository $dossierRepository, TagRepository $tagRepository, SluggerInterface $slugger, \Symfony\Component\Validator\Validator\ValidatorInterface $validator): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -130,13 +151,17 @@ class DocumentController extends AbstractController
             $document->setTypeDocument($request->request->get('type_document'));
             $document->setStatut($request->request->get('statut'));
             $document->setDescription($request->request->get('description'));
-            $document->setTags($request->request->get('tags'));
+            $this->syncDocumentTags($document, $request->request->get('tags'), $tagRepository);
             
-            $dateDoc = $request->request->get('date_document');
-            if ($dateDoc) $document->setDateDocument(new \DateTime($dateDoc));
-            
-            $dateEch = $request->request->get('date_echeance');
-            if ($dateEch) $document->setDateEcheance(new \DateTime($dateEch));
+            try {
+                $dateDoc = $request->request->get('date_document');
+                if ($dateDoc) $document->setDateDocument(new \DateTime($dateDoc));
+                
+                $dateEch = $request->request->get('date_echeance');
+                if ($dateEch) $document->setDateEcheance(new \DateTime($dateEch));
+            } catch (\Exception $e) {
+                $this->addFlash('danger', 'Format de date invalide.');
+            }
 
             $file = $request->files->get('fichier');
             if ($file) {
@@ -144,20 +169,28 @@ class DocumentController extends AbstractController
                 $safeFilename = $slugger->slug($originalFilename);
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
 
+                $fileSize = $file->getSize();
                 $file->move(
                     $this->getParameter('documents_directory'),
                     $newFilename
                 );
                 $document->setCheminFichier($newFilename);
-                $document->setTailleFichier($file->getSize());
+                $document->setTailleFichier($fileSize);
             }
 
             $document->setUpdatedAt(new \DateTime());
 
-            $entityManager->flush();
+            $violations = $validator->validate($document);
+            if (count($violations) > 0) {
+                foreach ($violations as $violation) {
+                    $this->addFlash('danger', $violation->getMessage());
+                }
+            } else {
+                $entityManager->flush();
 
-            $this->addFlash('success', 'Document mis à jour.');
-            return $this->redirectToRoute('admin_document_index');
+                $this->addFlash('success', 'Document mis à jour.');
+                return $this->redirectToRoute('admin_document_index');
+            }
         }
 
         return $this->render('backoffice/document/edit.html.twig', [
@@ -181,5 +214,48 @@ class DocumentController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_document_index');
+    }
+
+    private function syncDocumentTags(Document $document, mixed $tagsInput, TagRepository $tagRepository): void
+    {
+        $document->clearTags();
+
+        foreach ($this->normalizeTagValues($tagsInput) as $rawTag) {
+            $tag = ctype_digit($rawTag)
+                ? $tagRepository->find((int) $rawTag)
+                : null;
+
+            if (!$tag) {
+                $tag = $tagRepository->findOrCreateByName($rawTag);
+            }
+
+            if ($tag) {
+                $document->addTag($tag);
+            }
+        }
+    }
+
+    private function normalizeTagValues(mixed $tagsInput): array
+    {
+        if (is_array($tagsInput)) {
+            $values = $tagsInput;
+        } else {
+            $values = preg_split('/[;,\n]+/', (string) $tagsInput) ?: [];
+        }
+
+        $normalized = [];
+
+        foreach ($values as $value) {
+            $tag = trim((string) $value);
+
+            if ($tag === '') {
+                continue;
+            }
+
+            $key = mb_strtolower($tag);
+            $normalized[$key] = $tag;
+        }
+
+        return array_values($normalized);
     }
 }

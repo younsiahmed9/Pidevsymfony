@@ -1,138 +1,714 @@
 {% extends 'frontoffice/base.html.twig' %}
 
-{% block title %}Mes Documents{% endblock %}
+{% block title %}Tableau de Bord Documents – FinTrack{% endblock %}
+
+{% block stylesheets %}
+<style>
+/* ═══════════════════════════════════════════════════════════
+   DOCUMENT DASHBOARD — Premium User UI
+   ═══════════════════════════════════════════════════════════ */
+:root {
+    --doc-primary:   #4361ee;
+    --doc-success:   #10b981;
+    --doc-warning:   #f59e0b;
+    --doc-danger:    #ef4444;
+    --doc-info:      #3b82f6;
+    --doc-muted:     #64748b;
+    --doc-bg:        #f1f5f9;
+    --doc-card:      #ffffff;
+    --doc-border:    #e2e8f0;
+    --doc-text:      #1e293b;
+    --doc-radius:    16px;
+    --doc-shadow:    0 4px 24px rgba(67,97,238,.08);
+    --doc-shadow-lg: 0 12px 48px rgba(67,97,238,.14);
+}
+html[data-theme='dark'] {
+    --doc-bg:    #0f172a;
+    --doc-card:  #1e293b;
+    --doc-border:#334155;
+    --doc-text:  #e2e8f0;
+    --doc-muted: #94a3b8;
+    --doc-shadow:    0 4px 24px rgba(0,0,0,.4);
+    --doc-shadow-lg: 0 12px 48px rgba(0,0,0,.5);
+}
+
+body { background: var(--doc-bg) !important; }
+
+/* PAGE HEADER */
+.doc-hero {
+    background: #ffffff;
+    padding: 3rem 2rem 5rem;
+    color: var(--doc-text);
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--doc-border);
+}
+.doc-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: rgba(67, 97, 238, 0.03);
+}
+.doc-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(67, 97, 238, 0.02);
+}
+.doc-hero-title    { font-size: 2.2rem; font-weight: 800; letter-spacing: -.8px; color: #0f172a; }
+.doc-hero-subtitle { color: var(--doc-muted); font-size: 1rem; font-weight: 500; }
+
+/* FLOATING STAT CARDS (overlap the hero) */
+.doc-stats-row {
+    margin-top: -3rem;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 10;
+}
+.stat-card {
+    background: var(--doc-card);
+    border-radius: var(--doc-radius);
+    padding: 1.4rem 1.6rem;
+    box-shadow: var(--doc-shadow-lg);
+    border: 1px solid var(--doc-border);
+    transition: transform .3s, box-shadow .3s;
+    position: relative;
+    overflow: hidden;
+}
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(79,70,229,.18); }
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: var(--doc-radius) var(--doc-radius) 0 0;
+}
+.stat-card.primary::before   { background: linear-gradient(90deg,#1e293b,#4361ee); }
+.stat-card.success::before   { background: linear-gradient(90deg,#10b981,#34d399); }
+.stat-card.warning::before   { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+.stat-card.danger::before    { background: linear-gradient(90deg,#ef4444,#f87171); }
+.stat-card.info::before      { background: linear-gradient(90deg,#3b82f6,#60a5fa); }
+.stat-card.teal::before      { background: linear-gradient(90deg,#0d9488,#2dd4bf); }
+
+.stat-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.stat-card.primary .stat-icon   { background: #e0e7ff; color: #4361ee; }
+.stat-card.success .stat-icon   { background: #d1fae5; color: #059669; }
+.stat-card.warning .stat-icon   { background: #fef3c7; color: #d97706; }
+.stat-card.danger  .stat-icon   { background: #fee2e2; color: #dc2626; }
+.stat-card.info    .stat-icon   { background: #dbeafe; color: #2563eb; }
+.stat-card.teal    .stat-icon   { background: #ccfbf1; color: #0d9488; }
+
+.stat-value { font-size: 2rem; font-weight: 800; color: var(--doc-text); line-height: 1; }
+.stat-label { font-size: .8rem; font-weight: 600; color: var(--doc-muted); text-transform: uppercase; letter-spacing: .5px; margin-top: .2rem; }
+.stat-trend { font-size: .75rem; padding: .2rem .6rem; border-radius: 20px; font-weight: 600; }
+.trend-up   { background: #d1fae5; color: #059669; }
+.trend-warn { background: #fef3c7; color: #d97706; }
+.trend-info { background: #dbeafe; color: #2563eb; }
+
+/* SECTION CARDS */
+.doc-section {
+    background: var(--doc-card);
+    border-radius: var(--doc-radius);
+    box-shadow: var(--doc-shadow);
+    border: 1px solid var(--doc-border);
+    overflow: hidden;
+}
+.doc-section-header {
+    padding: 1.2rem 1.6rem;
+    border-bottom: 1px solid var(--doc-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.doc-section-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--doc-text);
+}
+
+/* CHART */
+.chart-wrapper { padding: 1.5rem; height: 200px; position: relative; }
+
+/* TYPE BADGE LIST */
+.type-row { display: flex; align-items: center; gap: .8rem; padding: .8rem 1.6rem; border-bottom: 1px solid var(--doc-border); }
+.type-row:last-child { border-bottom: none; }
+.type-bar-bg { flex: 1; height: 6px; background: var(--doc-border); border-radius: 4px; overflow: hidden; }
+.type-bar    { height: 100%; border-radius: 4px; transition: width .6s ease; }
+.type-label  { font-size: .8rem; font-weight: 600; color: var(--doc-text); min-width: 80px; }
+.type-count  { font-size: .8rem; font-weight: 700; color: var(--doc-muted); min-width: 28px; text-align: right; }
+
+/* DOCUMENT TABLE */
+.doc-table { width: 100%; border-collapse: collapse; }
+.doc-table th { padding: .85rem 1.4rem; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--doc-muted); background: #f8fafc; border-bottom: 1px solid var(--doc-border); }
+html[data-theme='dark'] .doc-table th { background: #0f172a !important; }
+.doc-table td { padding: .9rem 1.4rem; border-bottom: 1px solid var(--doc-border); vertical-align: middle; color: var(--doc-text); font-size: .88rem; }
+.doc-table tr:last-child td { border-bottom: none; }
+.doc-table tbody tr { transition: background .2s; }
+.doc-table tbody tr:hover { background: rgba(79,70,229,.04); }
+
+/* FILE ICON */
+.file-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .9rem; flex-shrink: 0; }
+.file-pdf   { background:#fee2e2; color:#dc2626; }
+.file-img   { background:#d1fae5; color:#059669; }
+.file-doc   { background:#dbeafe; color:#2563eb; }
+.file-other { background:#f3f4f6; color:#6b7280; }
+
+/* STATUS PILL */
+.pill { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .75rem; border-radius: 20px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+.pill-valide     { background:#d1fae5; color:#065f46; }
+.pill-expire     { background:#fee2e2; color:#991b1b; }
+.pill-a_renouveler { background:#fef3c7; color:#92400e; }
+.pill-archive    { background:#f3f4f6; color:#6b7280; }
+
+/* ALERT ITEMS */
+.alert-item { padding: 1rem 1.6rem; border-bottom: 1px solid var(--doc-border); display: flex; align-items: flex-start; gap: 1rem; }
+.alert-item:last-child { border-bottom: none; }
+.alert-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+
+/* SEARCH BAR */
+.search-bar { background: var(--doc-card); border-radius: var(--doc-radius); box-shadow: var(--doc-shadow); border: 1px solid var(--doc-border); padding: 1.4rem 1.6rem; margin-bottom: 1.5rem; }
+
+/* DOCUMENT GRID */
+.doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+.doc-card {
+    background: var(--doc-card);
+    border: 1px solid var(--doc-border);
+    border-radius: var(--doc-radius);
+    box-shadow: var(--doc-shadow);
+    transition: transform .3s, box-shadow .3s;
+    overflow: hidden;
+    position: relative;
+}
+.doc-card:hover { transform: translateY(-6px); box-shadow: var(--doc-shadow-lg); }
+.doc-card-body { padding: 1.4rem; }
+.doc-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 1rem; }
+.doc-card-title { font-size: .93rem; font-weight: 700; color: var(--doc-text); margin-bottom: .25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-card-sub   { font-size: .78rem; color: var(--doc-muted); }
+.doc-card-footer { padding: 1rem 1.4rem; border-top: 1px solid var(--doc-border); display: flex; align-items: center; justify-content: space-between; }
+
+/* EMPTY STATE */
+.empty-state { padding: 4rem 2rem; text-align: center; }
+.empty-icon { width: 80px; height: 80px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #4361ee; margin: 0 auto 1.5rem; }
+
+/* ACTION BTN */
+.btn-doc-primary { background: linear-gradient(135deg,#1e293b,#4361ee); color:#fff; border:none; padding: .6rem 1.4rem; border-radius: 10px; font-weight: 600; font-size: .88rem; transition: all .3s; display: inline-flex; align-items: center; gap:.4rem; text-decoration: none; }
+.btn-doc-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(67,97,238,.35); color:#fff; }
+.btn-doc-outline { background: transparent; border: 1.5px solid var(--doc-border); color: var(--doc-text); padding: .55rem 1.2rem; border-radius: 10px; font-weight: 600; font-size: .85rem; transition: all .2s; display: inline-flex; align-items: center; gap:.4rem; text-decoration: none; }
+.btn-doc-outline:hover { border-color: #4361ee; color: #4361ee; background: #4361ee22; }
+
+/* progress ring */
+.ring-wrap { position: relative; width: 70px; height: 70px; }
+.ring-wrap svg { transform: rotate(-90deg); }
+circle.track { stroke: var(--doc-border); fill: none; }
+circle.fill  { fill: none; stroke-linecap: round; transition: stroke-dashoffset .8s ease; }
+.ring-label  { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; color: var(--doc-text); }
+</style>
+{% endblock %}
 
 {% block body %}
-<section class="py-5 bg-light min-vh-100">
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-5 bg-white p-4 rounded-4 shadow-sm">
-            <div>
-                <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-file-invoice text-primary me-2"></i>Mes Documents</h1>
-                <p class="text-muted mb-0">Stockez, organisez et retrouvez tous vos documents importants en un clic.</p>
+
+{# ─── HERO HEADER ─────────────────────────────────────────── #}
+<div class="doc-hero">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div style="position:relative;z-index:2">
+                <p class="mb-1" style="color:var(--doc-primary);font-size:.85rem;letter-spacing:1px;text-transform:uppercase;font-weight:700">Gestion Documentaire</p>
+                <h1 class="doc-hero-title mb-1">Tableau de Bord</h1>
+                <p class="doc-hero-subtitle mb-0">Bonjour {{ app.user.fullName ?: app.user.email }} — {{ 'now'|date('d MMMM Y')|capitalize }} 👋</p>
             </div>
-            <div class="d-flex gap-2">
-                <a href="{{ path('dossier_document_new') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4">
-                    <i class="fas fa-folder-plus me-2"></i> Créer un dossier
+            <div style="position:relative;z-index:2" class="d-flex gap-2 flex-wrap">
+                <a href="{{ path('document_new') }}" class="btn-doc-primary">
+                    <i class="fas fa-upload"></i> Importer
                 </a>
-                <a href="{{ path('document_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
-                    <i class="fas fa-upload me-2"></i> Importer un document
+                <a href="{{ path('dossier_document_new') }}" class="btn-doc-outline">
+                    <i class="fas fa-folder-plus"></i> Nouveau dossier
+                </a>
+                <a href="{{ path('echeance_new') }}" class="btn-doc-outline">
+                    <i class="fas fa-bell"></i> Échéance
+                </a>
+                <a href="{{ path('document_export_pdf') }}" class="btn-doc-outline">
+                    <i class="fas fa-file-pdf"></i> PDF
                 </a>
             </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4">
-                <form method="GET" action="{{ path('document_index') }}" class="row g-3 align-items-end">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Recherche</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
-                            <input type="text" name="q" value="{{ q }}" class="form-control bg-light border-0 shadow-none" placeholder="Titre, tags, description...">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Type de document</label>
-                        <select name="type" class="form-select bg-light border-0 shadow-none">
-                            <option value="">Tous les types</option>
-                            {% for t in ['contrat', 'facture', 'releve', 'identite', 'assurance', 'fiscal', 'autre'] %}
-                                <option value="{{ t }}" {{ type == t ? 'selected' : '' }}>{{ t|capitalize }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">Filtrer</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            {% for document in documents %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover overflow-hidden">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-4">
-                                <div class="p-3 rounded-4" style="background-color: {{ document.categorie.couleur|default('#4e73df') }}15;">
-                                    <i class="fas fa-file-pdf fa-2x" style="color: {{ document.categorie.couleur|default('#4e73df') }};"></i>
-                                </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-link text-muted p-0 shadow-none" type="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
-                                        <li><a class="dropdown-item py-2" href="{{ path('document_show', {id: document.id}) }}"><i class="fas fa-eye me-2 text-primary small"></i> Consulter</a></li>
-                                        <li><a class="dropdown-item py-2" href="{{ path('document_edit', {id: document.id}) }}"><i class="fas fa-edit me-2 text-warning small"></i> Modifier</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form method="post" action="{{ path('document_delete', {'id': document.id}) }}" onsubmit="return confirm('Supprimer ce document ?');">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
-                                                <button class="dropdown-item py-2 text-danger"><i class="fas fa-trash-alt me-2 small"></i> Supprimer</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <h5 class="card-title fw-bold text-dark mb-1">{{ document.titre }}</h5>
-                            <div class="mb-3">
-                                <span class="badge bg-light text-muted px-2 py-1 rounded small text-capitalize">{{ document.typeDocument }}</span>
-                                {% if document.dossier %}
-                                    <span class="text-muted small ms-2"><i class="fas fa-folder-open me-1"></i>{{ document.dossier.nomDossier }}</span>
-                                {% endif %}
-                            </div>
-
-                            <div class="d-flex align-items-center mb-4">
-                                <i class="fas fa-tag me-2" style="color: {{ document.categorie.couleur|default('#4e73df') }};"></i>
-                                <span class="small text-dark fw-bold">{{ document.categorie.nomCategorie|default('Sans catégorie') }}</span>
-                            </div>
-
-                            <div class="small text-muted mb-3">
-                                <i class="fas fa-user me-1"></i>
-                                {{ document.utilisateur.fullName ?: document.utilisateur.email }}
-                            </div>
-
-                            <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto">
-                                {% set status_color = document.statut == 'valide' ? 'success' : (document.statut == 'expire' ? 'danger' : 'warning') %}
-                                <span class="badge bg-{{ status_color }} bg-opacity-10 text-{{ status_color }} rounded-pill px-3 py-2 small text-capitalize">
-                                    {{ document.statut }}
-                                </span>
-                                <span class="text-muted small">
-                                    <i class="far fa-calendar-alt me-1"></i> {{ document.dateDocument|date('d/m/Y') }}
-                                </span>
-                            </div>
-                        </div>
-                        <a href="{{ path('document_show', {id: document.id}) }}" class="stretched-link"></a>
-                    </div>
-                </div>
-            {% else %}
-                <div class="col-12 text-center py-5">
-                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block border">
-                        <i class="fas fa-file-upload fa-4x text-light mb-4 d-block"></i>
-                        <h3 class="fw-bold text-dark">Aucun document</h3>
-                        <p class="text-muted mb-4">Importez vos premiers documents pour commencer à les gérer.</p>
-                        <div class="d-flex justify-content-center gap-2">
-                            <a href="{{ path('dossier_document_new') }}" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold">
-                                Créer un dossier
-                            </a>
-                            <a href="{{ path('document_new') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
-                                Importer mon premier document
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
         </div>
     </div>
-</section>
+</div>
 
-<style>
-    .transition-hover {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .transition-hover:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.1) !important;
-    }
-</style>
+{# ─── FLOATING STAT CARDS ─────────────────────────────────── #}
+<div class="doc-stats-row">
+    <div class="container-fluid px-0">
+        <div class="row g-3">
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="stat-card primary h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                    </div>
+                    <div class="stat-value">{{ stats.total }}</div>
+                    <div class="stat-label">Total docs</div>
+                    <div class="mt-2"><span class="stat-trend trend-info"><i class="fas fa-plus me-1"></i>{{ stats.this_month }} ce mois</span></div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="stat-card success h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    </div>
+                    <div class="stat-value">{{ stats.valide }}</div>
+                    <div class="stat-label">Valides</div>
+                    <div class="mt-2">
+                        {% if stats.total > 0 %}
+                        <span class="stat-trend trend-up">{{ ((stats.valide/stats.total)*100)|round }}%</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="stat-card warning h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="fas fa-sync-alt"></i></div>
+                    </div>
+                    <div class="stat-value">{{ stats.a_renouveler }}</div>
+                    <div class="stat-label">À renouveler</div>
+                    <div class="mt-2"><span class="stat-trend trend-warn">Attention</span></div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="stat-card danger h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    </div>
+                    <div class="stat-value">{{ stats.expire }}</div>
+                    <div class="stat-label">Expirés</div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="stat-card info h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    </div>
+                    <div class="stat-value">{{ stats.expires_soon }}</div>
+                    <div class="stat-label">Expirent bientôt</div>
+                    <div class="mt-2"><span class="stat-trend trend-warn">≤ 7 jours</span></div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="stat-card teal h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon"><i class="fas fa-hdd"></i></div>
+                    </div>
+                    {% set mb = (stats.total_size / 1048576)|round(1) %}
+                    <div class="stat-value" style="font-size:1.5rem">{{ mb }} Mo</div>
+                    <div class="stat-label">Espace utilisé</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4 pt-4 pb-5">
+
+    {# ─── ROW 1 : Charts + Alerts ─── #}
+    <div class="row g-3 mb-3">
+
+        {# Monthly chart #}
+        <div class="col-lg-5">
+            <div class="doc-section h-100">
+                <div class="doc-section-header">
+                    <span class="doc-section-title"><i class="fas fa-chart-bar me-2 text-primary"></i>Activité (6 derniers mois)</span>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# Types breakdown #}
+        <div class="col-lg-3">
+            <div class="doc-section h-100">
+                <div class="doc-section-header">
+                    <span class="doc-section-title"><i class="fas fa-layer-group me-2 text-indigo-500" style="color:#6366f1"></i>Par type</span>
+                </div>
+                {% set type_colors = ['#4f46e5','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899'] %}
+                {% set type_total = stats.total > 0 ? stats.total : 1 %}
+                {% for t in stats.by_type %}
+                <div class="type-row">
+                    <i class="fas fa-file text-muted" style="font-size:.75rem;width:14px"></i>
+                    <span class="type-label text-capitalize">{{ t.type_document }}</span>
+                    <div class="type-bar-bg">
+                        <div class="type-bar" style="width:{{ ((t.cnt/type_total)*100)|round }}%;background:{{ type_colors[loop.index0 % 7] }}"></div>
+                    </div>
+                    <span class="type-count">{{ t.cnt }}</span>
+                </div>
+                {% else %}
+                <div style="padding:2rem;text-align:center;color:var(--doc-muted)">Aucune donnée</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# Expiry alerts #}
+        <div class="col-lg-4">
+            <div class="doc-section h-100">
+                <div class="doc-section-header">
+                    <span class="doc-section-title"><i class="fas fa-bell me-2" style="color:#f59e0b"></i>Alertes d'expiration</span>
+                    <a href="{{ path('document_index', {statut:'a_renouveler'}) }}" class="btn-doc-outline" style="font-size:.75rem;padding:.3rem .8rem">Voir tout</a>
+                </div>
+                {% for doc in expiringDocs %}
+                {% set daysLeft = doc.dateEcheance ? ((doc.dateEcheance.timestamp - 'now'|date('U')) / 86400)|round : 999 %}
+                <div class="alert-item">
+                    <div class="alert-dot" style="background: {{ daysLeft <= 3 ? '#ef4444' : (daysLeft <= 7 ? '#f59e0b' : '#10b981') }}"></div>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:.85rem;font-weight:600;color:var(--doc-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ doc.titre }}</div>
+                        <div style="font-size:.75rem;color:var(--doc-muted)">
+                            <i class="far fa-calendar me-1"></i>
+                            {{ doc.dateEcheance ? doc.dateEcheance|date('d/m/Y') : '–' }}
+                            &nbsp;·&nbsp;
+                            <span style="color:{{ daysLeft <= 3 ? '#ef4444' : (daysLeft <= 7 ? '#f59e0b' : '#10b981') }}">
+                                J-{{ daysLeft }}
+                            </span>
+                        </div>
+                    </div>
+                    <a href="{{ path('document_show', {id: doc.id}) }}" style="font-size:.75rem;color:#4361ee;text-decoration:none;font-weight:600">Voir</a>
+                </div>
+                {% else %}
+                <div style="padding:3rem;text-align:center;color:var(--doc-muted)">
+                    <i class="fas fa-check-circle fa-2x mb-2 d-block" style="color:#10b981;opacity:.5"></i>
+                    <span style="font-size:.85rem">Aucune expiration imminente</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# ─── ROW 2 : Recent Documents ─── #}
+    <div class="row g-3 mb-3">
+        <div class="col-lg-7">
+            <div class="doc-section">
+                <div class="doc-section-header">
+                    <span class="doc-section-title"><i class="fas fa-history me-2 text-primary"></i>Documents récents</span>
+                    <a href="{{ path('document_index') }}" class="btn-doc-outline" style="font-size:.75rem;padding:.3rem .8rem">Tous</a>
+                </div>
+                <table class="doc-table">
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Catégorie</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for doc in recentDocs %}
+                    {% set ext = doc.cheminFichier|split('.')|last|lower %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="file-icon {{ ext in ['pdf'] ? 'file-pdf' : (ext in ['jpg','jpeg','png','gif','webp'] ? 'file-img' : 'file-other') }}">
+                                    <i class="fas fa-file-{{ ext in ['pdf'] ? 'pdf' : (ext in ['jpg','jpeg','png','gif','webp'] ? 'image' : 'alt') }}"></i>
+                                </div>
+                                <div style="min-width:0">
+                                    <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px">
+                                        {{ doc.titre }}
+                                        {% if doc.dateEcheance and doc.dateEcheance < date('today') and doc.statut != 'archive' %}
+                                            <i class="fas fa-exclamation-circle text-danger ms-1" title="Échéance dépassée"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div style="font-size:.75rem;color:var(--doc-muted)">{{ doc.typeDocument|capitalize }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if doc.categorie %}
+                            <span style="font-size:.78rem;font-weight:600;color:{{ doc.categorie.couleur|default('#4f46e5') }}">
+                                <i class="fas fa-tag me-1"></i>{{ doc.categorie.nomCategorie }}
+                            </span>
+                            {% else %}
+                            <span style="font-size:.78rem;color:var(--doc-muted)">–</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="pill pill-{{ doc.statut }}">{{ doc.statut|replace({'a_renouveler':'À renouveler'}) }}</span></td>
+                        <td>
+                            {% set current_state = doc.getSignatureState() %}
+                            <span class="badge {% if current_state == 'signed' %}bg-success{% elseif current_state == 'pending_approval' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ current_state|capitalize }}
+                            </span>
+                            
+                            <div class="mt-1 d-flex gap-1">
+                                {% if workflow_can(doc, 'submit') %}
+                                    <form action="{{ path('document_apply_transition', {id: doc.id, transition: 'submit'}) }}" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-outline-primary" title="Soumettre pour signature"><i class="fas fa-paper-plane"></i></button>
+                                    </form>
+                                {% endif %}
+                                
+                                {% if workflow_can(doc, 'sign') %}
+                                    <form action="{{ path('document_apply_transition', {id: doc.id, transition: 'sign'}) }}" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-success" title="Signer le document"><i class="fas fa-pen-nib"></i> Signer</button>
+                                    </form>
+                                {% endif %}
+
+                                {% if workflow_can(doc, 'reject') %}
+                                    <form action="{{ path('document_apply_transition', {id: doc.id, transition: 'reject'}) }}" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-outline-danger" title="Rejeter"><i class="fas fa-times"></i></button>
+                                    </form>
+                                {% endif %}
+                                
+                                {% if workflow_can(doc, 'archive') %}
+                                    <form action="{{ path('document_apply_transition', {id: doc.id, transition: 'archive'}) }}" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-outline-secondary" title="Archiver"><i class="fas fa-archive"></i></button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td style="white-space:nowrap;color:var(--doc-muted);font-size:.8rem">
+                            <i class="far fa-calendar me-1"></i>{{ doc.createdAt|date('d/m/Y') }}
+                        </td>
+                        <td>
+                            <a href="{{ path('document_show', {id: doc.id}) }}" style="color:#4361ee;font-size:.8rem;font-weight:600;text-decoration:none">
+                                <i class="fas fa-eye me-1"></i>Voir
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--doc-muted)">Aucun document</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Quick actions #}
+        <div class="col-lg-5">
+            <div class="doc-section">
+                <div class="doc-section-header">
+                    <span class="doc-section-title"><i class="fas fa-bolt me-2" style="color:#f59e0b"></i>Accès rapide</span>
+                </div>
+                <div style="padding:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+                    {% set quick = [
+                        {label:'Importer un doc', icon:'fa-upload', color:'#51B56D', bg:'#e0f2e5', href: path('document_new')},
+                        {label:'Nouveau dossier', icon:'fa-folder-plus', color:'#059669', bg:'#d1fae5', href: path('dossier_document_new')},
+                        {label:'Créer un pack', icon:'fa-layer-group', color:'#2563eb', bg:'#dbeafe', href: path('bundle_index')},
+                        {label:'Planifier alerte', icon:'fa-bell-plus', color:'#d97706', bg:'#fef3c7', href: path('echeance_new')},
+                        {label:'Mes catégories', icon:'fa-tags', color:'#1e293b', bg:'#f1f5f9', href: '#'},
+                        {label:'Mes dossiers', icon:'fa-folder-open', color:'#0d9488', bg:'#ccfbf1', href: path('dossier_document_index')}
+                    ] %}
+                    {% for q in quick %}
+                    <a href="{{ q.href }}" style="display:flex;align-items:center;gap:.8rem;padding:.9rem 1rem;border-radius:12px;border:1.5px solid var(--doc-border);text-decoration:none;background:var(--doc-card);transition:all .2s;color:var(--doc-text)" onmouseover="this.style.borderColor='{{ q.color }}';this.style.background='{{ q.bg }}20'" onmouseout="this.style.borderColor='';this.style.background=''">
+                        <div style="width:38px;height:38px;border-radius:10px;background:{{ q.bg }};color:{{ q.color }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                            <i class="fas {{ q.icon }}"></i>
+                        </div>
+                        <span style="font-size:.82rem;font-weight:600">{{ q.label }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ─── ROW 3 : Full document grid with filters ─── #}
+    <div class="doc-section" id="all-documents">
+        <div class="doc-section-header">
+            <span class="doc-section-title"><i class="fas fa-th me-2 text-primary"></i>Tous mes documents</span>
+            <span style="font-size:.8rem;color:var(--doc-muted)">{{ documents|length }} résultat(s)</span>
+        </div>
+
+        {# Filters #}
+        <div style="padding:1.2rem 1.6rem;border-bottom:1px solid var(--doc-border);background:#f8fafc">
+            <form method="GET" action="{{ path('document_index') }}" class="d-flex flex-wrap gap-3 align-items-end">
+                <div style="flex:1;min-width:200px">
+                    <label style="font-size:.72rem;font-weight:700;color:var(--doc-muted);text-transform:uppercase;display:block;margin-bottom:.3rem">Recherche</label>
+                    <div style="position:relative">
+                        <i class="fas fa-search" style="position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--doc-muted);font-size:.8rem"></i>
+                        <input type="text" name="q" value="{{ q }}" placeholder="Titre, tags, description…" style="padding:.55rem .85rem .55rem 2.3rem;border-radius:10px;border:1.5px solid var(--doc-border);width:100%;font-size:.85rem;background:var(--doc-card);color:var(--doc-text)">
+                    </div>
+                </div>
+                <div style="min-width:160px">
+                    <label style="font-size:.72rem;font-weight:700;color:var(--doc-muted);text-transform:uppercase;display:block;margin-bottom:.3rem">Type</label>
+                    <select name="type" style="padding:.55rem .9rem;border-radius:10px;border:1.5px solid var(--doc-border);width:100%;font-size:.85rem;background:var(--doc-card);color:var(--doc-text)">
+                        <option value="">Tous les types</option>
+                        {% for t in ['contrat','facture','releve','identite','assurance','fiscal','autre'] %}
+                        <option value="{{ t }}" {{ type == t ? 'selected' }}>{{ t|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-doc-primary"><i class="fas fa-filter"></i> Filtrer</button>
+                    {% if q or type %}
+                    <a href="{{ path('document_index') }}" class="btn-doc-outline"><i class="fas fa-times"></i></a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        {# Grid #}
+        <div style="padding:1.5rem">
+            {% if documents %}
+            <div class="doc-grid">
+            {% for document in documents %}
+            {% set ext = document.cheminFichier|split('.')|last|lower %}
+            {% set catColor = document.categorie ? document.categorie.couleur|default('#4361ee') : '#4361ee' %}
+            <div class="doc-card">
+                {% if document.dateEcheance and document.dateEcheance < date('today') and document.statut != 'archive' %}
+                <div style="position:absolute; top:10px; right:12px; background:#ef4444; color:white; padding:3px 8px; border-radius:12px; font-size:0.65rem; font-weight:700; box-shadow:0 2px 8px rgba(239, 68, 68, 0.4); z-index:10; display:flex; align-items:center; gap:4px;" title="Date d'échéance dépassée">
+                    <i class="fas fa-exclamation-triangle"></i> Dépassé
+                </div>
+                {% endif %}
+                <div class="doc-card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="doc-card-icon" style="background:{{ catColor }}18;color:{{ catColor }}">
+                            <i class="fas fa-file-{{ ext in ['pdf'] ? 'pdf' : (ext in ['jpg','jpeg','png','gif','webp'] ? 'image' : 'alt') }}"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0 shadow-none" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
+                                <li><a class="dropdown-item py-2" href="{{ path('document_show', {id: document.id}) }}"><i class="fas fa-eye me-2 text-primary small"></i>Consulter</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ path('document_show', {id: document.id}) }}#ai-chat"><i class="fas fa-robot me-2 text-info small"></i>Intelligence IA</a></li>
+                                <li><button class="dropdown-item py-2" onclick="openBundleModal('{{ document.id }}', '{{ document.titre|escape('js') }}')"><i class="fas fa-layer-group me-2 text-success small"></i>Ajouter au pack</button></li>
+                                <li><a class="dropdown-item py-2" href="{{ path('document_edit', {id: document.id}) }}"><i class="fas fa-edit me-2 text-warning small"></i>Modifier</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{{ path('document_delete', {'id': document.id}) }}" onsubmit="return confirm('Supprimer ce document ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+                                        <button class="dropdown-item py-2 text-danger"><i class="fas fa-trash-alt me-2 small"></i>Supprimer</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="doc-card-title">{{ document.titre }}</div>
+                    <div class="doc-card-sub mb-2">
+                        <span class="text-capitalize">{{ document.typeDocument }}</span>
+                        {% if document.dossier %} &middot; <i class="fas fa-folder-open me-1"></i>{{ document.dossier.nomDossier }}{% endif %}
+                    </div>
+                    {% if document.categorie %}
+                    <div style="font-size:.78rem;font-weight:600;color:{{ catColor }}">
+                        <i class="fas fa-tag me-1"></i>{{ document.categorie.nomCategorie }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="doc-card-footer">
+                    <span class="pill pill-{{ document.statut }}">{{ document.statut|replace({'a_renouveler':'À renouveler'}) }}</span>
+                    <span style="font-size:.75rem;color:var(--doc-muted)"><i class="far fa-calendar me-1"></i>{{ document.dateDocument ? document.dateDocument|date('d/m/Y') : document.createdAt|date('d/m/Y') }}</span>
+                </div>
+                <a href="{{ path('document_show', {id: document.id}) }}" class="stretched-link"></a>
+            </div>
+            {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-file-upload"></i></div>
+                <h4 style="font-weight:700;color:var(--doc-text)">
+                    {{ q or type ? 'Aucun résultat' : 'Aucun document encore' }}
+                </h4>
+                <p style="color:var(--doc-muted);font-size:.9rem;margin-bottom:1.5rem">
+                    {{ q or type ? "Essayez d'autres critères" : "Importez vos premiers documents pour commencer" }}
+                </p>
+                <a href="{{ path('document_new') }}" class="btn-doc-primary"><i class="fas fa-upload"></i> Importer un document</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# ─── Bundle Modal ──────────────────────────────────────────── #}
+<div class="modal fade" id="addToBundleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-layer-group text-success me-2"></i>Ajouter au pack</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-4">Document : <strong id="selectedDocTitle"></strong></p>
+                <input type="hidden" id="selectedDocId">
+                <div class="list-group list-group-flush rounded-4 overflow-hidden border">
+                    {% for bundle in bundles %}
+                    <button type="button" class="list-group-item list-group-item-action py-3 d-flex justify-content-between align-items-center" onclick="confirmAddToBundle('{{ bundle.id }}')">
+                        <span><i class="fas fa-box-open me-2 text-primary"></i>{{ bundle.nomBundle }}</span>
+                        <i class="fas fa-chevron-right text-muted small"></i>
+                    </button>
+                    {% else %}
+                    <div class="list-group-item py-4 text-center">
+                        <p class="text-muted small mb-3">Aucun pack créé.</p>
+                        <a href="{{ path('bundle_index') }}" class="btn btn-sm btn-primary rounded-pill px-4">Créer un pack</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+/* ── Monthly bar chart ── */
+(function () {
+    const rawStats = {{ stats.by_month|json_encode|raw }};
+    const labels   = rawStats.map(m => m.month_label);
+    const data     = rawStats.map(m => m.cnt);
+    const isDark  = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textClr = isDark ? '#94a3b8' : '#64748b';
+    const gridClr = isDark ? '#334155' : '#e2e8f0';
+
+    const ctx = document.getElementById('monthlyChart');
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Documents',
+                data,
+                backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: textClr, font: { size: 11 } } },
+                y: { grid: { color: gridClr }, ticks: { color: textClr, stepSize: 1, font: { size: 11 } } }
+            }
+        }
+    });
+})();
+
+/* ── Bundle modal ── */
+let bundleModal = null;
+function openBundleModal(id, title) {
+    document.getElementById('selectedDocId').value = id;
+    document.getElementById('selectedDocTitle').textContent = title;
+    if (!bundleModal) bundleModal = new bootstrap.Modal(document.getElementById('addToBundleModal'));
+    bundleModal.show();
+}
+async function confirmAddToBundle(bundleId) {
+    const docId = document.getElementById('selectedDocId').value;
+    try {
+        const r = await fetch(`/bundle/${bundleId}/add-document`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ documentId: docId })
+        });
+        const d = await r.json();
+        if (bundleModal) bundleModal.hide();
+        if (typeof window.showToast === 'function') window.showToast(d.success ? '✓ Document ajouté au pack !' : d.message, d.success ? 'success' : 'error');
+        else alert(d.success ? '✓ Document ajouté au pack !' : d.message);
+    } catch (e) { alert('Erreur lors de l\'ajout au pack.'); }
+}
+</script>
 {% endblock %}

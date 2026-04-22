@@ -3,17 +3,18 @@
 namespace App\EventSubscriber;
 
 use App\Entity\User;
-use Symfony\Bundle\SecurityBundle\Security;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
-final class AdminFrontAccessSubscriber implements EventSubscriberInterface
+final class AdminFrontAccessSubscriber implements EventSubscriberInterface, ServiceSubscriberInterface
 {
     public function __construct(
-        private readonly Security $security,
+        private readonly ContainerInterface $locator,
         private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
@@ -24,7 +25,10 @@ final class AdminFrontAccessSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $user = $this->security->getUser();
+        // Resolve Security lazily to avoid circular dependency with Router / Firewall
+        $security = $this->locator->get('security');
+        $user = $security->getUser();
+
         if (!$user instanceof User) {
             return;
         }
@@ -45,6 +49,13 @@ final class AdminFrontAccessSubscriber implements EventSubscriberInterface
     {
         return [
             KernelEvents::REQUEST => 'onKernelRequest',
+        ];
+    }
+
+    public static function getSubscribedServices(): array
+    {
+        return [
+            'security' => \Symfony\Bundle\SecurityBundle\Security::class,
         ];
     }
 }

@@ -1,6 +1,103 @@
 {% extends 'frontoffice/base.html.twig' %}
 
-{% block title %}Mon Dashboard - FinTrack{% endblock %}
+{% block stylesheets %}
+<style>
+    :root {
+        --ft-primary: #4361ee;
+        --ft-secondary: #3f37c9;
+        --ft-success: #2ec4b6;
+        --ft-warning: #ff9f1c;
+        --ft-info: #4cc9f0;
+        --ft-card-bg: #ffffff;
+    }
+
+    [data-theme='dark'] {
+        --ft-card-bg: #1e293b;
+    }
+
+    .dashboard-stat-card {
+        border-radius: 1.25rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0,0,0,0.05) !important;
+        background: var(--ft-card-bg);
+    }
+
+    .dashboard-stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
+    }
+
+    .icon-shape-premium {
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1rem;
+        font-size: 1.25rem;
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-stat-card:hover .icon-shape-premium {
+        transform: rotate(-10deg) scale(1.1);
+    }
+
+    .table-premium thead th {
+        background-color: #f8f9fa;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        color: #64748b;
+        border-top: none;
+        padding: 1rem 1.5rem;
+    }
+
+    .table-premium tbody td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .badge-premium {
+        padding: 0.5em 1.2em;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+
+    /* Gradients matching the home style */
+    .bg-gradient-primary { background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%) !important; color: white !important; }
+    .bg-gradient-info { background: linear-gradient(135deg, #4cc9f0 0%, #4895ef 100%) !important; color: white !important; }
+    .bg-gradient-success { background: linear-gradient(135deg, #2ec4b6 0%, #20ad9e 100%) !important; color: white !important; }
+    .bg-gradient-warning { background: linear-gradient(135deg, #ff9f1c 0%, #ffbf69 100%) !important; color: white !important; }
+
+    .btn-view-doc {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        color: var(--ft-primary) !important;
+    }
+
+    .btn-view-doc:hover {
+        background-color: var(--ft-primary);
+        color: white !important;
+    }
+
+    .text-primary { color: var(--ft-primary) !important; }
+    .btn-primary { background-color: var(--ft-primary); border-color: var(--ft-primary); }
+</style>
+{% endblock %}
 
 {% block body %}
 <section class="section py-5">
@@ -11,18 +108,23 @@
                 <p class="text-muted">Bienvenue sur votre espace de gestion.</p>
             </div>
             <div class="col-md-6 text-md-end text-start mt-3 mt-md-0">
-                <a href="{{ path('front_transfer_select_card') }}" class="btn btn-primary"><i class="fas fa-arrow-right me-1"></i> Effectuer un Transfert</a>
+                <a href="{{ path('front_dashboard_pdf') }}" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm border-0 me-2" style="background-color: #2d8a5d;">
+                    <i class="fas fa-file-pdf me-1"></i> Générer PDF
+                </a>
+                <a href="{{ path('front_transfer_select_card') }}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm border-0">
+                    <i class="fas fa-arrow-right me-1"></i> Effectuer Un Transfert
+                </a>
             </div>
         </div>
 
-        <!-- Statistiques Résumé -->
+        <!-- Statistiques Résumé Financier -->
         <div class="row mb-5">
-            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                <div class="card shadow-sm border-0 h-100">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card dashboard-stat-card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title text-muted mb-0">Solde Total</h5>
-                            <div class="icon-shape bg-primary-subtle text-primary rounded-circle p-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">Solde Total</h5>
+                            <div class="icon-shape-premium bg-primary-subtle text-primary">
                                 <i class="fas fa-money-bill-wave"></i>
                             </div>
                         </div>
@@ -31,47 +133,217 @@
                 </div>
             </div>
             
-            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                <div class="card shadow-sm border-0 h-100">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card dashboard-stat-card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title text-muted mb-0">Portefeuilles</h5>
-                            <div class="icon-shape bg-info-subtle text-info rounded-circle p-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">Portefeuilles</h5>
+                            <div class="icon-shape-premium bg-info-subtle text-info">
                                 <i class="fas fa-wallet"></i>
                             </div>
                         </div>
                         <h2 class="mb-0 fw-bold">{{ portefeuilles|default([])|length }}</h2>
-                        <a href="{{ path('front_portefeuille_index') }}" class="text-decoration-none small mt-2 d-inline-block">Gérer <i class="fas fa-arrow-right fa-sm"></i></a>
+                        <a href="{{ path('front_portefeuille_index') }}" class="text-decoration-none small mt-2 d-inline-block fw-semibold text-info">Gérer <i class="fas fa-arrow-right fa-sm ms-1"></i></a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                <div class="card shadow-sm border-0 h-100">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card dashboard-stat-card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title text-muted mb-0">Cartes Actives</h5>
-                            <div class="icon-shape bg-success-subtle text-success rounded-circle p-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">Cartes Actives</h5>
+                            <div class="icon-shape-premium bg-success-subtle text-success">
                                 <i class="fas fa-credit-card"></i>
                             </div>
                         </div>
                         <h2 class="mb-0 fw-bold">{{ cartes_actives|default([])|length }}</h2>
-                        <a href="{{ path('front_carte_index') }}" class="text-decoration-none small mt-2 d-inline-block">Voir les cartes <i class="fas fa-arrow-right fa-sm"></i></a>
+                        <a href="{{ path('front_carte_index') }}" class="text-decoration-none small mt-2 d-inline-block fw-semibold text-success">Détails <i class="fas fa-arrow-right fa-sm ms-1"></i></a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                <div class="card shadow-sm border-0 h-100">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card dashboard-stat-card shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title text-muted mb-0">Virements Prog.</h5>
-                            <div class="icon-shape bg-warning-subtle text-warning rounded-circle p-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">Virements Prog.</h5>
+                            <div class="icon-shape-premium bg-warning-subtle text-warning">
                                 <i class="fas fa-sync-alt"></i>
                             </div>
                         </div>
                         <h2 class="mb-0 fw-bold">{{ virements_actifs|default([])|length }}</h2>
-                        <a href="{{ path('front_virement_index') }}" class="text-decoration-none small mt-2 d-inline-block">Gérer <i class="fas fa-arrow-right fa-sm"></i></a>
+                        <a href="{{ path('front_virement_index') }}" class="text-decoration-none small mt-2 d-inline-block fw-semibold text-warning">Programmer <i class="fas fa-arrow-right fa-sm ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Documents Intelligents -->
+        <div class="row mb-4 mt-2">
+            <div class="col-12">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-shape bg-primary text-white rounded-circle p-2 me-3 shadow-sm" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <h3 class="h5 mb-0 fw-bold text-dark">Gestion des Documents</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5 g-4">
+            <div class="col-lg col-md-4">
+                <div class="card dashboard-stat-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">Documents</h5>
+                            <div class="icon-shape-premium bg-primary-subtle text-primary">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                        </div>
+                        <h2 class="mb-0 fw-bold">{{ totalDocuments }}</h2>
+                        <a href="{{ path('document_index') }}" class="text-decoration-none small mt-2 d-inline-block fw-semibold text-primary">Explorer <i class="fas fa-arrow-right fa-sm ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg col-md-4">
+                <div class="card dashboard-stat-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">Catégories</h5>
+                            <div class="icon-shape-premium bg-info-subtle text-info">
+                                <i class="fas fa-tags"></i>
+                            </div>
+                        </div>
+                        <h2 class="mb-0 fw-bold">{{ totalCategories }}</h2>
+                        <span class="text-info small fw-medium">Organisées</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg col-md-4">
+                <div class="card dashboard-stat-card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">Dossiers</h5>
+                            <div class="icon-shape-premium bg-success-subtle text-success">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                        </div>
+                        <h2 class="mb-0 fw-bold">{{ totalDossiers }}</h2>
+                        <span class="text-success small fw-medium">Rangements</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg col-md-6">
+                <div class="card dashboard-stat-card shadow-sm h-100 border-start border-4 border-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">À Renouveler</h5>
+                            <div class="icon-shape-premium bg-warning-subtle text-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                        <h2 class="mb-0 fw-bold text-dark">{{ documentsARenouveler }}</h2>
+                        <span class="text-warning small fw-bold">Attention requise</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg col-md-6">
+                <div class="card dashboard-stat-card shadow-sm h-100 border-start border-4 border-secondary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title text-muted mb-0 small fw-bold text-uppercase">Archivés</h5>
+                            <div class="icon-shape-premium bg-secondary-subtle text-secondary">
+                                <i class="fas fa-archive"></i>
+                            </div>
+                        </div>
+                        <h2 class="mb-0 fw-bold text-dark">{{ documentsArchives }}</h2>
+                        <span class="text-secondary small fw-bold">Historique</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card shadow-sm border-0 overflow-hidden rounded-4">
+                    <div class="card-header bg-white pt-4 pb-3 px-4 d-flex justify-content-between align-items-center border-bottom-0">
+                        <h4 class="mb-0 h5 fw-bold"><i class="fas fa-clock me-2 text-primary"></i>Derniers Documents</h4>
+                        <a href="{{ path('document_index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold">
+                            Voir tout
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if derniers_documents is defined and derniers_documents|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 table-premium">
+                                    <thead>
+                                        <tr>
+                                            <th>Document</th>
+                                            <th>Type</th>
+                                            <th>Statut</th>
+                                            <th>Date d'ajout</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for doc in derniers_documents %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-shape bg-light text-danger rounded-3 p-2 me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                            <i class="fas fa-file-pdf fs-5"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold text-dark">{{ doc.titre }}</div>
+                                                            <div class="text-muted small">{{ doc.description|u.truncate(50, '...') }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark border-0 px-3 py-2 rounded-pill small fw-bold">{{ doc.type_document|capitalize }}</span>
+                                                </td>
+                                                <td>
+                                                    {% if doc.statut == 'valide' %}
+                                                        <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill small fw-bold">
+                                                            <span class="status-indicator bg-success"></span>Valide
+                                                        </span>
+                                                    {% elseif doc.statut == 'a_renouveler' %}
+                                                        <span class="badge bg-warning-subtle text-warning px-3 py-2 rounded-pill small fw-bold">
+                                                            <span class="status-indicator bg-warning"></span>À renouveler
+                                                        </span>
+                                                    {% elseif doc.statut == 'expire' %}
+                                                        <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill small fw-bold">
+                                                            <span class="status-indicator bg-danger"></span>Expiré
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill small fw-bold">{{ doc.statut|capitalize }}</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-muted small fw-medium">{{ doc.created_at|date('d/m/Y') }}</td>
+                                                <td class="text-end">
+                                                    <div class="d-flex justify-content-end">
+                                                        <a href="{{ path('document_show', {'id_document': doc.id_document}) }}" class="btn-view-doc btn-light" title="Détails">
+                                                            <i class="fas fa-chevron-right"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png" alt="Empty" style="width: 80px; opacity: 0.5;" class="mb-3">
+                                <p class="text-muted">Aucun document pour le moment.</p>
+                                <a href="{{ path('document_new') }}" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">Importer</a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -80,16 +352,16 @@
         <!-- Dernières Transactions -->
         <div class="row">
             <div class="col-12">
-                <div class="card shadow-sm border-0">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
                     <div class="card-header bg-white pt-4 pb-3 px-4 d-flex justify-content-between align-items-center border-bottom-0">
-                        <h4 class="mb-0 h5"><i class="fas fa-history me-2 text-primary"></i>Dernières Transactions</h4>
-                        <a href="{{ path('front_transaction_index') }}" class="btn btn-sm btn-outline-secondary">Voir tout</a>
+                        <h4 class="mb-0 h5 fw-bold"><i class="fas fa-exchange-alt me-2 text-primary"></i>Dernières Transactions</h4>
+                        <a href="{{ path('front_transaction_index') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-4 fw-bold">Tout voir</a>
                     </div>
-                    <div class="card-body px-4 pb-4">
+                    <div class="card-body p-0">
                         {% if dernieres_transactions is defined and dernieres_transactions|length > 0 %}
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="table-light">
+                                <table class="table table-hover align-middle mb-0 table-premium">
+                                    <thead>
                                         <tr>
                                             <th>Date</th>
                                             <th>Description</th>
@@ -101,27 +373,27 @@
                                     <tbody>
                                         {% for trx in dernieres_transactions %}
                                             <tr>
-                                                <td>{{ trx.date|date('d/m/Y H:i') }}</td>
-                                                <td>{{ trx.description }}</td>
+                                                <td class="small text-muted fw-medium">{{ trx.date|date('d/m/Y H:i') }}</td>
+                                                <td class="fw-bold text-dark">{{ trx.description }}</td>
                                                 <td>
                                                     {% if trx.type == 'DEPOT' %}
-                                                        <span class="badge bg-success-subtle text-success">Dépôt</span>
+                                                        <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill small fw-bold">Dépôt</span>
                                                     {% elseif trx.type == 'RETRAIT' %}
-                                                        <span class="badge bg-danger-subtle text-danger">Retrait</span>
+                                                        <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill small fw-bold">Retrait</span>
                                                     {% else %}
-                                                        <span class="badge bg-primary-subtle text-primary">Transfert</span>
+                                                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill small fw-bold">Transfert</span>
                                                     {% endif %}
                                                 </td>
                                                 <td>
                                                     {% if trx.statut == 'COMPLETED' or trx.statut == 'TERMINE' %}
-                                                        <span class="badge bg-success">Réussi</span>
+                                                        <span class="badge bg-success px-3 py-2 rounded-pill small fw-bold">Réussi</span>
                                                     {% elseif trx.statut == 'PENDING' or trx.statut == 'EN_ATTENTE' %}
-                                                        <span class="badge bg-warning text-dark">En attente</span>
+                                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill small fw-bold">Attente</span>
                                                     {% else %}
-                                                        <span class="badge bg-danger">Échoué</span>
+                                                        <span class="badge bg-danger px-3 py-2 rounded-pill small fw-bold">Échoué</span>
                                                     {% endif %}
                                                 </td>
-                                                <td class="text-end fw-bold {{ trx.type == 'DEPOT' ? 'text-success' : (trx.type == 'RETRAIT' ? 'text-danger' : '') }}">
+                                                <td class="text-end fw-bold fs-6 {{ trx.type == 'DEPOT' ? 'text-success' : (trx.type == 'RETRAIT' ? 'text-danger' : 'text-dark') }}">
                                                     {{ trx.type == 'RETRAIT' ? '-' : (trx.type == 'DEPOT' ? '+' : '') }}{{ trx.montant|number_format(2, ',', ' ') }} {{ trx.devise }}
                                                 </td>
                                             </tr>
@@ -130,7 +402,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted text-center py-4 mb-0">Aucune transaction récente à afficher.</p>
+                            <p class="text-muted text-center py-5 mb-0">Aucune transaction récente.</p>
                         {% endif %}
                     </div>
                 </div>

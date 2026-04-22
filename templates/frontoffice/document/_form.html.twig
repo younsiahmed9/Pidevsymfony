@@ -13,6 +13,9 @@
 
 <form method="post" enctype="multipart/form-data" class="needs-validation document-form" novalidate data-validate-url="{{ path('document_validate') }}">
     <input type="hidden" name="document_id" value="{{ documentFormData.id_document }}">
+    
+    <div class="alert alert-danger d-none" id="general-error" data-error-for="general"></div>
+
     <div class="row g-4">
         <div class="col-md-6">
             <label for="titre" class="form-label fw-bold text-dark mb-2">Titre du document</label>
@@ -115,16 +118,25 @@
             <label for="fichier" class="form-label fw-bold text-dark mb-2">Sélectionner le fichier</label>
             <div class="input-group">
                 <span class="input-group-text bg-light border-0"><i class="fas fa-cloud-upload-alt text-muted"></i></span>
-                <input type="file" id="fichier" name="fichier" class="form-control bg-light border-0 py-3 shadow-none" {{ documentFormData.id_document ? '' : 'required' }}>
+                <input type="file" id="fichier" name="fichier" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" class="form-control bg-light border-0 py-3 shadow-none" {{ documentFormData.id_document ? '' : 'required' }}>
             </div>
+            
+            <input type="hidden" name="converted_filename" id="converted_filename">
+
+            {{ include('partials/_ai_magic_button.html.twig') }}
             <div class="text-danger small mt-1" data-error-for="fichier"></div>
         </div>
 
         <div class="col-12">
-            <label for="tags" class="form-label fw-bold text-dark mb-2">Tags personnalisés</label>
-            <div class="input-group">
-                <span class="input-group-text bg-light border-0"><i class="fas fa-hashtag text-muted"></i></span>
-                <input type="text" id="tags" name="tags" class="form-control bg-light border-0 py-3 shadow-none" placeholder="Ex: 2024, important, impots" value="{{ documentFormData.tags }}">
+            <label for="tags_input" class="form-label fw-bold text-dark mb-2">Tags personnalisés</label>
+            <input type="hidden" id="tags" name="tags" value="{{ documentFormData.tags }}">
+            <div class="tag-widget border rounded-3 bg-light px-3 py-2" data-tags-widget>
+                <div class="d-flex align-items-center gap-2 flex-wrap" data-tags-list></div>
+                <div class="input-group mt-2">
+                    <span class="input-group-text bg-white border-0 text-muted fw-bold">#</span>
+                    <input type="text" id="tags_input" class="form-control bg-white border-0 py-2 shadow-none" placeholder="Tapez un tag puis Entrée (ex: facture)">
+                </div>
+                <small class="text-muted">Appuyez sur Entrée ou virgule pour ajouter un tag.</small>
             </div>
             <div class="text-danger small mt-1" data-error-for="tags"></div>
         </div>
@@ -134,6 +146,51 @@
             <textarea id="description" name="description" class="form-control bg-light border-0 py-3 shadow-none" rows="3" placeholder="Description courte du contenu du document...">{{ documentFormData.description }}</textarea>
             <div class="text-danger small mt-1" data-error-for="description"></div>
         </div>
+    </div>
+
+    <style>
+        /* Animation Premium pour les boutons Intelligents */
+        #btn-convert-pdf, #btnAiMagic {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        #btn-convert-pdf:hover, #btnAiMagic:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        #btn-convert-pdf:hover { background-color: #0dcaf0; color: white !important; border-color: #0dcaf0; }
+        #btnAiMagic:hover { background-color: #0d6efd; color: white !important; border-color: #0d6efd; }
+
+        /* Overlay de chargement pro */
+        #conversion-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-direction: column;
+        }
+        .loader-pro {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+
+    <div id="conversion-overlay">
+        <div class="loader-pro"></div>
+        <h4 class="fw-bold">Conversion Premium en cours...</h4>
+        <p class="text-white-50">Utilisation de l'IA CloudConvert pour un PDF parfait.</p>
     </div>
 
     <div class="d-grid mt-5">
@@ -162,8 +219,12 @@
             }
 
             var hasError = messages && messages.length;
-            input.classList.toggle('is-invalid', hasError);
-            input.classList.toggle('is-valid', !hasError);
+            if (name === 'general') {
+                input.classList.toggle('d-none', !hasError);
+            } else {
+                input.classList.toggle('is-invalid', hasError);
+                input.classList.toggle('is-valid', !hasError);
+            }
             errorBox.innerHTML = hasError ? messages.map(function (message) {
                 return '<div>' + message + '</div>';
             }).join('') : '';
@@ -252,5 +313,210 @@
         });
 
         runValidation();
-    })()
+    })();
+
+    (function () {
+        var widget = document.querySelector('[data-tags-widget]');
+        if (!widget) {
+            return;
+        }
+
+        var hiddenInput = document.getElementById('tags');
+        var textInput = document.getElementById('tags_input');
+        var list = widget.querySelector('[data-tags-list]');
+        var tags = [];
+
+        var normalize = function (value) {
+            return value.trim().replace(/\s+/g, ' ');
+        };
+
+        var hasTag = function (value) {
+            var lowered = value.toLowerCase();
+            return tags.some(function (tag) {
+                return tag.toLowerCase() === lowered;
+            });
+        };
+
+        var updateHiddenValue = function () {
+            hiddenInput.value = tags.join(', ');
+        };
+
+        var render = function () {
+            list.innerHTML = '';
+            tags.forEach(function (tag, index) {
+                var badge = document.createElement('span');
+                badge.className = 'badge bg-primary-subtle text-primary border px-2 py-2 d-inline-flex align-items-center';
+                badge.innerHTML = '<span class="me-2">' + tag + '</span>';
+
+                var removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'btn btn-sm p-0 border-0 text-primary fw-bold';
+                removeButton.setAttribute('aria-label', 'Supprimer le tag');
+                removeButton.innerHTML = '<span aria-hidden="true">×</span>';
+                removeButton.addEventListener('click', function () {
+                    tags.splice(index, 1);
+                    updateHiddenValue();
+                    render();
+                });
+
+                badge.appendChild(removeButton);
+                list.appendChild(badge);
+            });
+        };
+
+        window.addTagToWidget = function (rawValue) {
+            var value = normalize(rawValue);
+            if (!value || hasTag(value)) {
+                return;
+            }
+            tags.push(value);
+            updateHiddenValue();
+            render();
+        };
+
+        window.clearTagsInWidget = function() {
+            tags = [];
+            updateHiddenValue();
+            render();
+        };
+
+        hiddenInput.value.split(/[;,\n]+/).forEach(function (value) {
+            var normalized = normalize(value);
+            if (normalized && !hasTag(normalized)) {
+                tags.push(normalized);
+            }
+        });
+        updateHiddenValue();
+        render();
+
+        textInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ',') {
+                event.preventDefault();
+                window.addTagToWidget(textInput.value);
+                textInput.value = '';
+            }
+        });
+
+        textInput.addEventListener('blur', function () {
+            window.addTagToWidget(textInput.value);
+            textInput.value = '';
+        });
+    })();
+
+    /* ── CloudConvert Integration (Improved) ── */
+    (function () {
+        const fileInput = document.getElementById('fichier');
+        const btnConvert = document.getElementById('btn-convert-pdf');
+        const loader = document.getElementById('convert-loader');
+        const overlay = document.getElementById('conversion-overlay');
+        const convertedInput = document.getElementById('converted_filename');
+        const titleInput = document.getElementById('titre');
+
+        if (!fileInput || !btnConvert) return;
+
+        const updateUI = () => {
+            const file = fileInput.files[0];
+            
+            // Reset to default state
+            btnConvert.innerHTML = '<i class="fas fa-file-pdf me-1"></i> <span>Convertir en PDF</span>';
+            btnConvert.classList.remove('btn-success', 'text-white', 'opacity-50');
+            btnConvert.classList.add('btn-outline-info');
+            btnConvert.disabled = false;
+            convertedInput.value = '';
+
+            if (!file) {
+                btnConvert.classList.add('opacity-50');
+                return;
+            }
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            const needsConversion = ['docx', 'xlsx', 'jpg', 'jpeg', 'png', 'doc', 'xls', 'txt'].includes(ext);
+
+            if (!needsConversion) {
+                btnConvert.classList.add('opacity-50');
+            }
+        };
+
+        fileInput.addEventListener('change', updateUI);
+        
+        // Initial call to set correct state
+        updateUI();
+
+        btnConvert.addEventListener('click', async function (e) {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('Veuillez d\'abord sélectionner un fichier !', 'info');
+                } else {
+                    alert('Veuillez d\'abord sélectionner un fichier.');
+                }
+                return;
+            }
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            const allowed = ['docx', 'xlsx', 'jpg', 'jpeg', 'png', 'doc', 'xls', 'txt'];
+            if (!allowed.includes(ext)) {
+                 if (typeof window.showNotification === 'function') {
+                    window.showNotification('Ce format (' + ext.toUpperCase() + ') n\'a pas besoin de conversion.', 'info');
+                 } else {
+                    alert('Ce format (' + ext.toUpperCase() + ') n\'a pas besoin de conversion.');
+                 }
+                 return;
+            }
+
+            // Show Professional Overlay
+            if (overlay) overlay.style.display = 'flex';
+            btnConvert.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('{{ path('cloudconvert_convert') }}', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    convertedInput.value = data.filename;
+                    
+                    // Update Button State
+                    btnConvert.innerHTML = '<i class="fas fa-check-circle me-1"></i> PDF Prêt !';
+                    btnConvert.classList.remove('btn-outline-info', 'opacity-50');
+                    btnConvert.classList.add('btn-success', 'text-white');
+                    
+                    if (titleInput && !titleInput.value) {
+                        titleInput.value = data.original_name;
+                    }
+
+                    if (typeof window.showNotification === 'function') {
+                        window.showNotification('✓ Document converti avec succès en PDF !', 'success');
+                    }
+                } else {
+                    btnConvert.disabled = false;
+                    const errorMsg = data.error || 'Vérifiez votre clé API CloudConvert dans le fichier .env';
+                    if (typeof window.showNotification === 'function') {
+                        window.showNotification('❌ ' + errorMsg, 'error');
+                    } else {
+                        alert('Erreur : ' + errorMsg);
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                btnConvert.disabled = false;
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('❌ Erreur technique : Le serveur ne répond pas.', 'error');
+                } else {
+                    alert('Erreur technique : Le serveur ne répond pas.');
+                }
+            } finally {
+                if (overlay) overlay.style.display = 'none';
+            }
+        });
+    })();
 </script>

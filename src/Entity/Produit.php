@@ -35,7 +35,7 @@ class Produit
     #[ORM\Column(length: 20)]
     private string $statut = 'disponible';
 
-    #[ORM\Column(name: 'date_creation', type: 'datetime_mutable')]
+    #[ORM\Column(name: 'date_creation', type: 'datetime')]
     private ?\DateTimeInterface $dateCreation = null;
 
     /** @var Collection<int, Facture> */

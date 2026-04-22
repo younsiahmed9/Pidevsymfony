@@ -1,0 +1,45 @@
+{# Fonctions JS utilitaires communes #}
+<script>
+if (typeof showNotification === 'undefined') {
+    window.showNotification = function(message, type = 'info') {
+        const alertClass = `alert-${type === 'success' ? 'success' : (type === 'error' ? 'danger' : 'info')}`;
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed shadow border-0 rounded-3 d-flex align-items-center fw-bold`;
+        alertDiv.style.cssText = 'top: 30px; right: 30px; z-index: 9999; min-width: 300px; animation: slideInX 0.4s ease;';
+        
+        const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+        
+        alertDiv.innerHTML = `
+            <i class="fas ${icon} me-3 fs-5"></i>
+            <span>${message}</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Add animation style if not present
+        if (!document.getElementById('notification-animations')) {
+            const style = document.createElement('style');
+            style.id = 'notification-animations';
+            style.innerHTML = `
+                @keyframes slideInX {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes fadeOutX {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (document.body.contains(alertDiv)) {
+                alertDiv.style.animation = 'fadeOutX 0.4s ease forwards';
+                setTimeout(() => alertDiv.remove(), 400);
+            }
+        }, 4000);
+    };
+}
+</script>

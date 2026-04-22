@@ -145,6 +145,44 @@
             pendingTimer = window.setTimeout(runValidation, 250);
         });
 
+        /* ── Auto-fill from Document ── */
+        var docSelect = form.querySelector('[name="id_document"]');
+        if (docSelect) {
+            docSelect.addEventListener('change', function () {
+                var docId = this.value;
+                if (!docId) return;
+
+                fetch('/document/' + docId + '/data', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) return;
+
+                    // Fill fields
+                    if (data.titre) form.querySelector('[name="titre"]').value = data.titre;
+                    if (data.date_echeance) {
+                        form.querySelector('[name="date_echeance"]').value = data.date_echeance;
+                        
+                        // Suggest reminder (3 days before)
+                        var d = new Date(data.date_echeance);
+                        d.setDate(d.getDate() - 3);
+                        var rappel = d.toISOString().split('T')[0];
+                        if (!form.querySelector('[name="date_rappel"]').value) {
+                            form.querySelector('[name="date_rappel"]').value = rappel;
+                        }
+                    }
+                    if (data.description && !form.querySelector('[name="description"]').value) {
+                        form.querySelector('[name="description"]').value = data.description;
+                    }
+
+                    // Re-run validation to clear/show status
+                    runValidation();
+                })
+                .catch(err => console.error('Error fetching document data:', err));
+            });
+        }
+
         form.addEventListener('blur', function () {
             runValidation();
         }, true);

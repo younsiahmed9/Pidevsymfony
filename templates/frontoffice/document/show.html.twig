@@ -2,7 +2,80 @@
 
 {% block title %}Détails du Document{% endblock %}
 
+{% block stylesheets %}
+    <style>
+        .preview-glass-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            width: 250px;
+            height: 350px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-glass-box:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 15px 45px 0 rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .preview-glass-box i {
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: transform 0.3s ease;
+        }
+
+        .preview-glass-box:hover i {
+            transform: scale(1.1);
+        }
+
+        .preview-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .document-header-card {
+            background: linear-gradient(135deg, #198754 0%, #157347 100%) !important;
+            border-radius: 2rem 2rem 0 0 !important;
+            padding: 3rem 1rem !important;
+        }
+
+        .badge-id {
+            background: rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+        }
+
+        .thumbnail-img {
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 4px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .thumbnail-img:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
+{% set documentFileUrl = asset('uploads/documents/' ~ document.cheminFichier) %}
 <section class="py-5 bg-light min-vh-100">
     <div class="container py-4">
         <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -25,13 +98,30 @@
         <div class="row g-4">
             <div class="col-lg-5">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
-                    <div class="card-header bg-primary py-4 text-center">
-                        <div class="bg-white bg-opacity-25 d-inline-block p-4 rounded-circle mb-3 shadow-sm">
-                            <i class="fas fa-file-pdf fa-3x text-white"></i>
+                    <div class="card-header document-header-card text-center border-0">
+                        <div class="mb-4 d-flex justify-content-center align-items-center" style="min-height: 400px;">
+                            {% if document.cheminFichier matches '/\.(pdf)$/i' %}
+                                <div class="preview-glass-box">
+                                    <i class="fas fa-file-pdf fa-6x text-white"></i>
+                                    <span class="preview-label">Document PDF</span>
+                                </div>
+                            {% elseif document.cheminFichier matches '/\.(jpg|jpeg|png|gif|webp)$/i' %}
+                                <img src="{{ path('image_thumbnail', {filename: document.cheminFichier}) }}" 
+                                     alt="Document" 
+                                     class="thumbnail-img img-fluid" 
+                                     style="max-width: 250px; max-height: 350px; object-fit: contain; cursor: pointer;"
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#imageModal">
+                            {% else %}
+                                <div class="preview-glass-box">
+                                    <i class="fas fa-file-alt fa-6x text-white"></i>
+                                    <span class="preview-label">Fichier {{ document.cheminFichier|split('.')|last|upper }}</span>
+                                </div>
+                            {% endif %}
                         </div>
-                        <h2 class="h4 fw-bold text-white mb-0">{{ document.titre }}</h2>
-                        <span class="badge rounded-pill bg-white bg-opacity-25 text-white px-3 py-2 mt-2">
-                            ID: #{{ document.id }}
+                        <h2 class="h3 fw-bold text-white mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">{{ document.titre }}</h2>
+                        <span class="badge rounded-pill badge-id text-white px-3 py-2">
+                            <i class="fas fa-fingerprint me-1"></i> #{{ document.id }}
                         </span>
                     </div>
                     <div class="card-body p-4 bg-white">
@@ -86,22 +176,24 @@
                             <span class="text-dark small fw-bold">{{ (document.tailleFichier / 1024)|number_format(2) }} KB</span>
                         </div>
 
-                        {% if document.tags %}
+                        {% if document.tags|length %}
                             <div class="mt-4">
                                 <label class="text-muted small d-block mb-2">Tags</label>
                                 <div>
-                                    {% for tag in document.tags|split(',') %}
-                                        <span class="badge bg-light text-secondary border px-2 py-1 rounded me-1 mb-1">{{ tag|trim }}</span>
+                                    {% for tag in document.tags %}
+                                        <span class="badge bg-light text-secondary border px-2 py-1 rounded me-1 mb-1">{{ tag.nomTag }}</span>
                                     {% endfor %}
                                 </div>
                             </div>
                         {% endif %}
 
                         <div class="mt-4 pt-3 border-top">
-                            <a href="{{ asset('uploads/documents/' ~ document.cheminFichier) }}" class="btn btn-primary w-100 rounded-pill fw-bold" download>
+                            <a href="{{ documentFileUrl }}" class="btn btn-primary w-100 rounded-pill fw-bold" download>
                                 <i class="fas fa-download me-2"></i> Télécharger le document
                             </a>
                         </div>
+                        
+                        {% include 'partials/_share_buttons.html.twig' %}
                     </div>
                 </div>
             </div>
@@ -110,15 +202,20 @@
                 <div class="card border-0 shadow-sm rounded-4 h-100 bg-dark overflow-hidden">
                     <div class="card-header bg-dark border-bottom border-secondary py-3 d-flex justify-content-between align-items-center">
                         <h5 class="text-white mb-0 small fw-bold text-uppercase"><i class="fas fa-eye me-2"></i>Aperçu</h5>
-                        <a href="{{ asset('uploads/documents/' ~ document.cheminFichier) }}" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                        <a href="{{ documentFileUrl }}" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-3">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
                     <div class="card-body p-0 d-flex align-items-center justify-content-center bg-secondary bg-opacity-10" style="min-height: 500px;">
                         {% if document.cheminFichier matches '/\.(pdf)$/i' %}
-                            <embed src="{{ asset('uploads/documents/' ~ document.cheminFichier) }}" type="application/pdf" width="100%" height="600px" />
+                            <embed src="{{ documentFileUrl }}" type="application/pdf" width="100%" height="600px" />
                         {% elseif document.cheminFichier matches '/\.(jpg|jpeg|png|gif|webp)$/i' %}
-                            <img src="{{ asset('uploads/documents/' ~ document.cheminFichier) }}" class="img-fluid shadow" style="max-height: 550px;" alt="{{ document.titre }}">
+                            <img src="{{ documentFileUrl }}" 
+                                 class="img-fluid shadow" 
+                                 style="max-height: 550px; cursor: pointer;" 
+                                 alt="{{ document.titre }}"
+                                 data-bs-toggle="modal" 
+                                 data-bs-target="#imageModal">
                         {% else %}
                             <div class="text-center text-white-50">
                                 <i class="fas fa-file-alt fa-5x mb-4 opacity-25"></i>
@@ -127,8 +224,50 @@
                         {% endif %}
                     </div>
                 </div>
+
+                {# Panneau d'Intelligence Artificielle #}
+                {% include 'partials/_intelligence_panel.html.twig' %}
+
+                {# Panneau de traduction #}
+                {% include 'partials/_translation_panel.html.twig' %}
+
+                {# Chat IA Q&A #}
+                <div id="ai-chat">
+                    {% include 'partials/_document_chat.html.twig' %}
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Modal pour afficher l'image en plein écran -->
+{% if document.cheminFichier matches '/\.(jpg|jpeg|png|gif|webp)$/i' %}
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" role="document">
+        <div class="modal-content bg-dark">
+            <div class="modal-header bg-dark border-secondary">
+                <h5 class="modal-title text-white" id="imageModalLabel">{{ document.titre }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex align-items-center justify-content-center" style="background: #1a1a1a;">
+                <img src="{{ documentFileUrl }}" 
+                     class="img-fluid" 
+                     style="max-height: 90vh; max-width: 100%; object-fit: contain;"
+                     alt="{{ document.titre }}">
+            </div>
+            <div class="modal-footer bg-dark border-secondary">
+                <a href="{{ documentFileUrl }}" 
+                   class="btn btn-primary rounded-pill px-4" 
+                   download>
+                    <i class="fas fa-download me-2"></i> Télécharger
+                </a>
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

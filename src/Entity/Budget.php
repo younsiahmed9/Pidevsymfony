@@ -32,7 +32,7 @@ class Budget
     #[ORM\Column(length: 20)]
     private string $statut = 'actif';
 
-    #[ORM\Column(name: 'date_creation', type: 'datetime_mutable')]
+    #[ORM\Column(name: 'date_creation', type: 'datetime')]
     private ?\DateTimeInterface $dateCreation = null;
 
     /** @var Collection<int, Depense> */

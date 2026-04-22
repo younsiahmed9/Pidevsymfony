@@ -11,6 +11,7 @@ parameters:
     brevo_api_key: '%env(string:BREVO_API_KEY)%'
     brevo_sender_email: '%env(string:BREVO_SENDER_EMAIL)%'
     brevo_sender_name: '%env(string:BREVO_SENDER_NAME)%'
+    cloudconvert_api_key: '%env(string:CLOUDCONVERT_API_KEY)%'
 
 services:
     # default configuration for services in *this* file

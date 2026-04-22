@@ -32,10 +32,10 @@ class Service
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $frequence = null;
 
-    #[ORM\Column(name: 'date_debut', type: 'date_mutable')]
+    #[ORM\Column(name: 'date_debut', type: 'date')]
     private ?\DateTimeInterface $dateDebut = null;
 
-    #[ORM\Column(name: 'date_fin', type: 'date_mutable', nullable: true)]
+    #[ORM\Column(name: 'date_fin', type: 'date', nullable: true)]
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column(length: 20)]

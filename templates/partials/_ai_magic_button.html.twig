@@ -1,0 +1,145 @@
+{# Boutons Intelligents pour l'import de documents #}
+<div class="mt-2 text-end d-flex justify-content-end gap-2">
+    <!-- CloudConvert Button -->
+    <button type="button" id="btn-convert-pdf" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold shadow-none border-1" 
+            title="Convertir ce fichier en PDF professionnel">
+        <i class="fas fa-file-pdf me-1"></i> <span id="btnConvertText">Convertir en PDF</span>
+        <span id="convert-loader" class="spinner-border spinner-border-sm d-none" role="status"></span>
+    </button>
+
+    <!-- OCR Button -->
+    <button type="button" id="btnAiMagic" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold shadow-none border-1" 
+            onclick="triggerAiMagic()" title="Utiliser l'OCR pour remplir automatiquement le formulaire">
+        <i class="fas fa-magic me-1"></i> <span id="btnAiMagicText">OCR Intelligent</span>
+        <span id="btnAiMagicSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+    </button>
+</div>
+
+{% include 'partials/_common_js.html.twig' %}
+
+<script>
+async function triggerAiMagic() {
+    const fileInput = document.getElementById('fichier');
+    const titleInput = document.getElementById('titre');
+    const categorySelect = document.getElementById('id_categorie');
+    const folderSelect = document.getElementById('id_dossier');
+    const descriptionTextarea = document.getElementById('description');
+    const tagsInput = document.getElementById('tags');
+    const dateDocumentInput = document.getElementById('date_document');
+    const dateEcheanceInput = document.getElementById('date_echeance');
+    
+    const btnText = document.getElementById('btnAiMagicText');
+    const btnSpinner = document.getElementById('btnAiMagicSpinner');
+    const btn = document.getElementById('btnAiMagic');
+
+    if (!fileInput || !fileInput.files.length) {
+        showNotification('Veuillez d\'abord sélectionner un fichier !', 'info');
+        return;
+    }
+
+    // Changement d'état UI
+    btn.disabled = true;
+    btnText.textContent = 'Lecture du PDF...';
+    btnSpinner.classList.remove('d-none');
+
+    try {
+        const formData = new FormData();
+        formData.append('fichier', fileInput.files[0]);
+        formData.append('titre', titleInput ? titleInput.value : '');
+
+        const response = await fetch('/api/document-intelligence/analyze-upload', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        });
+
+        let data;
+        try {
+            const rawText = await response.text();
+            try {
+                data = JSON.parse(rawText);
+            } catch (e) {
+                console.error('OCR Error Parsing JSON. Raw response:', rawText);
+                showNotification('Erreur : Réponse du serveur non-JSON (Consultez la console).', 'error');
+                return;
+            }
+        } catch (e) {
+            console.error('OCR Error getting response text:', e);
+            showNotification('Erreur : Impossible de lire la réponse du serveur.', 'error');
+            return;
+        }
+
+        if (data.success && data.suggestion) {
+            const s = data.suggestion;
+            let count = 0;
+
+            // Remplissage des champs s'ils sont vides ou si on veut forcer
+            if (s.title && (!titleInput.value || titleInput.value === 'tttt')) {
+                titleInput.value = s.title;
+                titleInput.classList.add('is-valid');
+                count++;
+            }
+
+            if (s.categoryId) {
+                categorySelect.value = s.categoryId;
+                categorySelect.classList.add('is-valid');
+                count++;
+            }
+
+            if (s.folderId) {
+                folderSelect.value = s.folderId;
+                folderSelect.classList.add('is-valid');
+                count++;
+            }
+
+            if (s.description && !descriptionTextarea.value) {
+                descriptionTextarea.value = s.description;
+                descriptionTextarea.classList.add('is-valid');
+                count++;
+            }
+
+            if (s.tags) {
+                const tagList = s.tags.split(/[;,\n]+/);
+                tagList.forEach(tag => {
+                    if (window.addTagToWidget) {
+                        window.addTagToWidget(tag);
+                    } else {
+                        tagsInput.value = s.tags;
+                    }
+                });
+                tagsInput.classList.add('is-valid');
+                count++;
+            }
+
+            if (s.date_document && dateDocumentInput && !dateDocumentInput.value) {
+                dateDocumentInput.value = s.date_document;
+                dateDocumentInput.classList.add('is-valid');
+                count++;
+            }
+
+            if (s.date_echeance && dateEcheanceInput && !dateEcheanceInput.value) {
+                dateEcheanceInput.value = s.date_echeance;
+                dateEcheanceInput.classList.add('is-valid');
+                count++;
+            }
+
+            if (count > 0) {
+                showNotification(`OCR Succès : ${count} champs remplis automatiquement !`, 'success');
+                // Animation de succès sur le bouton
+                btn.classList.replace('btn-outline-primary', 'btn-success text-white');
+                setTimeout(() => btn.classList.replace('btn-success text-white', 'btn-outline-primary'), 2000);
+            } else {
+                showNotification('L\'OCR a lu le document mais n\'a pas trouvé de nouvelles infos.', 'info');
+            }
+        } else {
+            showNotification(data.message || 'L\'OCR n\'a pas pu lire ce document.', 'error');
+        }
+    } catch (error) {
+        showNotification('Erreur technique lors de la lecture OCR.', 'error');
+    } finally {
+        btn.disabled = false;
+        btnText.textContent = 'OCR Intelligent';
+        btnSpinner.classList.add('d-none');
+    }
+}
+</script>

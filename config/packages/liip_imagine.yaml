@@ -1,0 +1,12 @@
+liip_imagine:
+    webp:
+        generate: true
+
+    filter_sets:
+        cache: ~
+        doc_thumbnail:
+            quality: 80
+            filters:
+                thumbnail:
+                    size: [250, 350]
+                    mode: outbound

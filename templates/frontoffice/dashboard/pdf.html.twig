@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Rapport - FinTrack</title>
+    <style>
+        @page { margin: 0cm 0cm; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 11px; color: #1e293b; margin: 0; padding: 0; background-color: #ffffff; }
+        .header-bg { background: #1e293b; height: 140px; width: 100%; position: absolute; top: 0; z-index: -1; }
+        .container { padding: 40px 50px; }
+        .brand-section { color: #ffffff; margin-bottom: 40px; }
+        .brand-name { font-size: 24px; font-weight: bold; letter-spacing: 1px; }
+        .report-title { font-size: 14px; opacity: 0.8; margin-top: 5px; text-transform: uppercase; }
+        
+        .stats-container { display: table; width: 100%; border-spacing: 15px 0; margin: 0 -15px 30px -15px; }
+        .stat-card { display: table-cell; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.02); width: 100%; }
+        .stat-value { font-size: 22px; font-weight: bold; color: #0f172a; display: block; margin-bottom: 5px; }
+        .stat-label { font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+
+        .section-header { border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px; margin-top: 20px; }
+        .section-title { font-size: 16px; font-weight: bold; color: #1e293b; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background-color: #f8fafc; color: #475569; text-align: left; padding: 12px 15px; font-weight: bold; text-transform: uppercase; font-size: 9px; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tr:nth-child(even) { background-color: #fafafa; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 9px; font-weight: bold; display: inline-block; text-align: center; }
+        .badge-success { background-color: #dcfce7; color: #15803d; }
+        .badge-danger { background-color: #fee2e2; color: #b91c1c; }
+        .badge-primary { background-color: #e0e7ff; color: #4338ca; }
+
+        .footer { position: fixed; bottom: 30px; left: 50px; right: 50px; text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 15px; }
+        .page-number:after { content: counter(page); }
+    </style>
+</head>
+<body>
+    <div class="header-bg"></div>
+    <div class="container">
+        <div class="brand-section">
+            <div class="brand-name">FINTRACK <span style="font-weight: normal; opacity: 0.7;">FINANCE</span></div>
+            <div class="report-title">Rapport de Situation Financière</div>
+            <div style="margin-top: 15px; font-size: 10px; opacity: 0.9;">
+                Généré le {{ "now"|date('d/m/Y') }} à {{ "now"|date('H:i') }}<br>
+                Utilisateur : {{ app.user.fullName ?: app.user.email }}
+            </div>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card" style="border-left: 4px solid #51B56D;">
+                <span class="stat-value">{{ balanceTotal|number_format(2, ',', ' ') }} EUR</span>
+                <span class="stat-label">Solde Total Disponible</span>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <span class="section-title">Dernières Transactions</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Statut</th>
+                    <th style="text-align: right;">Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trx in dernieres_transactions %}
+                <tr>
+                    <td>{{ trx.date|date('d/m/Y H:i') }}</td>
+                    <td><div style="font-weight: bold;">{{ trx.description }}</div></td>
+                    <td>
+                        <span class="badge {% if trx.type == 'DEPOT' %}badge-success{% elseif trx.type == 'RETRAIT' %}badge-danger{% else %}badge-primary{% endif %}">
+                            {{ trx.type }}
+                        </span>
+                    </td>
+                    <td>{{ trx.statut }}</td>
+                    <td style="text-align: right; font-weight: bold;">
+                        {{ trx.montant|number_format(2, ',', ' ') }} {{ trx.devise }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" style="text-align: center; padding: 20px;">Aucune transaction récente.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="footer">
+        FinTrack Finance &copy; {{ "now"|date('Y') }} - Page <span class="page-number"></span>
+    </div>
+</body>
+</html>

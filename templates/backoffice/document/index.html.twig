@@ -1,124 +1,559 @@
 {% extends 'backoffice/base.html.twig' %}
 
-{% block title %}Gestion des Documents - Admin{% endblock %}
+{% block title %}Dashboard Documents – Admin FinTrack{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ═══════════════════════════════════════════════════════════
+   ADMIN DOCUMENT DASHBOARD — Dark-Premium
+   ═══════════════════════════════════════════════════════════ */
+:root {
+    --ad-bg:      #0f172a;
+    --ad-surface: #1e293b;
+    --ad-border:  #334155;
+    --ad-text:    #f1f5f9;
+    --ad-muted:   #94a3b8;
+    --ad-radius:  14px;
+    --ad-shadow:  0 4px 24px rgba(0,0,0,.4);
+    --ad-accent:  #6366f1;
+    --ad-success: #10b981;
+    --ad-warn:    #f59e0b;
+    --ad-danger:  #ef4444;
+    --ad-info:    #3b82f6;
+}
+.main-content { background: var(--ad-bg) !important; }
+
+/* PAGE TITLE */
+.admin-page-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--ad-text);
+    letter-spacing: -.3px;
+}
+.admin-breadcrumb { font-size: .8rem; color: var(--ad-muted); }
+
+/* STAT CARD */
+.a-stat {
+    background: var(--ad-surface);
+    border: 1px solid var(--ad-border);
+    border-radius: var(--ad-radius);
+    padding: 1.4rem 1.6rem;
+    box-shadow: var(--ad-shadow);
+    transition: transform .3s, box-shadow .3s;
+    position: relative;
+    overflow: hidden;
+}
+.a-stat:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,.6); }
+.a-stat::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--ad-radius) var(--ad-radius) 0 0;
+}
+.a-stat.accent::after   { background: linear-gradient(90deg,#6366f1,#818cf8); }
+.a-stat.success::after  { background: linear-gradient(90deg,#10b981,#34d399); }
+.a-stat.warn::after     { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+.a-stat.danger::after   { background: linear-gradient(90deg,#ef4444,#f87171); }
+.a-stat.info::after     { background: linear-gradient(90deg,#3b82f6,#60a5fa); }
+.a-stat.teal::after     { background: linear-gradient(90deg,#0d9488,#2dd4bf); }
+.a-stat.pink::after     { background: linear-gradient(90deg,#ec4899,#f472b6); }
+.a-stat.purple::after   { background: linear-gradient(90deg,#8b5cf6,#a78bfa); }
+
+.a-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+}
+.icon-accent  { background:rgba(99,102,241,.15);  color:#818cf8; }
+.icon-success { background:rgba(16,185,129,.15);  color:#34d399; }
+.icon-warn    { background:rgba(245,158,11,.15);  color:#fbbf24; }
+.icon-danger  { background:rgba(239,68,68,.15);   color:#f87171; }
+.icon-info    { background:rgba(59,130,246,.15);  color:#60a5fa; }
+.icon-teal    { background:rgba(13,148,136,.15);  color:#2dd4bf; }
+.icon-pink    { background:rgba(236,72,153,.15);  color:#f472b6; }
+.icon-purple  { background:rgba(139,92,246,.15);  color:#a78bfa; }
+
+.a-val   { font-size: 2rem; font-weight: 800; color: var(--ad-text); line-height: 1; }
+.a-lbl   { font-size: .73rem; font-weight: 600; color: var(--ad-muted); text-transform: uppercase; letter-spacing: .5px; margin-top: .2rem; }
+.a-pill  { display: inline-flex; align-items: center; gap: .3rem; padding: .18rem .6rem; border-radius: 20px; font-size: .7rem; font-weight: 700; margin-top: .5rem; }
+.pill-up    { background: rgba(16,185,129,.15);  color: #34d399; }
+.pill-warn  { background: rgba(245,158,11,.15);  color: #fbbf24; }
+.pill-info  { background: rgba(59,130,246,.15);  color: #60a5fa; }
+
+/* SECTION CARD */
+.a-card {
+    background: var(--ad-surface);
+    border: 1px solid var(--ad-border);
+    border-radius: var(--ad-radius);
+    box-shadow: var(--ad-shadow);
+    overflow: hidden;
+}
+.a-card-header {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--ad-border);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.a-card-title { font-size: .88rem; font-weight: 700; color: var(--ad-text); }
+
+/* TABLE */
+.a-table { width: 100%; border-collapse: collapse; }
+.a-table th { padding: .75rem 1.2rem; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--ad-muted); background: rgba(255,255,255,.03); border-bottom: 1px solid var(--ad-border); }
+.a-table td { padding: .85rem 1.2rem; border-bottom: 1px solid var(--ad-border); vertical-align: middle; color: var(--ad-text); font-size: .85rem; }
+.a-table tr:last-child td { border-bottom: none; }
+.a-table tbody tr { transition: background .15s; }
+.a-table tbody tr:hover { background: rgba(255,255,255,.03); }
+
+/* FILE ICON */
+.fi { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .85rem; flex-shrink: 0; }
+.fi-pdf { background:rgba(239,68,68,.15);  color:#f87171; }
+.fi-img { background:rgba(16,185,129,.15); color:#34d399; }
+.fi-def { background:rgba(148,163,184,.1); color:#94a3b8; }
+
+/* STATUS */
+.sp { display: inline-flex; align-items: center; gap: .25rem; padding: .2rem .7rem; border-radius: 20px; font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+.sp-valide      { background:rgba(16,185,129,.15);  color:#34d399; }
+.sp-expire      { background:rgba(239,68,68,.15);   color:#f87171; }
+.sp-a_renouveler{ background:rgba(245,158,11,.15);  color:#fbbf24; }
+.sp-archive     { background:rgba(148,163,184,.1);  color:#94a3b8; }
+
+/* TYPE BAR */
+.tb-row { display: flex; align-items: center; gap: .8rem; padding: .75rem 1.5rem; border-bottom: 1px solid var(--ad-border); }
+.tb-row:last-child { border-bottom: none; }
+.tb-bg  { flex: 1; height: 6px; background: var(--ad-border); border-radius: 4px; overflow: hidden; }
+.tb-bar { height: 100%; border-radius: 4px; transition: width .7s ease; }
+.tb-lbl { font-size: .78rem; font-weight: 600; color: var(--ad-text); min-width: 80px; text-transform: capitalize; }
+.tb-cnt { font-size: .78rem; font-weight: 700; color: var(--ad-muted); min-width: 28px; text-align: right; }
+
+/* TOP USER ROW */
+.tu-row { display: flex; align-items: center; gap: 1rem; padding: .8rem 1.5rem; border-bottom: 1px solid var(--ad-border); }
+.tu-row:last-child { border-bottom: none; }
+.tu-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; flex-shrink: 0; }
+
+/* FILTER BAR */
+.filter-bar { padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--ad-border); display: flex; flex-wrap: wrap; gap: .8rem; align-items: flex-end; background: rgba(255,255,255,.02); }
+.filter-input { padding: .5rem .9rem; border-radius: 9px; border: 1.5px solid var(--ad-border); background: rgba(255,255,255,.05); color: var(--ad-text); font-size: .83rem; outline: none; transition: border .2s; }
+.filter-input:focus { border-color: var(--ad-accent); }
+.filter-input::placeholder { color: var(--ad-muted); }
+.btn-adm { background: linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border: none; padding: .5rem 1.2rem; border-radius: 9px; font-weight: 600; font-size: .82rem; cursor: pointer; display: inline-flex; align-items: center; gap:.35rem; transition: all .2s; text-decoration: none; }
+.btn-adm:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,.4); color:#fff; }
+.btn-adm-ghost { background: transparent; border: 1.5px solid var(--ad-border); color: var(--ad-text); padding: .5rem 1.1rem; border-radius: 9px; font-weight: 600; font-size: .82rem; cursor: pointer; display: inline-flex; align-items: center; gap:.35rem; text-decoration: none; transition: all .2s; }
+.btn-adm-ghost:hover { border-color: var(--ad-accent); color: #818cf8; }
+
+/* Action buttons in table */
+.act { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--ad-border); background: transparent; color: var(--ad-muted); text-decoration: none; transition: all .2s; font-size: .8rem; cursor: pointer; }
+.act:hover { border-color: var(--ad-accent); color: #818cf8; background: rgba(99,102,241,.1); }
+.act.danger:hover { border-color: var(--ad-danger); color: #f87171; background: rgba(239,68,68,.1); }
+
+/* Donut chart mini */
+.donut-wrap { padding: 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+</style>
+{% endblock %}
 
 {% block body %}
-<div class="container-fluid mt-4 px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+<div class="container-fluid px-4">
+
+    {# ─── PAGE TITLE ─────────────────────────────────────────── #}
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
         <div>
-            <h1 class="h3 mb-1 text-gray-800"><i class="fas fa-file-invoice me-2 text-primary"></i>Gestion des Documents</h1>
-            <p class="text-muted small mb-0">Administrez tous les documents importés par les utilisateurs.</p>
+            <div class="admin-breadcrumb mb-1"><i class="fas fa-home me-1"></i> Admin <i class="fas fa-chevron-right mx-1" style="font-size:.6rem"></i> Documents</div>
+            <h1 class="admin-page-title"><i class="fas fa-layer-group me-2" style="color:#6366f1"></i>Tableau de Bord Documents</h1>
         </div>
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ path('admin_categorie_new') }}" class="btn btn-outline-primary shadow-sm rounded-pill px-4">
-                <i class="fas fa-tags fa-sm me-1"></i> Nouvelle Catégorie
-            </a>
-            <a href="{{ path('admin_document_new') }}" class="btn btn-primary shadow-sm rounded-pill px-4">
-                <i class="fas fa-plus fa-sm text-white-50 me-1"></i> Nouveau Document
-            </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ path('admin_document_new') }}" class="btn-adm"><i class="fas fa-plus"></i> Nouveau document</a>
+            <a href="{{ path('admin_categorie_new') }}" class="btn-adm-ghost"><i class="fas fa-tags"></i> Catégorie</a>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="card shadow-sm mb-4 border-0">
-        <div class="card-body">
-            <form method="GET" action="{{ path('admin_document_index') }}" class="row g-3 align-items-end">
-                <div class="col-md-10">
-                    <label class="form-label small fw-bold text-uppercase text-muted">Rechercher par titre, type, utilisateur ou tags</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" name="q" value="{{ q }}" class="form-control bg-light border-0 shadow-none" placeholder="Titre, utilisateur, tags...">
+    {# ─── STAT CARDS ROW 1 ─────────────────────────────────── #}
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-sm-4 col-xl-3">
+            <div class="a-stat accent h-100">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="a-icon icon-accent"><i class="fas fa-file-alt"></i></div>
+                    <span class="a-lbl">Total documents</span>
+                </div>
+                <div class="a-val">{{ stats.total }}</div>
+                <div><span class="a-pill pill-info"><i class="fas fa-plus"></i> {{ stats.this_month }} ce mois</span></div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-3">
+            <div class="a-stat success h-100">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="a-icon icon-success"><i class="fas fa-check-circle"></i></div>
+                    <span class="a-lbl">Valides</span>
+                </div>
+                <div class="a-val">{{ stats.valide }}</div>
+                {% if stats.total > 0 %}
+                <div><span class="a-pill pill-up">{{ ((stats.valide/stats.total)*100)|round }}% du total</span></div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-3">
+            <div class="a-stat danger h-100">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="a-icon icon-danger"><i class="fas fa-exclamation-triangle"></i></div>
+                    <span class="a-lbl">Expirés</span>
+                </div>
+                <div class="a-val">{{ stats.expire }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-3">
+            <div class="a-stat warn h-100">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="a-icon icon-warn"><i class="fas fa-sync-alt"></i></div>
+                    <span class="a-lbl">À renouveler</span>
+                </div>
+                <div class="a-val">{{ stats.a_renouveler }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-3">
+            <div class="a-stat info h-100">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="a-icon icon-info"><i class="fas fa-archive"></i></div>
+                    <span class="a-lbl">Archivés</span>
+                </div>
+                <div class="a-val">{{ stats.archive }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-3">
+            <div class="a-stat teal h-100">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="a-icon icon-teal"><i class="fas fa-users"></i></div>
+                    <span class="a-lbl">Utilisateurs actifs</span>
+                </div>
+                <div class="a-val">{{ stats.nb_users }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-3">
+            <div class="a-stat pink h-100">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="a-icon icon-pink"><i class="fas fa-clock"></i></div>
+                    <span class="a-lbl">Expirent sous 7j</span>
+                </div>
+                <div class="a-val">{{ stats.expires_soon }}</div>
+                <div><span class="a-pill pill-warn">Urgent</span></div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-xl-3">
+            <div class="a-stat purple h-100">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <div class="a-icon icon-purple"><i class="fas fa-hdd"></i></div>
+                    <span class="a-lbl">Espace total</span>
+                </div>
+                {% set mb = (stats.total_size / 1048576)|round(1) %}
+                <div class="a-val" style="font-size:1.6rem">{{ mb }}<span style="font-size:1rem;font-weight:600"> Mo</span></div>
+            </div>
+        </div>
+    </div>
+
+    {# ─── ROW 2: Charts + Top Users ──────────────────────────── #}
+    <div class="row g-3 mb-3">
+
+        {# Monthly chart #}
+        <div class="col-lg-5">
+            <div class="a-card h-100">
+                <div class="a-card-header">
+                    <span class="a-card-title"><i class="fas fa-chart-line me-2" style="color:#6366f1"></i>Documents (6 derniers mois)</span>
+                </div>
+                <div style="padding:1.5rem;height:220px;position:relative">
+                    <canvas id="adminMonthly"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {# Donut chart #}
+        <div class="col-lg-3">
+            <div class="a-card h-100">
+                <div class="a-card-header">
+                    <span class="a-card-title"><i class="fas fa-chart-pie me-2" style="color:#f59e0b"></i>Répartition statuts</span>
+                </div>
+                <div class="donut-wrap">
+                    <canvas id="statusDonut" style="max-height:130px;max-width:130px"></canvas>
+                    <div style="width:100%">
+                        {% for item in [
+                            {label:'Valides',       cnt: stats.valide,       color:'#34d399'},
+                            {label:'Expirés',       cnt: stats.expire,       color:'#f87171'},
+                            {label:'À renouveler',  cnt: stats.a_renouveler, color:'#fbbf24'},
+                            {label:'Archivés',      cnt: stats.archive,      color:'#94a3b8'}
+                        ] %}
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="width:10px;height:10px;border-radius:50%;background:{{ item.color }};flex-shrink:0;display:inline-block"></span>
+                                <span style="font-size:.75rem;color:var(--ad-muted)">{{ item.label }}</span>
+                            </div>
+                            <span style="font-size:.8rem;font-weight:700;color:var(--ad-text)">{{ item.cnt }}</span>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill">Filtrer</button>
+            </div>
+        </div>
+
+        {# Top 5 users #}
+        <div class="col-lg-4">
+            <div class="a-card h-100">
+                <div class="a-card-header">
+                    <span class="a-card-title"><i class="fas fa-trophy me-2" style="color:#f59e0b"></i>Top 5 utilisateurs</span>
                 </div>
-            </form>
+                {% set pal = ['#6366f1','#10b981','#f59e0b','#ef4444','#3b82f6'] %}
+                {% for u in stats.top_users %}
+                {% set name = u.full_name ?: u.email %}
+                <div class="tu-row">
+                    <div class="tu-avatar" style="background:{{ pal[loop.index0 % 5] }}22;color:{{ pal[loop.index0 % 5] }}">
+                        {{ name|slice(0,1)|upper }}
+                    </div>
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:.83rem;font-weight:600;color:var(--ad-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ name }}</div>
+                        <div style="font-size:.72rem;color:var(--ad-muted)">{{ u.email }}</div>
+                    </div>
+                    <span class="a-pill" style="background:{{ pal[loop.index0 % 5] }}22;color:{{ pal[loop.index0 % 5] }}">
+                        {{ u.nb }} docs
+                    </span>
+                </div>
+                {% else %}
+                <div style="padding:2rem;text-align:center;color:var(--ad-muted);font-size:.85rem">Aucun utilisateur</div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
-    <!-- Data Table -->
-    <div class="card shadow-sm mb-4 border-0 rounded-4">
-        <div class="card-header py-3 bg-white border-bottom-0 rounded-top-4">
-            <h6 class="m-0 font-weight-bold text-primary">📋 Liste des Documents</h6>
+    {# ─── ROW 3: Type breakdown + Recent ─────────────────────── #}
+    <div class="row g-3 mb-3">
+        <div class="col-lg-4">
+            <div class="a-card">
+                <div class="a-card-header">
+                    <span class="a-card-title"><i class="fas fa-layer-group me-2" style="color:#6366f1"></i>Répartition par type</span>
+                </div>
+                {% set type_colors = ['#6366f1','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899'] %}
+                {% set t_total = stats.total > 0 ? stats.total : 1 %}
+                {% for t in stats.by_type %}
+                <div class="tb-row">
+                    <span class="tb-lbl">{{ t.type_document }}</span>
+                    <div class="tb-bg">
+                        <div class="tb-bar" style="width:{{ ((t.cnt/t_total)*100)|round }}%;background:{{ type_colors[loop.index0 % 7] }}"></div>
+                    </div>
+                    <span class="tb-cnt">{{ t.cnt }}</span>
+                </div>
+                {% else %}
+                <div style="padding:2rem;text-align:center;color:var(--ad-muted)">Aucun document</div>
+                {% endfor %}
+            </div>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
+
+        <div class="col-lg-8">
+            <div class="a-card">
+                <div class="a-card-header">
+                    <span class="a-card-title"><i class="fas fa-history me-2" style="color:#6366f1"></i>Documents récents</span>
+                    <a href="{{ path('admin_document_index') }}" class="btn-adm-ghost" style="font-size:.73rem;padding:.3rem .8rem">Tout voir</a>
+                </div>
+                <table class="a-table">
+                    <thead>
                         <tr>
-                            <th class="ps-4" style="width: 80px;">ID</th>
                             <th>Document</th>
-                            <th>Type / Catégorie</th>
                             <th>Propriétaire</th>
+                            <th>Type</th>
                             <th class="text-center">Statut</th>
-                            <th class="text-center">Date Doc.</th>
-                            <th class="text-center pe-4">Actions</th>
+                            <th class="text-center">Date</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for document in documents %}
-                            <tr>
-                                <td class="ps-4 text-muted small">#{{ document.id }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
-                                            <i class="fas fa-file-pdf text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <span class="fw-bold text-dark d-block">{{ document.titre }}</span>
-                                            <span class="text-muted small"><i class="fas fa-folder-open me-1"></i>{{ document.dossier.nomDossier|default('Hors dossier') }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill text-capitalize small d-block mb-1">
-                                        {{ document.typeDocument }}
-                                    </span>
-                                    <span class="small text-muted">
-                                        <i class="fas fa-tag me-1" style="color: {{ document.categorie.couleur|default('#ccc') }};"></i>
-                                        {{ document.categorie.nomCategorie|default('Sans catégorie') }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="small fw-bold text-dark">{{ document.utilisateur.fullName ?: document.utilisateur.email }}</span>
-                                    <span class="text-muted d-block small">{{ document.utilisateur.email }}</span>
-                                </td>
-                                <td class="text-center">
-                                    {% set status_color = document.statut == 'valide' ? 'success' : (document.statut == 'expire' ? 'danger' : 'warning') %}
-                                    <span class="badge bg-{{ status_color }} bg-opacity-10 text-{{ status_color }} px-3 py-2 rounded-pill text-capitalize small">
-                                        {{ document.statut }}
-                                    </span>
-                                </td>
-                                <td class="text-center small text-muted">{{ document.dateDocument|date('d/m/Y') }}</td>
-                                <td class="text-center pe-4">
-                                    <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                                        <a href="{{ path('admin_document_show', {id: document.id}) }}" class="btn btn-sm btn-white border-end" title="Voir"><i class="fas fa-eye text-primary"></i></a>
-                                        <a href="{{ path('admin_document_edit', {id: document.id}) }}" class="btn btn-sm btn-white border-end" title="Modifier"><i class="fas fa-edit text-warning"></i></a>
-                                        <form method="post" action="{{ path('admin_document_delete', {id: document.id}) }}" class="d-inline" onsubmit="return confirm('Supprimer ce document ?');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
-                                            <button class="btn btn-sm btn-white" title="Supprimer"><i class="fas fa-trash text-danger"></i></button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="7" class="text-center py-5">
-                                    <div class="text-muted">
-                                        <i class="fas fa-file-invoice fa-3x mb-3 d-block opacity-25"></i>
-                                        Aucun document trouvé.
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
+                    {% for doc in recentDocs %}
+                    {% set ext = doc.cheminFichier|split('.')|last|lower %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="fi {{ ext in ['pdf'] ? 'fi-pdf' : (ext in ['jpg','jpeg','png','gif','webp'] ? 'fi-img' : 'fi-def') }}">
+                                    <i class="fas fa-file-{{ ext in ['pdf'] ? 'pdf' : (ext in ['jpg','jpeg','png','gif','webp'] ? 'image' : 'alt') }}"></i>
+                                </div>
+                                <div style="min-width:0">
+                                    <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">{{ doc.titre }}</div>
+                                    {% if doc.dossier %}
+                                    <div style="font-size:.72rem;color:var(--ad-muted)"><i class="fas fa-folder-open me-1"></i>{{ doc.dossier.nomDossier }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size:.82rem;font-weight:600">{{ doc.utilisateur.fullName ?: doc.utilisateur.email }}</div>
+                            <div style="font-size:.72rem;color:var(--ad-muted)">{{ doc.utilisateur.email }}</div>
+                        </td>
+                        <td style="text-transform:capitalize;font-size:.8rem;color:var(--ad-muted)">{{ doc.typeDocument }}</td>
+                        <td class="text-center"><span class="sp sp-{{ doc.statut }}">{{ doc.statut|replace({'a_renouveler':'À renouv.'}) }}</span></td>
+                        <td class="text-center" style="font-size:.78rem;color:var(--ad-muted);white-space:nowrap">
+                            {{ doc.createdAt|date('d/m/Y') }}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex gap-1 justify-content-center">
+                                <a href="{{ path('admin_document_show', {id: doc.id}) }}" class="act" title="Voir"><i class="fas fa-eye"></i></a>
+                                <a href="{{ path('admin_document_edit', {id: doc.id}) }}" class="act" title="Modifier"><i class="fas fa-pencil-alt"></i></a>
+                                <form method="post" action="{{ path('admin_document_delete', {id: doc.id}) }}" onsubmit="return confirm('Supprimer ?')" style="display:inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ doc.id) }}">
+                                    <button type="submit" class="act danger" title="Supprimer"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--ad-muted)">Aucun document.</td></tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="card-footer bg-white border-top-0 py-3 rounded-bottom-4">
-            <div class="text-muted small">Total : <strong>{{ documents|length }}</strong> document(s)</div>
+    </div>
+
+    {# ─── FULL DATA TABLE with filter ─────────────────────────── #}
+    <div class="a-card mb-4">
+        <div class="a-card-header">
+            <span class="a-card-title"><i class="fas fa-table me-2" style="color:#6366f1"></i>Tous les documents
+                <span style="margin-left:.6rem;background:rgba(99,102,241,.15);color:#818cf8;padding:.15rem .6rem;border-radius:20px;font-size:.7rem;font-weight:700">{{ documents|length }}</span>
+            </span>
+        </div>
+        <div class="filter-bar">
+            <form method="GET" action="{{ path('admin_document_index') }}" class="d-flex flex-wrap gap-2 align-items-center w-100">
+                <div style="position:relative;flex:1;min-width:220px">
+                    <i class="fas fa-search" style="position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--ad-muted);font-size:.78rem"></i>
+                    <input type="text" name="q" value="{{ q }}" placeholder="Titre, utilisateur, tags..." class="filter-input" style="width:100%;padding-left:2.2rem">
+                </div>
+                <button type="submit" class="btn-adm"><i class="fas fa-filter"></i> Filtrer</button>
+                {% if q %}
+                <a href="{{ path('admin_document_index') }}" class="btn-adm-ghost"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="a-table">
+                <thead>
+                    <tr>
+                        <th style="padding-left:1.5rem">ID</th>
+                        <th>Document</th>
+                        <th>Type / Catégorie</th>
+                        <th>Propriétaire</th>
+                        <th class="text-center">Statut</th>
+                        <th class="text-center">Date</th>
+                        <th class="text-center" style="padding-right:1.5rem">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for document in documents %}
+                {% set ext = document.cheminFichier|split('.')|last|lower %}
+                <tr>
+                    <td style="padding-left:1.5rem;color:var(--ad-muted);font-size:.78rem">#{{ document.id }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="fi {{ ext in ['pdf'] ? 'fi-pdf' : (ext in ['jpg','jpeg','png','gif','webp'] ? 'fi-img' : 'fi-def') }}">
+                                <i class="fas fa-file-{{ ext in ['pdf'] ? 'pdf' : (ext in ['jpg','jpeg','png','gif','webp'] ? 'image' : 'alt') }}"></i>
+                            </div>
+                            <div style="min-width:0">
+                                <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">{{ document.titre }}</div>
+                                <div style="font-size:.72rem;color:var(--ad-muted)"><i class="fas fa-folder-open me-1"></i>{{ document.dossier.nomDossier|default('Hors dossier') }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size:.8rem;font-weight:600;text-transform:capitalize;color:var(--ad-text)">{{ document.typeDocument }}</div>
+                        {% if document.categorie %}
+                        <div style="font-size:.72rem;color:{{ document.categorie.couleur|default('#94a3b8') }}">
+                            <i class="fas fa-tag me-1"></i>{{ document.categorie.nomCategorie }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-size:.82rem;font-weight:600;color:var(--ad-text)">{{ document.utilisateur.fullName ?: document.utilisateur.email }}</div>
+                        <div style="font-size:.72rem;color:var(--ad-muted)">{{ document.utilisateur.email }}</div>
+                    </td>
+                    <td class="text-center"><span class="sp sp-{{ document.statut }}">{{ document.statut|replace({'a_renouveler':'À renouv.'}) }}</span></td>
+                    <td class="text-center" style="font-size:.78rem;color:var(--ad-muted);white-space:nowrap">
+                        {{ document.dateDocument ? document.dateDocument|date('d/m/Y') : '–' }}
+                    </td>
+                    <td class="text-center" style="padding-right:1.5rem">
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="{{ path('admin_document_show', {id: document.id}) }}" class="act" title="Voir"><i class="fas fa-eye"></i></a>
+                            <a href="{{ path('admin_document_edit', {id: document.id}) }}" class="act" title="Modifier"><i class="fas fa-pencil-alt"></i></a>
+                            <form method="post" action="{{ path('admin_document_delete', {id: document.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ce document ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+                                <button type="submit" class="act danger" title="Supprimer"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--ad-muted)">
+                    <i class="fas fa-file-invoice fa-2x mb-2 d-block opacity-25"></i>Aucun document trouvé.
+                </td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="padding:.9rem 1.5rem;border-top:1px solid var(--ad-border);font-size:.78rem;color:var(--ad-muted)">
+            Total : <strong style="color:var(--ad-text)">{{ documents|length }}</strong> document(s)
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+/* ── Monthly bar ── */
+(function () {
+    const rawStats = {{ stats.by_month|json_encode|raw }};
+    const labels   = rawStats.map(m => m.month_label);
+    const data     = rawStats.map(m => m.cnt);
+    const ctx    = document.getElementById('adminMonthly');
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Documents',
+                data,
+                backgroundColor: 'rgba(99,102,241,.7)',
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+                y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', stepSize: 1, font: { size: 11 } } }
+            }
+        }
+    });
+})();
+
+/* ── Status Donut ── */
+(function () {
+    const ctx = document.getElementById('statusDonut');
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Valides', 'Expirés', 'À renouveler', 'Archivés'],
+            datasets: [{
+                data: [{{ stats.valide }}, {{ stats.expire }}, {{ stats.a_renouveler }}, {{ stats.archive }}],
+                backgroundColor: ['#34d399','#f87171','#fbbf24','#94a3b8'],
+                borderColor: '#1e293b',
+                borderWidth: 3,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '72%',
+            plugins: { legend: { display: false }, tooltip: { callbacks: {
+                label: (c) => ` ${c.label}: ${c.raw}`
+            }}}
+        }
+    });
+})();
+</script>
 {% endblock %}

@@ -21,10 +21,10 @@ class Facture
     #[ORM\Column(type: 'decimal', precision: 15, scale: 2)]
     private ?string $montant = null;
 
-    #[ORM\Column(name: 'date_facture', type: 'date_mutable')]
+    #[ORM\Column(name: 'date_facture', type: 'date')]
     private ?\DateTimeInterface $dateFacture = null;
 
-    #[ORM\Column(name: 'date_echeance', type: 'date_mutable', nullable: true)]
+    #[ORM\Column(name: 'date_echeance', type: 'date', nullable: true)]
     private ?\DateTimeInterface $dateEcheance = null;
 
     #[ORM\ManyToOne(targetEntity: Service::class, inversedBy: 'factures')]

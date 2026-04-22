@@ -77,19 +77,19 @@
                         <span class="text-dark small fw-bold">{{ (document.tailleFichier / 1024)|number_format(2) }} KB</span>
                     </div>
 
-                    {% if document.tags %}
+                    {% if document.tags|length %}
                         <div class="mt-4">
                             <label class="text-muted small d-block mb-2">Tags</label>
                             <div>
-                                {% for tag in document.tags|split(',') %}
-                                    <span class="badge bg-light text-secondary border px-2 py-1 rounded me-1 mb-1">{{ tag|trim }}</span>
+                                {% for tag in document.tags %}
+                                    <span class="badge bg-light text-secondary border px-2 py-1 rounded me-1 mb-1">{{ tag.nomTag }}</span>
                                 {% endfor %}
                             </div>
                         </div>
                     {% endif %}
                 </div>
                 <div class="card-footer bg-light border-0 p-4 pt-0">
-                    <div class="row g-2">
+                    <div class="row g-2 mb-3">
                         <div class="col-6">
                             <a href="{{ path('admin_document_edit', {id: document.id}) }}" class="btn btn-warning w-100 rounded-pill fw-bold text-white shadow-sm btn-sm">
                                 <i class="fas fa-edit me-2"></i> Modifier
@@ -104,6 +104,8 @@
                             </form>
                         </div>
                     </div>
+                    
+                    {% include 'partials/_share_buttons.html.twig' %}
                 </div>
             </div>
         </div>
@@ -132,6 +134,12 @@
                     {% endif %}
                 </div>
             </div>
+
+            {# Panneau d'Intelligence Artificielle #}
+            {% include 'partials/_intelligence_panel.html.twig' %}
+
+            {# Panneau de traduction #}
+            {% include 'partials/_translation_panel.html.twig' %}
         </div>
     </div>
 </div>
