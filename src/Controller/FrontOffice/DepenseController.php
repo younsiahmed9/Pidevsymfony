@@ -9,9 +9,18 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+use App\Service\BudgetNotificationService;
+
 #[Route('/depense', name: 'depense_')]
 final class DepenseController extends AbstractController
 {
+    private BudgetNotificationService $budgetNotificationService;
+
+    public function __construct(BudgetNotificationService $budgetNotificationService)
+    {
+        $this->budgetNotificationService = $budgetNotificationService;
+    }
+
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager): Response
     {
@@ -95,7 +104,12 @@ final class DepenseController extends AbstractController
                 ]);
 
                 $this->addFlash('success', 'Dépense enregistrée avec succès.');
+                
+                // Vérifier le seuil du budget
+                $this->budgetNotificationService->checkAndNotify((int) $depenseFormData['id_budget'], $user);
+
                 return $this->redirectToRoute('depense_index');
+
             }
 
             $this->addFlash('danger', 'Veuillez corriger les erreurs du formulaire.');
@@ -169,7 +183,12 @@ final class DepenseController extends AbstractController
                 ], ['id_depense' => $id, 'user_id' => $user->getId()]);
 
                 $this->addFlash('success', 'Dépense mise à jour avec succès.');
+                
+                // Vérifier le seuil du budget
+                $this->budgetNotificationService->checkAndNotify((int) $depenseFormData['id_budget'], $user);
+
                 return $this->redirectToRoute('depense_index');
+
             }
 
             $this->addFlash('danger', 'Veuillez corriger les erreurs du formulaire.');

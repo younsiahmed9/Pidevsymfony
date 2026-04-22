@@ -3,7 +3,6 @@
 namespace App\Controller\FrontOffice;
 
 use App\Entity\User;
-use App\Service\Transfer\BrevoEmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,7 +21,6 @@ final class VirementController extends AbstractController
     private const APP_TIMEZONE = 'Africa/Tunis';
 
     public function __construct(
-        private readonly BrevoEmailService $brevoEmailService,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -143,29 +141,7 @@ final class VirementController extends AbstractController
             $sourceCardLabel = $this->resolveCardLabel($cardRows, (int) $data['carte_source']);
             $destCardLabel = $data['carte_dest'] ? $this->resolveCardLabel($cardRows, (int) $data['carte_dest']) : '-';
 
-            try {
-                $this->brevoEmailService->sendProgrammedTransferCreatedConfirmation([
-                    'scheduled_id' => $scheduledId,
-                    'amount' => number_format((float) $data['montant'], 2, '.', ''),
-                    'currency' => (string) $data['devise'],
-                    'source_card' => $sourceCardLabel,
-                    'dest_card' => $destCardLabel,
-                    'next_execution' => $data['prochaine_execution']?->format('Y-m-d H:i:s') ?? '-',
-                    'frequency' => (string) $data['frequence'],
-                ], (string) $user->getEmail());
-                $this->logger->info('Programmed transfer creation email sent', [
-                    'scheduled_id' => $scheduledId,
-                    'recipient' => $user->getEmail(),
-                ]);
-            } catch (\Throwable $e) {
-                $this->logger->error('Programmed transfer creation email failed', [
-                    'scheduled_id' => $scheduledId,
-                    'recipient' => $user->getEmail(),
-                    'error' => $e->getMessage(),
-                    'exception' => get_class($e),
-                ]);
-                $this->addFlash('warning', 'Virement créé, mais email indisponible: ' . mb_substr($e->getMessage(), 0, 100));
-            }
+            /* Email notification skipped (Brevo disabled) */
 
             $this->addFlash('success', 'Virement programmé avec succès.');
 

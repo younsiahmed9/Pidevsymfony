@@ -24,6 +24,20 @@
             </div>
         </div>
 
+        {% set progress = budget.montant_total > 0 ? (budget.total_depense / budget.montant_total * 100) : 0 %}
+        {% if progress >= 80 %}
+            <div class="alert {{ progress >= 100 ? 'alert-danger' : 'alert-warning' }} border-0 shadow-sm rounded-4 p-4 mb-4 d-flex align-items-center gap-3">
+                <div class="bg-white bg-opacity-25 p-3 rounded-circle">
+                    <i class="fas {{ progress >= 100 ? 'fa-ban' : 'fa-exclamation-triangle' }} fa-lg"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1">Attention : Seuil Limite Atteint</h5>
+                    <p class="mb-0 text-dark opacity-75">Vous avez utilisé <strong>{{ progress|number_format(1) }}%</strong> de votre budget total pour {{ budget.nom_budget }}.</p>
+                </div>
+            </div>
+        {% endif %}
+
+
         <div class="row g-4">
             <!-- Left Column: Summary & Progress -->
             <div class="col-lg-4">

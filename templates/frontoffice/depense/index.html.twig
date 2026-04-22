@@ -10,9 +10,17 @@
                 <h1 class="h2 fw-bold text-dark mb-1">Mes Dépenses</h1>
                 <p class="text-muted mb-0">Gardez un œil sur chaque dépense effectuée.</p>
             </div>
-            <a href="{{ path('depense_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
-                <i class="fas fa-plus me-2"></i> Enregistrer une dépense
-            </a>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-info btn-lg rounded-pill shadow-sm px-4" id="ai-advice-btn">
+                    <i class="fas fa-magic me-2"></i> Conseiller IA
+                </button>
+                <a href="{{ path('bundle_index') }}" class="btn btn-outline-success btn-lg rounded-pill shadow-sm px-4">
+                    <i class="fas fa-tractor me-2"></i> Faire la Moisson
+                </a>
+                <a href="{{ path('depense_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+                    <i class="fas fa-plus me-2"></i> Enregistrer une dépense
+                </a>
+            </div>
         </div>
 
         <!-- Summary Statistics -->
@@ -115,8 +123,112 @@
     </div>
 </section>
 
+</style>
+
+<!-- AI Advice Modal -->
+<div class="modal fade" id="aiAdviceModal" tabindex="-1" aria-labelledby="aiAdviceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-info text-white py-4 px-4 border-0">
+                <h5 class="modal-title fw-bold" id="aiAdviceModalLabel">
+                    <i class="fas fa-robot me-2"></i> Conseils Personnalisés de FinTrack AI
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-white" id="ai-advice-content">
+                <div class="text-center py-5" id="ai-loading">
+                    <div class="spinner-border text-info mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <p class="text-muted fw-bold">Analyse de vos dépenses et budgets en cours...</p>
+                    <p class="small text-muted">Cela peut prendre quelques secondes.</p>
+                </div>
+                <div id="ai-result" class="d-none">
+                    <div class="ai-advice-text">
+                        <!-- Content injected by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light p-3">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const adviceBtn = document.getElementById('ai-advice-btn');
+        const adviceModalEl = document.getElementById('aiAdviceModal');
+        const adviceContent = document.getElementById('ai-result');
+        const loadingSpinner = document.getElementById('ai-loading');
+        
+        if (adviceBtn && adviceModalEl) {
+            const adviceModal = new bootstrap.Modal(adviceModalEl);
+            
+            adviceBtn.addEventListener('click', function () {
+                adviceModal.show();
+                adviceContent.classList.add('d-none');
+                loadingSpinner.classList.remove('d-none');
+
+                fetch("{{ path('depense_ai_advice') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Erreur serveur');
+                    return response.json();
+                })
+                .then(data => {
+                    loadingSpinner.classList.add('d-none');
+                    adviceContent.classList.remove('d-none');
+                    
+                    if (data.advice) {
+                        // Utilisation de marked pour le rendu markdown
+                        const aiTextDiv = adviceContent.querySelector('.ai-advice-text');
+                        aiTextDiv.innerHTML = marked.parse(data.advice);
+                    } else {
+                        adviceContent.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i> ' + (data.error || 'Impossible de générer des conseils.') + '</div>';
+                    }
+                })
+                .catch(error => {
+                    loadingSpinner.classList.add('d-none');
+                    adviceContent.classList.remove('d-none');
+                    adviceContent.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i> Une erreur est survenue lors de la connexion au conseiller IA.</div>';
+                });
+            });
+        }
+    });
+</script>
+
 <style>
-    .pointer-event { cursor: pointer; transition: background-color 0.2s; }
-    .pointer-event:hover { background-color: #f8fafc; }
+    .ai-advice-text {
+        color: #334155;
+        line-height: 1.6;
+    }
+    .ai-advice-text h1, .ai-advice-text h2, .ai-advice-text h3 {
+        color: #0ea5e9;
+        font-weight: 700;
+        margin-top: 1.5rem;
+    }
+    .ai-advice-text ul {
+        padding-left: 1.25rem;
+    }
+    .ai-advice-text li {
+        margin-bottom: 0.5rem;
+    }
+    .ai-advice-text blockquote {
+        border-left: 4px solid #0ea5e9;
+        padding-left: 1rem;
+        font-style: italic;
+        color: #64748b;
+        background: #f0f9ff;
+        padding: 1rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+    }
 </style>
 {% endblock %}

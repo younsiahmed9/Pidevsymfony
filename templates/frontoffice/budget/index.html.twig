@@ -10,9 +10,14 @@
                 <h1 class="h2 fw-bold text-dark mb-1">Mes Budgets</h1>
                 <p class="text-muted mb-0">Gérez vos limites de dépenses par catégorie.</p>
             </div>
-            <a href="{{ path('budget_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
-                <i class="fas fa-plus me-2"></i> Nouveau Budget
-            </a>
+            <div class="d-flex">
+                <button type="button" class="btn btn-outline-primary btn-lg rounded-pill shadow-sm px-4 me-2" data-bs-toggle="modal" data-bs-target="#budgetChartModal">
+                    <i class="fas fa-chart-pie me-2"></i> Voir Graphique
+                </button>
+                <a href="{{ path('budget_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+                    <i class="fas fa-plus me-2"></i> Nouveau Budget
+                </a>
+            </div>
         </div>
 
         <div class="row g-4">
@@ -29,6 +34,11 @@
                                     <i class="fas fa-wallet text-primary fa-lg"></i>
                                 </div>
                                 <div class="dropdown">
+                                    {% if progress >= 80 %}
+                                        <span class="badge {{ progress >= 100 ? 'bg-danger' : 'bg-warning text-dark' }} rounded-pill me-2 shadow-sm pulse-animation">
+                                            <i class="fas fa-exclamation-triangle me-1"></i> Seuil atteint
+                                        </span>
+                                    {% endif %}
                                     <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
@@ -90,5 +100,121 @@
         transform: translateY(-5px);
         box-shadow: 0 1rem 3rem rgba(0,0,0,.1) !important;
     }
+    .pulse-animation {
+        animation: pulse-red 2s infinite;
+    }
+    @keyframes pulse-red {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
 </style>
+
+<!-- Modal Graphique -->
+<div class="modal fade" id="budgetChartModal" tabindex="-1" aria-labelledby="budgetChartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 pb-0 bg-white">
+                <div class="p-3">
+                    <h5 class="modal-title fw-bold" id="budgetChartModalLabel">Statistiques de Consommation des Budquets</h5>
+                    <p class="text-muted small mb-0">Visualisation du pourcentage de dépenses par budget.</p>
+                </div>
+                <button type="button" class="btn-close me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-white">
+                <div style="height: 400px; width: 100%;">
+                    <canvas id="budgetPercentagesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const budgetsData = {{ budgets|json_encode|raw }};
+        
+        if (!budgetsData || budgetsData.length === 0) return;
+
+        const labels = budgetsData.map(b => b.nom_budget);
+        const data = budgetsData.map(b => {
+            const total = parseFloat(b.montant_total);
+            const spent = parseFloat(b.total_depense);
+            return total > 0 ? (spent / total * 100).toFixed(1) : 0;
+        });
+
+        const ctx = document.getElementById('budgetPercentagesChart').getContext('2d');
+        const gradientSuccess = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientSuccess.addColorStop(0, '#10b981');
+        gradientSuccess.addColorStop(1, '#34d399');
+
+        const gradientWarning = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientWarning.addColorStop(0, '#f59e0b');
+        gradientWarning.addColorStop(1, '#fbbf24');
+
+        const gradientDanger = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientDanger.addColorStop(0, '#ef4444');
+        gradientDanger.addColorStop(1, '#f87171');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Consommation',
+                    data: data,
+                    backgroundColor: data.map(val => val >= 100 ? gradientDanger : (val >= 80 ? gradientWarning : gradientSuccess)),
+                    borderColor: data.map(val => val >= 100 ? '#ef4444' : (val >= 80 ? '#f59e0b' : '#10b981')),
+                    borderWidth: 1,
+                    borderRadius: 12,
+                    barThickness: 45
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 110,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            font: { family: 'Rubik' }
+                        },
+                        grid: {
+                            display: true,
+                            drawBorder: false,
+                            color: '#f1f5f9'
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: 'Rubik', weight: '500' } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        padding: 12,
+                        titleFont: { family: 'Rubik', size: 14 },
+                        bodyFont: { family: 'Rubik', size: 13 },
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                return ' ' + context.raw + '% du budget consommé';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
 {% endblock %}

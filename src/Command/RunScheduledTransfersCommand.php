@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Entity\CarteVirtuelle;
 use App\Entity\Transaction;
-use App\Service\Transfer\BrevoEmailService;
 use App\Service\Transfer\CurrencyRateService;
 use App\Service\Transfer\TransferFeeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,7 +20,6 @@ final class RunScheduledTransfersCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly CurrencyRateService $currencyRateService,
-        private readonly BrevoEmailService $brevoEmailService,
         private readonly TransferFeeService $transferFeeService,
         private readonly LoggerInterface $logger,
     ) {
@@ -247,38 +245,7 @@ final class RunScheduledTransfersCommand extends Command
             'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
         ]);
 
-        // Fetch user email for notification
-        $userEmail = $this->entityManager->getConnection()->fetchOne(
-            'SELECT email FROM users WHERE id = :uid',
-            ['uid' => (int) $row['user_id']]
-        ) ?: '';
-
-        if ($userEmail === '') {
-            $userEmail = 'noreply@fintrack.local';
-        }
-
-        try {
-            $this->brevoEmailService->sendScheduledTransferConfirmation([
-                'scheduled_id' => $scheduledId,
-                'amount' => number_format($amount, 2, '.', ''),
-                'currency' => $transferCurrency,
-                'source_card' => (string) $sourceCard->getNumeroCarte(),
-                'dest_card' => (string) $destCard->getNumeroCarte(),
-                'executed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
-            ], $userEmail);
-
-            $this->logger->info('Scheduled transfer confirmation email sent', [
-                'scheduled_id' => $scheduledId,
-                'recipient' => $userEmail,
-            ]);
-        } catch (\Throwable $e) {
-            $this->logger->error('Scheduled transfer confirmation email failed', [
-                'scheduled_id' => $scheduledId,
-                'recipient' => $userEmail,
-                'error' => $e->getMessage(),
-                'exception' => get_class($e),
-            ]);
-        }
+/* Email notification skipped (Brevo disabled) */
     }
 
     private function ensureDatabaseConnection(): void

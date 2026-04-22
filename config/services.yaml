@@ -8,9 +8,11 @@ parameters:
     apilocate_api_key: '%env(string:APILOCATE_API_KEY)%'
     fcs_api_key: '%env(string:FCS_API_KEY)%'
     fcs_cache_ttl_seconds: '%env(int:FCS_CACHE_TTL_SECONDS)%'
-    brevo_api_key: '%env(string:BREVO_API_KEY)%'
-    brevo_sender_email: '%env(string:BREVO_SENDER_EMAIL)%'
-    brevo_sender_name: '%env(string:BREVO_SENDER_NAME)%'
+    gemini_api_key: '%env(default:default_gemini_key:GEMINI_API_KEY)%'
+    default_gemini_key: 'not_set'
+    twilio_account_sid: '%env(string:TWILIO_ACCOUNT_SID)%'
+    twilio_auth_token: '%env(string:TWILIO_AUTH_TOKEN)%'
+    twilio_from_number: '%env(string:TWILIO_FROM_NUMBER)%'
 
 services:
     # default configuration for services in *this* file
@@ -39,8 +41,12 @@ services:
         arguments:
             $apiLocateApiKey: '%apilocate_api_key%'
 
-    App\Service\Transfer\BrevoEmailService:
+    App\Service\AIService:
         arguments:
-            $brevoApiKey: '%brevo_api_key%'
-            $senderEmail: '%brevo_sender_email%'
-            $senderName: '%brevo_sender_name%'
+            $geminiApiKey: '%gemini_api_key%'
+
+    App\Service\SmsService:
+        arguments:
+            $accountSid: '%twilio_account_sid%'
+            $authToken: '%twilio_auth_token%'
+            $fromNumber: '%twilio_from_number%'

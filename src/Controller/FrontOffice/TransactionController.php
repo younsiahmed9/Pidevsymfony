@@ -5,7 +5,6 @@ namespace App\Controller\FrontOffice;
 use App\Entity\CarteVirtuelle;
 use App\Entity\Transaction;
 use App\Entity\User;
-use App\Service\Transfer\BrevoEmailService;
 use App\Service\Transfer\CurrencyRateService;
 use App\Service\Transfer\GeoLocateService;
 use App\Service\Transfer\TransferFeeService;
@@ -31,7 +30,6 @@ final class TransactionController extends AbstractController
     public function __construct(
         private readonly CurrencyRateService $currencyRateService,
         private readonly GeoLocateService $geoLocateService,
-        private readonly BrevoEmailService $brevoEmailService,
         private readonly TransferFeeService $transferFeeService,
         private readonly LoggerInterface $logger,
     ) {
@@ -121,11 +119,11 @@ final class TransactionController extends AbstractController
                 'message' => 'Moteur local disponible',
             ],
             'email' => [
-                'name' => 'Confirmations Email (Brevo)',
-                'description' => 'Reçoit les confirmations de transfert à ton adresse email',
+                'name' => 'Confirmations Email',
+                'description' => 'Service de notification par email',
                 'status' => 'inactive',
                 'icon' => 'fa-envelope',
-                'message' => 'Vérification en attente',
+                'message' => 'Service désactivé',
             ],
         ];
 
@@ -153,11 +151,7 @@ final class TransactionController extends AbstractController
             $status['currency_conversion']['message'] = 'Erreur - ' . mb_substr($e->getMessage(), 0, 80);
         }
 
-        $brevoHealth = $this->brevoEmailService->verifyConnection();
-        $status['email']['status'] = $brevoHealth['ok'] ? 'active' : 'inactive';
-        $status['email']['message'] = $brevoHealth['ok']
-            ? 'OK - ' . $brevoHealth['message']
-            : 'Indisponible - ' . mb_substr($brevoHealth['message'], 0, 80);
+        /* Brevo health check skipped */
 
         return $status;
     }
@@ -175,7 +169,7 @@ final class TransactionController extends AbstractController
         $results = [
             'geolocation' => $this->verifyGeolocation($request),
             'currency' => $this->verifyCurrency(),
-            'email' => $this->verifyEmail(),
+            'email' => ['status' => 'inactive', 'message' => 'Service désactivé'],
             'timestamp' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
         ];
 
@@ -269,25 +263,11 @@ final class TransactionController extends AbstractController
 
     private function verifyEmail(): array
     {
-        try {
-            $result = $this->brevoEmailService->verifyConnection();
-
-            return [
-                'status' => $result['ok'] ? 'success' : 'warning',
-                'message' => $result['ok']
-                    ? '✓ Email confirmations OK'
-                    : 'Email indisponible',
-                'details' => $result['ok']
-                    ? 'Brevo prêt à envoyer les confirmations'
-                    : 'Service non disponible',
-            ];
-        } catch (\Throwable $e) {
-            return [
-                'status' => 'error',
-                'message' => 'Erreur email',
-                'details' => mb_substr($e->getMessage(), 0, 100),
-            ];
-        }
+        return [
+            'status' => 'inactive',
+            'message' => 'Service désactivé',
+            'details' => 'Le service de notification Brevo a été retiré.',
+        ];
     }
 
     #[Route('/export/excel', name: 'front_transaction_export_excel', methods: ['GET'])]
@@ -706,28 +686,7 @@ final class TransactionController extends AbstractController
                     'created_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
                 ]);
 
-                try {
-                    $this->brevoEmailService->sendNormalTransferConfirmation([
-                        'transaction_id' => $transaction->getId(),
-                        'amount' => number_format($montant, 2, '.', ''),
-                        'currency' => (string) $data['devise'],
-                        'source_card' => (string) ($sourceCard?->getNumeroCarte() ?? ''),
-                        'dest_card' => (string) ($destCard?->getNumeroCarte() ?? ''),
-                        'executed_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
-                    ], (string) $user->getEmail());
-                    $this->logger->info('Transfer confirmation email sent', [
-                        'transaction_id' => $transaction->getId(),
-                        'recipient' => $user->getEmail(),
-                    ]);
-                } catch (\Throwable $e) {
-                    $this->logger->error('Email sending failed', [
-                        'transaction_id' => $transaction->getId(),
-                        'recipient' => $user->getEmail(),
-                        'error' => $e->getMessage(),
-                        'exception' => get_class($e),
-                    ]);
-                    $this->addFlash('warning', 'Transfert valide, mais envoi email indisponible: ' . mb_substr($e->getMessage(), 0, 100));
-                }
+                /* Email notification skipped (Brevo disabled) */
             }
 
             $this->addFlash('success', 'Transaction enregistrée.');
