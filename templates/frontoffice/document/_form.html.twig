@@ -11,7 +11,9 @@
     description: ''
 }) %}
 
-<form method="post" enctype="multipart/form-data" class="needs-validation document-form" novalidate data-validate-url="{{ path('document_validate') }}">
+<form method="post" enctype="multipart/form-data" class="needs-validation document-form" novalidate 
+    data-validate-url="{{ path('document_validate') }}"
+    data-analyze-url="{{ path('document_analyze_upload') }}">
     <input type="hidden" name="document_id" value="{{ documentFormData.id_document }}">
     <div class="row g-4">
         <div class="col-md-6">
@@ -151,6 +153,7 @@
         }
 
         var validateUrl = form.getAttribute('data-validate-url');
+        var analyzeUrl = form.getAttribute('data-analyze-url');
         var pendingTimer = null;
         var submitting = false;
 
@@ -168,6 +171,55 @@
                 return '<div>' + message + '</div>';
             }).join('') : '';
         };
+
+        var runAnalysis = function () {
+            var fileInput = form.querySelector('input[type="file"]');
+            if (!fileInput || !fileInput.files.length || !analyzeUrl) {
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('fichier', fileInput.files[0]);
+
+            // Show loading state
+            var submitBtn = form.querySelector('button[type="submit"]');
+            var originalBtnHtml = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyse IA en cours...';
+
+            fetch(analyzeUrl, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.metadata.title) form.querySelector('[name="titre"]').value = data.metadata.title;
+                    if (data.metadata.description) form.querySelector('[name="description"]').value = data.metadata.description;
+                    if (data.metadata.tags) form.querySelector('[name="tags"]').value = data.metadata.tags;
+                    if (data.metadata.date_document) form.querySelector('[name="date_document"]').value = data.metadata.date_document;
+                    if (data.metadata.date_echeance) form.querySelector('[name="date_echeance"]').value = data.metadata.date_echeance;
+                    
+                    if (data.suggested_category) {
+                        form.querySelector('[name="id_categorie"]').value = data.suggested_category;
+                    }
+                    if (data.suggested_folder) {
+                        form.querySelector('[name="id_dossier"]').value = data.suggested_folder;
+                    }
+
+                    // Trigger validation after filling fields
+                    runValidation();
+                }
+            })
+            .catch(error => console.error('Erreur analyse:', error))
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            });
+        };
+
+        form.querySelector('input[type="file"]').addEventListener('change', runAnalysis);
 
         var clearGeneralError = function () {
             var generalBox = form.querySelector('[data-error-for="general"]');
@@ -251,6 +303,6 @@
             });
         });
 
-        runValidation();
+        clearAllStates();
     })()
 </script>

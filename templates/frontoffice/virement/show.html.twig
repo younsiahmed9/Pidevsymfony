@@ -52,11 +52,13 @@
                 </div>
             </div>
             <div class="card-footer bg-white text-end">
-                <a href="{{ path('front_virement_edit', {'id': virement.id}) }}" class="btn btn-primary me-2">Modifier</a>
-                <form method="post" action="{{ path('front_virement_delete', {'id': virement.id}) }}" class="d-inline-block" onsubmit="return confirm('Voulez-vous vraiment annuler ce virement programmé ?');">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ virement.id) }}">
-                    <button class="btn btn-outline-danger">Supprimer</button>
-                </form>
+                <div class="d-inline-flex gap-2 justify-content-end flex-wrap align-items-center" role="group" aria-label="Actions virement">
+                    <a href="{{ path('front_virement_edit', {'id': virement.id}) }}" class="btn btn-primary btn-action-icon" title="Modifier"><i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span></a>
+                    <form method="post" action="{{ path('front_virement_delete', {'id': virement.id}) }}" class="d-inline-block mb-0" onsubmit="return confirm('Voulez-vous vraiment annuler ce virement programmé ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ virement.id) }}">
+                        <button type="submit" class="btn btn-outline-danger btn-action-icon" title="Supprimer"><i class="fas fa-trash-alt" aria-hidden="true"></i><span class="visually-hidden">Supprimer</span></button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

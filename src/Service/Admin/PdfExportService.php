@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 final class PdfExportService
 {
-    public function __construct(private readonly ?Pdf $snappyPdf = null)
+    public function __construct(private ?Pdf $snappyPdf = null)
     {
     }
 
@@ -26,6 +26,11 @@ final class PdfExportService
         );
 
         return $response;
+    }
+
+    public function renderPdfContent(string $html, string $filename, string $paper = 'A4', string $orientation = 'portrait'): string
+    {
+        return $this->renderContent($html, $paper, $orientation);
     }
 
     private function renderContent(string $html, string $paper, string $orientation): string

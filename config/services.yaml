@@ -4,13 +4,34 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    documents_directory: '%kernel.project_dir%/public/uploads/documents'
+    documents_directory: '%kernel.project_dir%/var/storage/documents'
+    legacy_documents_directory: '%kernel.project_dir%/public/uploads/documents'
     apilocate_api_key: '%env(string:APILOCATE_API_KEY)%'
+    groq_api_key: '%env(string:GROQ_API_KEY)%'
+    moderation_api_key: '%env(string:MODERATE_API_KEY)%'
     fcs_api_key: '%env(string:FCS_API_KEY)%'
     fcs_cache_ttl_seconds: '%env(int:FCS_CACHE_TTL_SECONDS)%'
+    voucherify_api_url: '%env(string:VOUCHERIFY_API_URL)%'
+    voucherify_app_id: '%env(string:VOUCHERIFY_APP_ID)%'
+    voucherify_app_token: '%env(string:VOUCHERIFY_APP_TOKEN)%'
+    voucherify_channel: '%env(string:VOUCHERIFY_CHANNEL)%'
+    whatsapp_api_url: '%env(string:WHATSAPP_API_URL)%'
+    whatsapp_access_token: '%env(string:WHATSAPP_ACCESS_TOKEN)%'
+    whatsapp_phone_number_id: '%env(string:WHATSAPP_PHONE_NUMBER_ID)%'
+    invoice_api_url: '%env(string:INVOICE_API_URL)%'
+    invoice_api_key: '%env(string:INVOICE_API_KEY)%'
+    invoice_api_template: '%env(string:INVOICE_API_TEMPLATE)%'
     brevo_api_key: '%env(string:BREVO_API_KEY)%'
     brevo_sender_email: '%env(string:BREVO_SENDER_EMAIL)%'
     brevo_sender_name: '%env(string:BREVO_SENDER_NAME)%'
+    brevo_sms_api_key: '%env(string:BREVO_SMS_API_KEY)%'
+    brevo_sms_sender: '%env(string:BREVO_SMS_SENDER)%'
+    sms_test_mode: '%env(bool:SMS_TEST_MODE)%'
+    gemini_api_key: '%env(string:GEMINI_API_KEY)%'
+    twilio_account_sid: '%env(string:TWILIO_ACCOUNT_SID)%'
+    twilio_auth_token: '%env(string:TWILIO_AUTH_TOKEN)%'
+    twilio_from_number: '%env(string:TWILIO_FROM_NUMBER)%'
+    twilio_messaging_service_sid: '%env(default::TWILIO_MESSAGING_SERVICE_SID)%'
     scheduled_transfer_engine: '%env(string:SCHEDULED_TRANSFER_ENGINE)%'
     n8n_scheduled_transfer_webhook: '%env(string:N8N_SCHEDULED_TRANSFER_WEBHOOK)%'
     scheduled_transfer_internal_token: '%env(string:SCHEDULED_TRANSFER_INTERNAL_TOKEN)%'
@@ -44,6 +65,36 @@ services:
         arguments:
             $apiLocateApiKey: '%apilocate_api_key%'
 
+    App\Service\Promotion\VoucherifyPromotionService:
+        arguments:
+            $apiUrl: '%voucherify_api_url%'
+            $appId: '%voucherify_app_id%'
+            $appToken: '%voucherify_app_token%'
+            $channel: '%voucherify_channel%'
+
+    App\Service\Promotion\WhatsAppPromotionNotifier:
+        arguments:
+            $apiUrl: '%whatsapp_api_url%'
+            $accessToken: '%whatsapp_access_token%'
+            $phoneNumberId: '%whatsapp_phone_number_id%'
+
+    App\Service\Invoice\InvoiceApiService:
+        arguments:
+            $apiUrl: '%invoice_api_url%'
+            $apiKey: '%invoice_api_key%'
+            $templateId: '%invoice_api_template%'
+
+    App\Service\Invoice\InvoicePdfService:
+        arguments:
+            $symfonyBaseUrl: '%symfony_base_url%'
+            $appSecret: '%kernel.secret%'
+
+    App\Service\Invoice\InvoiceEmailService:
+        arguments:
+            $brevoApiKey: '%brevo_api_key%'
+            $senderEmail: '%brevo_sender_email%'
+            $senderName: '%brevo_sender_name%'
+
     App\Service\Transfer\BrevoEmailService:
         arguments:
             $brevoApiKey: '%brevo_api_key%'
@@ -58,12 +109,52 @@ services:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
+    App\Service\AIService:
+        arguments:
+            $groqApiKey: '%groq_api_key%'
+
+    App\Service\MessageRewriteService:
+        arguments:
+            $groqApiKey: '%groq_api_key%'
+
+    App\Service\Chatbot\RecommendationChatbotService:
+        arguments:
+            $groqApiKey: '%groq_api_key%'
+
+    App\Service\GeminiAIService:
+        arguments:
+            $geminiApiKey: '%gemini_api_key%'
+
+    App\Service\DocumentStorageService:
+        arguments:
+            $documentsDirectory: '%documents_directory%'
+            $legacyDocumentsDirectory: '%legacy_documents_directory%'
+
+    App\Service\SmsService:
+        arguments:
+            $accountSid: '%twilio_account_sid%'
+            $authToken: '%twilio_auth_token%'
+            $fromNumber: '%twilio_from_number%'
+            $messagingServiceSid: '%twilio_messaging_service_sid%'
+            $brevoSms: '@App\Service\Sms\BrevoSmsService'
+
     App\Service\Transfer\N8nScheduledTransferDispatcher:
         arguments:
             $webhookUrl: '%n8n_scheduled_transfer_webhook%'
             $internalToken: '%scheduled_transfer_internal_token%'
             $timeoutSeconds: '%n8n_scheduled_transfer_timeout%'
             $symfonyBaseUrl: '%symfony_base_url%'
+
+    App\Service\Sms\BrevoSmsService:
+        arguments:
+            $apiKey: '%brevo_sms_api_key%'
+            $sender: '%brevo_sms_sender%'
+            $testMode: '%sms_test_mode%'
+
+    App\Service\ContentModerationService:
+        arguments:
+            $apiKey: '%moderation_api_key%'
+            $groqApiKey: '%groq_api_key%'
 
     App\Controller\Integration\N8nScheduledTransferController:
         arguments:

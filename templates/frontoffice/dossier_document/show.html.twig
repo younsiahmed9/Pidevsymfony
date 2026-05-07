@@ -7,7 +7,7 @@
     <div class="container py-4">
         <div class="d-flex gap-2 mb-4">
             <a href="{{ path('dossier_document_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
-            <a href="{{ path('dossier_document_edit', {id: dossier.id}) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Modifier</a>
+            <a href="{{ path('dossier_document_edit', {id: dossier.id}) }}" class="btn btn-primary btn-action-icon" title="Modifier"><i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span></a>
             {% include 'frontoffice/dossier_document/_delete_form.html.twig' with {action: path('dossier_document_delete', {id: dossier.id}), dossier: dossier} %}
         </div>
 

@@ -1,6 +1,6 @@
 <form method="post" action="{{ path('compte_delete', {'id': compte.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir fermer ce compte ? Cette action est irréversible.');">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ compte.id) }}">
-    <button class="btn btn-outline-danger btn-sm rounded-pill px-3">
-        <i class="fas fa-trash-alt me-1"></i> Fermer le compte
+    <button type="submit" class="btn btn-outline-danger btn-sm btn-action-icon btn-sm" title="Fermer le compte">
+        <i class="fas fa-trash-alt" aria-hidden="true"></i><span class="visually-hidden">Fermer le compte</span>
     </button>
 </form>

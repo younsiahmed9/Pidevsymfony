@@ -1,0 +1,156 @@
+{# Composant de partage sur les réseaux sociaux #}
+<div class="share-container mt-4 pt-4 border-top border-light">
+    <h6 class="text-uppercase text-muted small fw-bold mb-3">
+        <i class="fas fa-share-alt me-2"></i> Partager le Document
+    </h6>
+    
+    <div class="share-buttons d-flex gap-2 flex-wrap">
+        {# Facebook #}
+        <button class="btn btn-outline-primary rounded-circle p-3 share-btn" 
+                onclick="shareOnNetwork('facebook')" 
+                title="Partager sur Facebook"
+                data-bs-toggle="tooltip">
+            <i class="fab fa-facebook-f fa-lg"></i>
+        </button>
+        
+        {# Twitter/X #}
+        <button class="btn btn-outline-dark rounded-circle p-3 share-btn" 
+                onclick="shareOnNetwork('twitter')" 
+                title="Partager sur Twitter"
+                data-bs-toggle="tooltip">
+            <i class="fab fa-x-twitter fa-lg"></i>
+        </button>
+        
+        {# LinkedIn #}
+        <button class="btn btn-outline-info rounded-circle p-3 share-btn" 
+                onclick="shareOnNetwork('linkedin')" 
+                title="Partager sur LinkedIn"
+                data-bs-toggle="tooltip">
+            <i class="fab fa-linkedin-in fa-lg"></i>
+        </button>
+        
+        {# Instagram #}
+        <button class="btn btn-outline-danger rounded-circle p-3 share-btn" 
+                onclick="shareOnNetwork('instagram')" 
+                title="Partager sur Instagram"
+                data-bs-toggle="tooltip">
+            <i class="fab fa-instagram fa-lg"></i>
+        </button>
+        
+        {# Email #}
+        <button class="btn btn-outline-secondary rounded-circle p-3 share-btn" 
+                onclick="shareOnNetwork('email')" 
+                title="Envoyer par email"
+                data-bs-toggle="tooltip">
+            <i class="fas fa-envelope fa-lg"></i>
+        </button>
+        
+        {# Copier le lien #}
+        <button class="btn btn-outline-success rounded-circle p-3 share-btn" 
+                onclick="copyLinkToClipboard()" 
+                title="Copier le lien"
+                data-bs-toggle="tooltip"
+                id="copyLinkBtn">
+            <i class="fas fa-link fa-lg"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .share-container {
+        background: rgba(0, 0, 0, 0.02);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .share-btn {
+        transition: all 0.3s ease;
+        border-width: 2px;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .share-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .share-btn:active {
+        transform: translateY(-1px);
+    }
+</style>
+
+<script>
+function shareOnNetwork(network) {
+    const pageUrl = window.location.href;
+    const pageTitle = document.querySelector('h2') ? document.querySelector('h2').innerText : 'Découvrez ce document';
+    
+    let shareUrl = '';
+    
+    switch(network) {
+        case 'facebook':
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+            break;
+        case 'twitter':
+            shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(pageTitle)}`;
+            break;
+        case 'linkedin':
+            shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
+            break;
+        case 'instagram':
+            copyLinkToClipboard();
+            if (typeof window.showNotification === 'function') {
+                window.showNotification('Lien copié! Collez-le dans votre bio Instagram.', 'info');
+            }
+            return;
+        case 'email':
+            shareUrl = `mailto:?subject=${encodeURIComponent(pageTitle)}&body=${encodeURIComponent('Découvrez ce document: ' + pageUrl)}`;
+            break;
+    }
+    
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+}
+
+function copyLinkToClipboard() {
+    const pageUrl = window.location.href;
+    
+    navigator.clipboard.writeText(pageUrl).then(() => {
+        if (typeof window.showNotification === 'function') {
+            window.showNotification('✓ Lien copié dans le presse-papiers!', 'success');
+        }
+        
+        // Animation du bouton
+        const btn = document.getElementById('copyLinkBtn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check fa-lg"></i>';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-success');
+        }, 2000);
+    }).catch(() => {
+        if (typeof window.showNotification === 'function') {
+            window.showNotification('Erreur lors de la copie du lien', 'error');
+        }
+    });
+}
+
+// Initialiser les tooltips Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        tooltipElements.forEach(element => {
+            new bootstrap.Tooltip(element);
+        });
+    }
+});
+</script>

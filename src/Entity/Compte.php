@@ -34,7 +34,6 @@ class Compte
 
     #[ORM\Column(name: 'type_compte', length: 50)]
     #[Assert\NotBlank(message: 'Le type de compte est obligatoire.')]
-    #[Assert\Choice(choices: ['courant', 'epargne'], message: 'Type invalide.')]
     private string $typeCompte;
 
     #[ORM\Column(type: 'decimal', precision: 15, scale: 2)]
@@ -67,15 +66,18 @@ class Compte
 
     #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message: 'L\'état est obligatoire.')]
-    #[Assert\Choice(choices: ['actif', 'bloque', 'clos'], message: 'État invalide.')]
     private string $etat = 'actif';
 
     #[ORM\OneToMany(mappedBy: 'compte', targetEntity: Credit::class, cascade: ['persist', 'remove'])]
     private Collection $credits;
 
+    #[ORM\OneToMany(mappedBy: 'compte', targetEntity: Releve::class, cascade: ['persist', 'remove'])]
+    private Collection $releves;
+
     public function __construct()
     {
         $this->credits = new ArrayCollection();
+        $this->releves = new ArrayCollection();
         $this->dateCreation = new \DateTime();
     }
 
@@ -129,5 +131,6 @@ class Compte
     public function getEtat(): string { return $this->etat; }
     public function setEtat(string $etat): static { $this->etat = $etat; return $this; }
     public function getCredits(): Collection { return $this->credits; }
+    public function getReleves(): Collection { return $this->releves; }
     public function __toString(): string { return $this->numeroCompte ?? ''; }
 }

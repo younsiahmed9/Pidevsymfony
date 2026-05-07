@@ -40,12 +40,10 @@ class CarteVirtuelle
 
     #[ORM\Column(type: "string", length: 20, options: ["default" => "NORMAL"])]
     #[Assert\NotBlank(message: 'Le type de carte est obligatoire.')]
-    #[Assert\Choice(choices: ['NORMAL', 'SILVER', 'GOLD'], message: 'Type de carte invalide.')]
     private ?string $type = "NORMAL";
 
     #[ORM\Column(type: "string", length: 10, options: ["default" => "TND"])]
     #[Assert\NotBlank(message: 'La devise est obligatoire.')]
-    #[Assert\Choice(choices: ['TND', 'EUR', 'USD'], message: 'Devise invalide.')]
     private ?string $devise = "TND";
 
     #[ORM\ManyToOne(targetEntity: Portefeuille::class, inversedBy: "cartes")]

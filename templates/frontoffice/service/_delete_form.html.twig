@@ -1,6 +1,6 @@
 <form method="post" action="{{ path('service_delete', {'id': service.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce service ? Cette action est irréversible.');">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ service.id) }}">
-    <button class="btn btn-outline-danger btn-sm rounded-pill px-3">
-        <i class="fas fa-trash-alt me-1"></i> Supprimer le service
+    <button type="submit" class="btn btn-outline-danger btn-sm btn-action-icon btn-sm" title="Supprimer le service">
+        <i class="fas fa-trash-alt" aria-hidden="true"></i><span class="visually-hidden">Supprimer le service</span>
     </button>
 </form>

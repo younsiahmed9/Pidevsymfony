@@ -24,13 +24,13 @@ class Facture
     #[Assert\Positive(message: 'Montant positif')]
     private ?string $montant = null;
 
-    #[ORM\Column(name: 'date_facture', type: 'date_mutable')]
+    #[ORM\Column(name: 'date_facture', type: 'datetime')]
     #[Assert\NotBlank(message: 'Date de facture obligatoire')]
     #[Assert\Type(type: '\DateTimeInterface', message: 'Date invalide')]
     #[Assert\LessThanOrEqual(value: 'today', message: 'La date de facture ne peut pas être postérieure à aujourd\'hui')]
     private ?\DateTimeInterface $dateFacture = null;
 
-    #[ORM\Column(name: 'date_echeance', type: 'date_mutable', nullable: true)]
+    #[ORM\Column(name: 'date_echeance', type: 'datetime', nullable: true)]
     #[Assert\Type(type: '\DateTimeInterface', message: 'Date invalide')]
     #[Assert\Expression(
         "this.getDateEcheance() == null or this.getDateEcheance() >= this.getDateFacture()",
@@ -47,7 +47,7 @@ class Facture
     private ?Produit $produit = null;
 
     #[ORM\Column(length: 20)]
-    #[Assert\Choice(choices: ['non_payee', 'payee', 'en_retard', 'annulee'], message: 'Statut invalide')]
+    #[Assert\NotBlank(message: 'Le statut est obligatoire.')]
     private string $statut = 'non_payee';
 
     #[ORM\Column(name: 'numero_facture', length: 50, nullable: true)]

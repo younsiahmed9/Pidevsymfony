@@ -34,6 +34,9 @@ class ChatMessage
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $isRead = false;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $isStarred = false;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -103,6 +106,18 @@ class ChatMessage
     public function setIsRead(bool $isRead): static
     {
         $this->isRead = $isRead;
+
+        return $this;
+    }
+
+    public function isStarred(): bool
+    {
+        return $this->isStarred;
+    }
+
+    public function setIsStarred(bool $isStarred): static
+    {
+        $this->isStarred = $isStarred;
 
         return $this;
     }

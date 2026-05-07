@@ -2,36 +2,307 @@
 
 {% block title %}Détails du Document{% endblock %}
 
+{% block stylesheets %}
+    <style>
+        /* Propriétés | Aperçu : même hauteur (juxtaposés), pas de colonne aperçu plus haute */
+        .document-detail-page .document-detail-split {
+            align-items: stretch;
+        }
+        .document-detail-page .document-detail-split > [class*="col-"] {
+            display: flex;
+            flex-direction: column;
+        }
+        .document-detail-page .document-detail-split .document-properties-card,
+        .document-detail-page .document-detail-split .document-preview-card {
+            flex: 1 1 auto;
+            width: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .document-detail-page .document-detail-split .document-preview-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .document-detail-page .document-detail-split .document-preview-frame {
+            flex: 1 1 auto;
+            min-height: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .document-detail-page .document-detail-split .document-preview-frame iframe.document-preview-embed {
+            flex: 1 1 auto;
+            width: 100%;
+            min-height: 12rem;
+            height: 100%;
+            border: 0;
+        }
+        .document-detail-page .document-detail-split .document-preview-img {
+            max-height: min(100%, clamp(12rem, 36vh, 24rem));
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        /* PDF : zone compacte avant chargement */
+        .document-detail-page .document-preview-card.pdf-preview-lazy:not(.pdf-preview-active) .document-preview-body.document-preview-body--lazy-pdf {
+            flex: 0 0 auto;
+        }
+        .document-detail-page .document-preview-card.pdf-preview-lazy:not(.pdf-preview-active) .document-preview-frame {
+            min-height: 9rem;
+        }
+        .document-detail-page .document-preview-card.pdf-preview-lazy.pdf-preview-active .document-preview-body.document-preview-body--lazy-pdf {
+            flex: 1 1 auto;
+        }
+
+        .document-detail-page .pdf-preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.75rem;
+            padding: 2rem 1.25rem;
+            width: 100%;
+            cursor: pointer;
+            border: 2px dashed rgba(148, 163, 184, 0.55);
+            border-radius: 0.75rem;
+            margin: 0.75rem;
+            max-width: calc(100% - 1.5rem);
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .document-detail-page .pdf-preview-placeholder:hover,
+        .document-detail-page .pdf-preview-placeholder:focus-visible {
+            outline: none;
+            border-color: rgba(13, 110, 253, 0.55);
+            background: rgba(13, 110, 253, 0.06);
+        }
+        html[data-theme='dark'] .document-detail-page .pdf-preview-placeholder {
+            border-color: rgba(148, 163, 184, 0.35);
+            color: #cbd5e1;
+        }
+        html:not([data-theme='dark']) .document-detail-page .pdf-preview-placeholder {
+            color: #334155;
+        }
+        html[data-theme='dark'] .document-detail-page .pdf-preview-placeholder:focus-visible {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .document-detail-page .js-document-pdf-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .document-detail-page .js-document-pdf-header .document-external-preview-link:focus-visible {
+            z-index: 2;
+            position: relative;
+        }
+        .document-detail-page .document-preview-frame .document-preview-img {
+            cursor: pointer;
+        }
+
+        /* Mode clair : panneau aperçu cohérent avec le reste de la page */
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card.document-preview-theme {
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card.document-preview-theme .preview-header-light {
+            background: #fff !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+            color: #111827 !important;
+        }
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card.document-preview-theme .preview-header-light h5,
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card.document-preview-theme .preview-header-light .preview-title {
+            color: #111827 !important;
+        }
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card.document-preview-theme .preview-header-light .btn-outline-light {
+            color: #0d6efd !important;
+            border-color: rgba(13, 110, 253, 0.55) !important;
+            background-color: transparent !important;
+        }
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card.document-preview-theme .preview-header-light .btn-outline-light:hover,
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card.document-preview-theme .preview-header-light .btn-outline-light:focus-visible {
+            color: #fff !important;
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+        }
+        html:not([data-theme='dark']) .document-detail-page .document-preview-frame {
+            background: #f1f5f9 !important;
+        }
+        html:not([data-theme='dark']) .document-detail-page .document-preview-unavailable {
+            color: #475569 !important;
+        }
+
+        /* Mode sombre : garder un fond sombre pour PDF / confort visuel */
+        html[data-theme='dark'] .document-detail-page .document-preview-frame {
+            background: #0b1220 !important;
+        }
+        html[data-theme='dark'] .document-detail-page .preview-header-light {
+            background-color: #0f172a !important;
+            border-bottom-color: #374151 !important;
+        }
+        html[data-theme='dark'] .document-detail-page .preview-header-light .preview-title {
+            color: #f8fafc !important;
+        }
+
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card.document-preview-theme.bg-dark {
+            background-color: #ffffff !important;
+        }
+        html:not([data-theme='dark']) .document-detail-page .document-preview-card .document-preview-body.bg-dark.bg-opacity-50 {
+            background-color: #ffffff !important;
+            --bs-bg-opacity: 1;
+        }
+
+        .preview-glass-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            width: 250px;
+            height: 350px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-glass-box:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 15px 45px 0 rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .preview-glass-box i {
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: transform 0.3s ease;
+        }
+
+        .preview-glass-box:hover i {
+            transform: scale(1.1);
+        }
+
+        .preview-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .document-thumb-area {
+            min-height: clamp(10rem, 18vh, 14rem);
+            max-height: clamp(10rem, 22vh, 16rem);
+        }
+        .document-thumb-area .preview-glass-box {
+            width: clamp(8rem, 22vw, 11rem);
+            height: clamp(10rem, 26vw, 13rem);
+        }
+        .document-thumb-area .preview-glass-box .fa-6x {
+            font-size: clamp(2rem, 6vw, 3rem) !important;
+        }
+        .document-header-card {
+            background: linear-gradient(135deg, #198754 0%, #157347 100%) !important;
+            border-radius: 2rem 2rem 0 0 !important;
+            padding: 1.5rem 1rem !important;
+        }
+
+        .badge-id {
+            background: rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+        }
+
+        .thumbnail-img {
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 4px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .thumbnail-img:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<section class="py-5 bg-light min-vh-100">
+{% set documentFileUrl = path('document_preview', {id: document.id}) %}
+{% set documentDownloadUrl = path('document_download', {id: document.id}) %}
+<section class="py-5 bg-light min-vh-100 document-detail-page">
     <div class="container py-4">
         <div class="mb-4 d-flex justify-content-between align-items-center">
             <a href="{{ path('document_index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm bg-white">
                 <i class="fas fa-arrow-left me-2"></i> Retour à mes documents
             </a>
-            <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                <a href="{{ path('document_edit', {id: document.id}) }}" class="btn btn-warning btn-sm px-3 text-white fw-bold">
-                    <i class="fas fa-edit me-2"></i> Modifier
+            <div class="d-inline-flex flex-wrap gap-1 align-items-center shadow-sm rounded-pill px-1 py-1 bg-white border" role="group" aria-label="Actions document">
+                <a href="{{ path('document_edit', {id: document.id}) }}" class="btn btn-warning btn-sm btn-action-icon text-white rounded-circle" title="Modifier">
+                    <i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span>
                 </a>
-                <form method="post" action="{{ path('document_delete', {'id': document.id}) }}" onsubmit="return confirm('Supprimer ce document ?');" class="d-inline">
+
+                {# Sign button: visible if workflow allows sign and user is owner/admin or designated signer #}
+                {% if workflow_can(document, 'sign') and (is_granted('DOCUMENT_EDIT', document) or (document.signer and document.signer.id == app.user.id)) %}
+                    <a href="{{ path('document_signature_page', {id: document.id}) }}" class="btn btn-success btn-sm btn-action-icon text-white rounded-circle" title="Signer">
+                        <i class="fas fa-pen-nib" aria-hidden="true"></i><span class="visually-hidden">Signer</span>
+                    </a>
+                {% endif %}
+
+                {% if not document.isArchived %}
+                    <form method="post" action="{{ path('document_archive', {'id': document.id}) }}" onsubmit="return confirm('Archiver ce document ?');" class="d-inline mb-0">
+                        <input type="hidden" name="_token" value="{{ csrf_token('archive' ~ document.id) }}">
+                        <button type="submit" class="btn btn-secondary btn-sm btn-action-icon rounded-circle" title="Archiver">
+                            <i class="fas fa-box-archive" aria-hidden="true"></i><span class="visually-hidden">Archiver</span>
+                        </button>
+                    </form>
+                {% endif %}
+                <form method="post" action="{{ path('document_delete', {'id': document.id}) }}" onsubmit="return confirm('Supprimer ce document ?');" class="d-inline mb-0">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
-                    <button class="btn btn-danger btn-sm px-3 fw-bold border-0 h-100">
-                        <i class="fas fa-trash-alt me-2"></i> Supprimer
+                    <button type="submit" class="btn btn-danger btn-sm btn-action-icon rounded-circle" title="Supprimer">
+                        <i class="fas fa-trash-alt" aria-hidden="true"></i><span class="visually-hidden">Supprimer</span>
                     </button>
                 </form>
             </div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-lg-5">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
-                    <div class="card-header bg-primary py-4 text-center">
-                        <div class="bg-white bg-opacity-25 d-inline-block p-4 rounded-circle mb-3 shadow-sm">
-                            <i class="fas fa-file-pdf fa-3x text-white"></i>
+        <div class="row g-4 align-items-stretch document-detail-split">
+            <div class="col-lg-6 d-flex flex-column">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white document-properties-card flex-fill">
+                    <div class="card-header document-header-card text-center border-0">
+                        <div class="mb-3 d-flex justify-content-center align-items-center document-thumb-area">
+                            {% if document.cheminFichier matches '/\.(pdf)$/i' %}
+                                <div class="preview-glass-box">
+                                    <i class="fas fa-file-pdf fa-6x text-white"></i>
+                                    <span class="preview-label">Document PDF</span>
+                                </div>
+                            {% elseif document.cheminFichier matches '/\.(jpg|jpeg|png|gif|webp)$/i' %}
+                                <img src="{{ documentFileUrl }}" 
+                                     alt="Document" 
+                                     class="thumbnail-img img-fluid" 
+                                     style="max-width: 100%; max-height: clamp(8rem, 20vh, 13rem); object-fit: contain; cursor: pointer;"
+                                     data-bs-toggle="modal" 
+                                     data-bs-target="#imageModal">
+                            {% else %}
+                                <div class="preview-glass-box">
+                                    <i class="fas fa-file-alt fa-6x text-white"></i>
+                                    <span class="preview-label">Fichier {{ document.cheminFichier|split('.')|last|upper }}</span>
+                                </div>
+                            {% endif %}
                         </div>
-                        <h2 class="h4 fw-bold text-white mb-0">{{ document.titre }}</h2>
-                        <span class="badge rounded-pill bg-white bg-opacity-25 text-white px-3 py-2 mt-2">
-                            ID: #{{ document.id }}
+                        <h2 class="h3 fw-bold text-white mb-2" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">{{ document.titre }}</h2>
+                        <span class="badge rounded-pill badge-id text-white px-3 py-2">
+                            <i class="fas fa-fingerprint me-1"></i> #{{ document.id }}
                         </span>
                     </div>
                     <div class="card-body p-4 bg-white">
@@ -86,49 +357,188 @@
                             <span class="text-dark small fw-bold">{{ (document.tailleFichier / 1024)|number_format(2) }} KB</span>
                         </div>
 
-                        {% if document.tags %}
+                        <div class="mb-3 d-flex justify-content-between">
+                            <span class="text-muted small">Version courante</span>
+                            <span class="text-dark small fw-bold">v{{ document.currentVersionNumber }}</span>
+                        </div>
+
+                        {% if document.tags|length %}
                             <div class="mt-4">
                                 <label class="text-muted small d-block mb-2">Tags</label>
                                 <div>
-                                    {% for tag in document.tags|split(',') %}
-                                        <span class="badge bg-light text-secondary border px-2 py-1 rounded me-1 mb-1">{{ tag|trim }}</span>
+                                    {% for tag in document.tags %}
+                                        <span class="badge bg-light text-secondary border px-2 py-1 rounded me-1 mb-1">{{ tag.nomTag }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if document.versions|length %}
+                            <div class="mt-4">
+                                <label class="text-muted small d-block mb-2">Historique des versions</label>
+                                <div class="list-group small">
+                                    {% for version in document.versions|slice(0, 5) %}
+                                        <div class="list-group-item d-flex justify-content-between align-items-center px-2 py-2">
+                                            <span class="fw-semibold">v{{ version.versionNumber }}</span>
+                                            <span class="text-muted">{{ version.createdAt|date('d/m/Y H:i') }}</span>
+                                        </div>
                                     {% endfor %}
                                 </div>
                             </div>
                         {% endif %}
 
                         <div class="mt-4 pt-3 border-top">
-                            <a href="{{ asset('uploads/documents/' ~ document.cheminFichier) }}" class="btn btn-primary w-100 rounded-pill fw-bold" download>
+                            <a href="{{ documentDownloadUrl }}" class="btn btn-primary w-100 rounded-pill fw-bold">
                                 <i class="fas fa-download me-2"></i> Télécharger le document
                             </a>
                         </div>
+                        
+                        {% include 'partials/_share_buttons.html.twig' %}
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-7">
-                <div class="card border-0 shadow-sm rounded-4 h-100 bg-dark overflow-hidden">
-                    <div class="card-header bg-dark border-bottom border-secondary py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="text-white mb-0 small fw-bold text-uppercase"><i class="fas fa-eye me-2"></i>Aperçu</h5>
-                        <a href="{{ asset('uploads/documents/' ~ document.cheminFichier) }}" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-3">
+            <div class="col-lg-6 d-flex flex-column">
+                {% set is_pdf_preview = document.cheminFichier matches '/\.(pdf)$/i' %}
+                <div class="card border-0 shadow-sm rounded-4 flex-fill overflow-hidden document-preview-card document-preview-theme bg-dark{% if is_pdf_preview %} pdf-preview-lazy{% endif %}">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center border-secondary bg-dark preview-header-light{% if is_pdf_preview %} js-document-pdf-header{% endif %}">
+                        <h5 class="preview-title text-white mb-0 small fw-bold text-uppercase"><i class="fas fa-eye me-2"></i>Aperçu</h5>
+                        <a href="{{ documentFileUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-sm rounded-pill px-3 document-external-preview-link">
                             <i class="fas fa-external-link-alt"></i>
+                            <span class="visually-hidden">Ouvrir le fichier dans un nouvel onglet</span>
                         </a>
                     </div>
-                    <div class="card-body p-0 d-flex align-items-center justify-content-center bg-secondary bg-opacity-10" style="min-height: 500px;">
-                        {% if document.cheminFichier matches '/\.(pdf)$/i' %}
-                            <embed src="{{ asset('uploads/documents/' ~ document.cheminFichier) }}" type="application/pdf" width="100%" height="600px" />
+                    <div class="card-body p-0 document-preview-body bg-dark bg-opacity-50{% if is_pdf_preview %} document-preview-body--lazy-pdf{% endif %}">
+                        <div class="document-preview-frame">
+                        {% if is_pdf_preview %}
+                            <div id="pdfPreviewPlaceholder-{{ document.id }}" class="pdf-preview-placeholder js-pdf-preview-placeholder" role="button" tabindex="0" aria-label="Afficher l’aperçu du PDF">
+                                <i class="fas fa-file-pdf fa-3x opacity-75" aria-hidden="true"></i>
+                                <strong class="d-block fs-6">Afficher l’aperçu</strong>
+                                <span class="small opacity-85">Le PDF sera chargé ici après un clic sur « Aperçu » ou sur cette zone</span>
+                            </div>
+                            <iframe
+                                id="pdfPreviewFrame-{{ document.id }}"
+                                title="Aperçu PDF — {{ document.titre|e('html_attr') }}"
+                                class="document-preview-embed d-none js-document-pdf-iframe"
+                                data-src="{{ documentFileUrl }}"
+                                loading="lazy"
+                                aria-hidden="true"
+                            ></iframe>
                         {% elseif document.cheminFichier matches '/\.(jpg|jpeg|png|gif|webp)$/i' %}
-                            <img src="{{ asset('uploads/documents/' ~ document.cheminFichier) }}" class="img-fluid shadow" style="max-height: 550px;" alt="{{ document.titre }}">
+                            <img src="{{ documentFileUrl }}"
+                                 class="img-fluid shadow document-preview-img"
+                                 alt="{{ document.titre }}"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#imageModal">
                         {% else %}
-                            <div class="text-center text-white-50">
+                            <div class="text-center text-white-50 document-preview-unavailable px-3">
                                 <i class="fas fa-file-alt fa-5x mb-4 opacity-25"></i>
-                                <p>Aperçu non disponible pour ce type de fichier.</p>
+                                <p class="mb-0">Aperçu non disponible pour ce type de fichier.</p>
                             </div>
                         {% endif %}
+                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-lg-1">
+            <div class="col-12">
+                {# Panneau d'Intelligence Artificielle #}
+                {% include 'partials/_intelligence_panel.html.twig' %}
+
+                {# Panneau de traduction #}
+                {% include 'partials/_translation_panel.html.twig' %}
+
+                {# Chat IA Q&A #}
+                <div id="ai-chat">
+                    {% include 'partials/_document_chat.html.twig' %}
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Modal pour afficher l'image en plein écran -->
+{% if document.cheminFichier matches '/\.(jpg|jpeg|png|gif|webp)$/i' %}
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" role="document">
+        <div class="modal-content bg-dark">
+            <div class="modal-header bg-dark border-secondary">
+                <h5 class="modal-title text-white" id="imageModalLabel">{{ document.titre }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex align-items-center justify-content-center" style="background: #1a1a1a;">
+                <img src="{{ documentFileUrl }}" 
+                     class="img-fluid" 
+                     style="max-height: 90vh; max-width: 100%; object-fit: contain;"
+                     alt="{{ document.titre }}">
+            </div>
+            <div class="modal-footer bg-dark border-secondary">
+                <a href="{{ documentDownloadUrl }}" 
+                   class="btn btn-primary rounded-pill px-4" 
+                   >
+                    <i class="fas fa-download me-2"></i> Télécharger
+                </a>
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        (function () {
+            var card = document.querySelector('.document-detail-page .pdf-preview-lazy');
+            if (!card) {
+                return;
+            }
+
+            var iframe = card.querySelector('.js-document-pdf-iframe');
+            var placeholder = card.querySelector('.js-pdf-preview-placeholder');
+            var header = card.querySelector('.js-document-pdf-header');
+            var pdfSrc = iframe ? iframe.getAttribute('data-src') : null;
+            var activated = false;
+
+            function activate() {
+                if (activated || !iframe || !pdfSrc) {
+                    return;
+                }
+                activated = true;
+                iframe.setAttribute('aria-hidden', 'false');
+                iframe.src = pdfSrc;
+                iframe.classList.remove('d-none');
+                if (placeholder) {
+                    placeholder.classList.add('d-none');
+                    placeholder.setAttribute('aria-hidden', 'true');
+                    placeholder.blur();
+                }
+                card.classList.add('pdf-preview-active');
+            }
+
+            if (placeholder) {
+                placeholder.addEventListener('click', function () { activate(); });
+                placeholder.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        activate();
+                    }
+                });
+            }
+
+            if (header) {
+                header.addEventListener('click', function (e) {
+                    if (e.target.closest('.document-external-preview-link')) {
+                        return;
+                    }
+                    activate();
+                });
+            }
+        })();
+    </script>
 {% endblock %}

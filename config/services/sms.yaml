@@ -1,0 +1,12 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Service\Sms\:
+        resource: '../../src/Service/Sms/'
+
+    App\Service\Sms\BrevoSmsService:
+        arguments:
+            $apiKey: '%env(resolve:BREVO_SMS_API_KEY)%'
+            $sender: '%env(resolve:BREVO_SMS_SENDER)%'

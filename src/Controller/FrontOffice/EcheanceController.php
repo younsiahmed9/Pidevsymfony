@@ -7,6 +7,7 @@ use App\Entity\Echeance;
 use App\Entity\User;
 use App\Repository\EcheanceRepository;
 use App\Repository\DocumentRepository;
+use App\Service\EcheanceService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,8 +20,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class EcheanceController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(Request $request, EcheanceRepository $echeanceRepository): Response
-    {
+    public function index(
+        Request $request,
+        EcheanceRepository $echeanceRepository,
+        EcheanceService $echeanceService
+    ): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         /** @var User|null $user */
@@ -30,7 +34,11 @@ class EcheanceController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $q = $request->query->get('q', '');
+        // Auto-update overdue statuses on each visit (light-weight)
+        $echeanceService->updateOverdueStatuses();
+        $echeanceService->markTodayReminders();
+
+        $q      = $request->query->get('q', '');
         $statut = $request->query->get('statut', '');
 
         $qb = $echeanceRepository->createQueryBuilder('e')
@@ -50,10 +58,17 @@ class EcheanceController extends AbstractController
 
         $echeances = $qb->orderBy('e.dateEcheance', 'ASC')->getQuery()->getResult();
 
+        // User echeance stats (for dashboard widgets)
+        $stats   = $echeanceService->getUserStats($user);
+        $urgents = $echeanceService->getUrgentEcheances($user, 7);
+
         return $this->render('frontoffice/echeance/index.html.twig', [
             'echeances' => $echeances,
-            'q' => $q,
-            'statut' => $statut,
+            'q'         => $q,
+            'statut'    => $statut,
+            'stats'     => $stats,
+            'urgents'   => $urgents,
+            'echeanceService' => $echeanceService,
         ]);
     }
 

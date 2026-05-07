@@ -26,8 +26,8 @@ final class FaceIdAuthenticator extends AbstractAuthenticator implements Authent
     private const COSINE_THRESHOLD = 0.85;
 
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private EntityManagerInterface $entityManager,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -78,6 +78,16 @@ final class FaceIdAuthenticator extends AbstractAuthenticator implements Authent
             throw new CustomUserMessageAuthenticationException('Face not recognized.');
         }
 
+        if ($matchedUser->getRole() === 'ADMIN') {
+            $sessionData = $request->getSession()->get(AdminFaceAuthSession::SESSION_KEY);
+            $sessionEmail = is_array($sessionData) ? strtolower((string) ($sessionData['email'] ?? '')) : '';
+            $pending = is_array($sessionData) && ($sessionData['verified'] ?? false) !== true;
+
+            if (!$pending || $sessionEmail === '' || $sessionEmail !== strtolower((string) $matchedUser->getUserIdentifier())) {
+                throw new CustomUserMessageAuthenticationException('Complete the password step first, then validate Face ID.');
+            }
+        }
+
         return new SelfValidatingPassport(
             new UserBadge($matchedUser->getUserIdentifier(), static fn () => $matchedUser),
             [new CsrfTokenBadge(self::CSRF_TOKEN_ID, $token)]
@@ -88,10 +98,27 @@ final class FaceIdAuthenticator extends AbstractAuthenticator implements Authent
     {
         /** @var User $user */
         $user = $token->getUser();
+        $session = $request->getSession();
 
         if ($user->getRole() === 'ADMIN') {
-            return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
+            $sessionData = $session->get(AdminFaceAuthSession::SESSION_KEY);
+            if (is_array($sessionData)) {
+                $sessionData['email'] = strtolower((string) ($sessionData['email'] ?? $user->getUserIdentifier()));
+                $sessionData['verified'] = true;
+                $sessionData['verifiedAt'] = time();
+                $session->set(AdminFaceAuthSession::SESSION_KEY, $sessionData);
+            } else {
+                $session->set(AdminFaceAuthSession::SESSION_KEY, [
+                    'email' => strtolower((string) $user->getUserIdentifier()),
+                    'verified' => true,
+                    'verifiedAt' => time(),
+                ]);
+            }
+
+            return new RedirectResponse($this->urlGenerator->generate('admin_index'));
         }
+
+        $session->remove(AdminFaceAuthSession::SESSION_KEY);
 
         return new RedirectResponse($this->urlGenerator->generate('app_home'));
     }
@@ -128,7 +155,11 @@ final class FaceIdAuthenticator extends AbstractAuthenticator implements Authent
         if ($email !== null && $email !== '') {
             $targetUser = $this->entityManager->getRepository(User::class)->findByEmail(strtolower($email));
 
-            if (!$targetUser instanceof User || !$targetUser->isActive() || !$targetUser->hasFaceTemplate()) {
+            if (!$targetUser instanceof User || !$targetUser->isActive() || $targetUser->getRole() !== 'ADMIN') {
+                return [null, INF, 'template_missing'];
+            }
+
+            if (!$targetUser->hasFaceTemplate()) {
                 return [null, INF, 'template_missing'];
             }
 
@@ -150,7 +181,9 @@ final class FaceIdAuthenticator extends AbstractAuthenticator implements Authent
             ->createQueryBuilder('u')
             ->andWhere('u.faceTemplate IS NOT NULL')
             ->andWhere('u.isActive = :active')
+            ->andWhere('u.role = :role')
             ->setParameter('active', true)
+            ->setParameter('role', 'ADMIN')
             ->getQuery()
             ->getResult();
 

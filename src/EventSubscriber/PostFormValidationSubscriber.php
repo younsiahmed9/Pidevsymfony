@@ -27,6 +27,10 @@ final class PostFormValidationSubscriber implements EventSubscriberInterface
             return;
         }
 
+        if ($request->isXmlHttpRequest()) {
+            return;
+        }
+
         $payload = $request->request->all();
         if ($payload === []) {
             return;

@@ -29,11 +29,11 @@ use Psr\Log\LoggerInterface;
 final class TransactionController extends AbstractController
 {
     public function __construct(
-        private readonly CurrencyRateService $currencyRateService,
-        private readonly GeoLocateService $geoLocateService,
-        private readonly BrevoEmailService $brevoEmailService,
-        private readonly TransferFeeService $transferFeeService,
-        private readonly LoggerInterface $logger,
+        private CurrencyRateService $currencyRateService,
+        private GeoLocateService $geoLocateService,
+        private BrevoEmailService $brevoEmailService,
+        private TransferFeeService $transferFeeService,
+        private LoggerInterface $logger,
     ) {
     }
 

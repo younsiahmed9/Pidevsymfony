@@ -1,0 +1,246 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Signer le document - {{ document.titre }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5 min-vh-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <!-- Header -->
+                    <div class="card-header bg-success text-white py-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h2 class="mb-0 fw-bold">
+                                    <i class="fas fa-pen-nib me-2"></i>Signer le document
+                                </h2>
+                                <p class="text-white-50 small mb-0 mt-2">{{ document.titre }}</p>
+                            </div>
+                            <div class="text-end">
+                                <div class="badge bg-light text-success px-3 py-2 fs-6 rounded-pill">
+                                    <i class="fas fa-check-circle me-2"></i>Prêt à signer
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body p-4">
+                        <!-- Instructions -->
+                        <div class="alert alert-info border-0 rounded-3 mb-4">
+                            <div class="d-flex">
+                                <i class="fas fa-info-circle text-info me-3 mt-1 flex-shrink-0"></i>
+                                <div>
+                                    <strong>Comment signer:</strong>
+                                    <ul class="mb-0 mt-2 small">
+                                        <li>Utilisez votre souris ou votre doigt (tactile) pour dessiner votre signature</li>
+                                        <li>Cliquez sur "Effacer" si vous voulez recommencer</li>
+                                        <li>Cliquez sur "Signer le document" quand vous êtes satisfait</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Document Info -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <small class="text-muted d-block mb-1">Document</small>
+                                    <strong class="text-dark">{{ document.titre }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <small class="text-muted d-block mb-1">Signataire</small>
+                                    <strong class="text-dark">{{ user.fullName ?: user.email }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signature Canvas -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">
+                                <i class="fas fa-pen me-2 text-success"></i>Espace de signature
+                            </label>
+                            <div class="signature-wrapper p-3 border-2 border-dashed border-success rounded-3 bg-white" style="min-height: 350px;">
+                                <canvas 
+                                    id="signatureCanvas" 
+                                    class="d-block w-100"
+                                    style="display:block; width:100%; height:300px; cursor:crosshair; background:white; border-radius:8px;"
+                                ></canvas>
+                            </div>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fas fa-mobile-alt me-1"></i>Tactile supporté
+                            </small>
+                        </div>
+
+                        <!-- Feedback -->
+                        <div id="signatureFeedback" class="mb-4"></div>
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-3">
+                            <button 
+                                type="button" 
+                                id="clearSignatureBtn" 
+                                class="btn btn-lg btn-outline-secondary rounded-pill flex-fill fw-bold"
+                            >
+                                <i class="fas fa-redo-alt me-2"></i>Effacer
+                            </button>
+                            <button 
+                                type="button" 
+                                id="saveSignatureBtn" 
+                                class="btn btn-lg btn-success rounded-pill flex-fill fw-bold text-white"
+                            >
+                                <i class="fas fa-check-circle me-2"></i>Signer le document
+                            </button>
+                        </div>
+
+                        <!-- Cancel link -->
+                        <div class="text-center mt-4">
+                            <a href="{{ path('document_show', {id: document.id}) }}" class="text-secondary text-decoration-none small fw-semibold">
+                                <i class="fas fa-times-circle me-1"></i>Annuler
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('signatureCanvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const wrapper = canvas.parentElement;
+
+  // Resize canvas to match display size and device pixel ratio
+  function resizeCanvas() {
+    const ratio = window.devicePixelRatio || 1;
+    const w = wrapper.clientWidth - 24; // Account for padding
+    const h = 300;
+    
+    canvas.width = w * ratio;
+    canvas.height = h * ratio;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#000';
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  let isDrawing = false;
+  let lastPos = {x: 0, y: 0};
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    return {x, y};
+  }
+
+  // Mouse events
+  canvas.addEventListener('mousedown', (e) => {
+    isDrawing = true;
+    lastPos = getPos(e);
+    e.preventDefault();
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (!isDrawing) return;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastPos.x, lastPos.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastPos = pos;
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    isDrawing = false;
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    isDrawing = false;
+  });
+
+  // Touch events
+  canvas.addEventListener('touchstart', (e) => {
+    isDrawing = true;
+    lastPos = getPos(e);
+    e.preventDefault();
+  });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (!isDrawing) return;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(lastPos.x, lastPos.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    lastPos = pos;
+    e.preventDefault();
+  });
+
+  canvas.addEventListener('touchend', () => {
+    isDrawing = false;
+  });
+
+  // Clear button
+  document.getElementById('clearSignatureBtn').addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('signatureFeedback').innerHTML = '';
+  });
+
+  // Save button
+  document.getElementById('saveSignatureBtn').addEventListener('click', async () => {
+    const dataUrl = canvas.toDataURL('image/png');
+    const feedback = document.getElementById('signatureFeedback');
+
+    if (dataUrl === 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==') {
+      feedback.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Veuillez dessiner votre signature</div>';
+      return;
+    }
+
+    feedback.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...</div>';
+
+    try {
+      const res = await fetch('{{ path('document_sign_with_image', {id: document.id}) }}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({signature: dataUrl})
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        feedback.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>' + (data.message || 'Document signé avec succès!') + '</div>';
+        setTimeout(() => {
+          window.location.href = '{{ path('document_show', {id: document.id}) }}';
+        }, 1500);
+      } else {
+        feedback.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>' + (data.message || 'Erreur lors de la signature') + '</div>';
+      }
+    } catch (e) {
+      feedback.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Erreur de connexion: ' + e.message + '</div>';
+    }
+  });
+})();
+</script>
+
+<style>
+#signatureCanvas {
+  touch-action: none;
+  user-select: none;
+}
+</style>
+{% endblock %}

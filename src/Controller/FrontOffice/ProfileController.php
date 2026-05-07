@@ -2,6 +2,7 @@
 
 namespace App\Controller\FrontOffice;
 
+use App\Entity\Client;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,6 +13,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class ProfileController extends AbstractController
 {
@@ -30,20 +32,52 @@ final class ProfileController extends AbstractController
             ['uid' => $user->getId()]
         );
 
-        $form = $this->createFormBuilder($user)
+        $formBuilder = $this->createFormBuilder($user)
             ->add('fullName', TextType::class)
-            ->add('email', EmailType::class)
-            ->add('profilePhotoFile', FileType::class, [
+            ->add('email', EmailType::class);
+
+        if ($user->getRole() === 'CLIENT') {
+            $formBuilder->add('phone', TextType::class, [
                 'mapped' => false,
                 'required' => false,
-            ])
-            ->getForm();
+                'label' => 'Numéro de téléphone',
+                'help' => 'Utilisé pour les SMS (confirmation de demande de crédit, codes de vérification). Ex. : 20123456 ou +21620123456.',
+                'data' => $user->getClient()?->getPhone() ?? '',
+                'attr' => [
+                    'class' => 'form-control shadow-none',
+                    'placeholder' => '+216… ou 20123456',
+                    'maxlength' => 30,
+                    'autocomplete' => 'tel',
+                ],
+                'constraints' => [
+                    new Assert\Length(max: 30),
+                ],
+            ]);
+        }
+
+        $formBuilder->add('profilePhotoFile', FileType::class, [
+            'mapped' => false,
+            'required' => false,
+        ]);
+
+        $form = $formBuilder->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var UploadedFile|null $uploadedPhoto */
             $uploadedPhoto = $form->get('profilePhotoFile')->getData();
+
+            if ($user->getRole() === 'CLIENT' && $form->has('phone')) {
+                $phoneTrimmed = trim((string) $form->get('phone')->getData());
+                $client = $user->getClient();
+                if (!$client instanceof Client) {
+                    $client = new Client();
+                    $client->setUser($user);
+                    $entityManager->persist($client);
+                }
+                $client->setPhone($phoneTrimmed !== '' ? $phoneTrimmed : null);
+            }
 
             if ($uploadedPhoto instanceof UploadedFile) {
                 $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];

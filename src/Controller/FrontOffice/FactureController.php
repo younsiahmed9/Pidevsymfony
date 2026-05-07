@@ -4,6 +4,10 @@ namespace App\Controller\FrontOffice;
 
 use App\Entity\User;
 use App\Entity\Facture;
+use App\Entity\Produit;
+use App\Entity\Service as ServiceEntity;
+use App\Service\Invoice\InvoiceEmailService;
+use App\Service\Admin\PdfExportService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -184,16 +188,34 @@ final class FactureController extends AbstractController
             $formErrors = $this->validateFactureInput($factureFormData, $entityManager, (int) $user->getId());
 
             if ($formErrors === []) {
-                $entityManager->getConnection()->insert('facture', [
-                    'user_id' => $user->getId(),
-                    'montant' => number_format((float) str_replace(',', '.', $factureFormData['montant']), 2, '.', ''),
-                    'date_facture' => $factureFormData['dateFacture'],
-                    'date_echeance' => $factureFormData['dateEcheance'] !== '' ? $factureFormData['dateEcheance'] : $factureFormData['dateFacture'],
-                    'id_service' => $factureFormData['service'] !== '' ? (int) $factureFormData['service'] : null,
-                    'id_produit' => $factureFormData['produit'] !== '' ? (int) $factureFormData['produit'] : null,
-                    'statut' => $factureFormData['statut'],
-                    'numero_facture' => $factureFormData['numeroFacture'] !== '' ? $factureFormData['numeroFacture'] : 'FAC-' . strtoupper(bin2hex(random_bytes(4))),
-                ]);
+                $serviceEntity = null;
+                if ($factureFormData['service'] !== '') {
+                    $serviceEntity = $entityManager->getRepository(ServiceEntity::class)->findOneBy([
+                        'id' => (int) $factureFormData['service'],
+                        'user' => $user,
+                    ]);
+                }
+
+                $produitEntity = null;
+                if ($factureFormData['produit'] !== '') {
+                    $produitEntity = $entityManager->getRepository(Produit::class)->findOneBy([
+                        'id' => (int) $factureFormData['produit'],
+                        'user' => $user,
+                    ]);
+                }
+
+                $factureEntity = new Facture();
+                $factureEntity->setUser($user);
+                $factureEntity->setMontant(number_format((float) str_replace(',', '.', $factureFormData['montant']), 2, '.', ''));
+                $factureEntity->setDateFacture(new \DateTime($factureFormData['dateFacture']));
+                $factureEntity->setDateEcheance(new \DateTime($factureFormData['dateEcheance'] !== '' ? $factureFormData['dateEcheance'] : $factureFormData['dateFacture']));
+                $factureEntity->setService($serviceEntity instanceof ServiceEntity ? $serviceEntity : null);
+                $factureEntity->setProduit($produitEntity instanceof Produit ? $produitEntity : null);
+                $factureEntity->setStatut($factureFormData['statut']);
+                $factureEntity->setNumeroFacture($factureFormData['numeroFacture'] !== '' ? $factureFormData['numeroFacture'] : 'FAC-' . strtoupper(bin2hex(random_bytes(4))));
+
+                $entityManager->persist($factureEntity);
+                $entityManager->flush();
 
                 $this->addFlash('success', 'Facture créée avec succès.');
                 return $this->redirectToRoute('facture_index');
@@ -238,33 +260,31 @@ final class FactureController extends AbstractController
             ['user_id' => $user->getId()]
         );
 
-        $facture = $entityManager->getConnection()->fetchAssociative(
-            'SELECT id_facture AS id, montant, date_facture AS dateFacture, date_echeance AS dateEcheance, id_service AS service, id_produit AS produit, statut, numero_facture AS numeroFacture, user_id
-             FROM facture
-             WHERE id_facture = :id AND user_id = :user_id',
-            ['id' => $id, 'user_id' => $user->getId()]
-        );
+        $factureEntity = $entityManager->getRepository(Facture::class)->findOneBy([
+            'id' => $id,
+            'user' => $user,
+        ]);
 
-        if (!$facture) {
+        if (!$factureEntity instanceof Facture) {
             throw $this->createNotFoundException('Facture introuvable.');
         }
 
         $factureFormData = [
-            'id' => (string) ($facture['id'] ?? $id),
-            'numeroFacture' => (string) ($facture['numeroFacture'] ?? ''),
-            'montant' => (string) ($facture['montant'] ?? ''),
-            'dateFacture' => (string) ($facture['dateFacture'] ?? (new \DateTime())->format('Y-m-d')),
-            'dateEcheance' => (string) ($facture['dateEcheance'] ?? ''),
-            'service' => (string) ($facture['service'] ?? ''),
-            'produit' => (string) ($facture['produit'] ?? ''),
-            'statut' => (string) ($facture['statut'] ?? 'non_payee'),
+            'id' => (string) ($factureEntity->getId() ?? $id),
+            'numeroFacture' => (string) ($factureEntity->getNumeroFacture() ?? ''),
+            'montant' => (string) ($factureEntity->getMontant() ?? ''),
+            'dateFacture' => $factureEntity->getDateFacture() ? $factureEntity->getDateFacture()->format('Y-m-d') : (new \DateTime())->format('Y-m-d'),
+            'dateEcheance' => $factureEntity->getDateEcheance() ? $factureEntity->getDateEcheance()->format('Y-m-d') : '',
+            'service' => (string) ($factureEntity->getService()?->getId() ?? ''),
+            'produit' => (string) ($factureEntity->getProduit()?->getId() ?? ''),
+            'statut' => (string) ($factureEntity->getStatut() ?? 'non_payee'),
         ];
         $formErrors = [];
 
         if ($request->isMethod('POST')) {
             try {
                 $factureFormData = [
-                    'id' => (string) ($facture['id'] ?? $id),
+                    'id' => (string) ($factureEntity->getId() ?? $id),
                     'numeroFacture' => trim((string) $request->request->get('numeroFacture', $factureFormData['numeroFacture'])),
                     'montant' => trim((string) $request->request->get('montant', '')),
                     'dateFacture' => trim((string) $request->request->get('dateFacture', $factureFormData['dateFacture'])),
@@ -277,14 +297,29 @@ final class FactureController extends AbstractController
                 $formErrors = $this->validateFactureInput($factureFormData, $entityManager, (int) $user->getId(), $id);
 
                 if ($formErrors === []) {
-                    // Validation supplémentaire avec l'entité
-                    $factureEntity = new Facture();
-                    $factureEntity->setMontant($factureFormData['montant']);
+                    $serviceEntity = null;
+                    if ($factureFormData['service'] !== '') {
+                        $serviceEntity = $entityManager->getRepository(ServiceEntity::class)->findOneBy([
+                            'id' => (int) $factureFormData['service'],
+                            'user' => $user,
+                        ]);
+                    }
+
+                    $produitEntity = null;
+                    if ($factureFormData['produit'] !== '') {
+                        $produitEntity = $entityManager->getRepository(Produit::class)->findOneBy([
+                            'id' => (int) $factureFormData['produit'],
+                            'user' => $user,
+                        ]);
+                    }
+
+                    $factureEntity->setMontant(number_format((float) str_replace(',', '.', $factureFormData['montant']), 2, '.', ''));
                     $factureEntity->setDateFacture(new \DateTime($factureFormData['dateFacture']));
-                    $factureEntity->setDateEcheance($factureFormData['dateEcheance'] !== '' ? new \DateTime($factureFormData['dateEcheance']) : null);
+                    $factureEntity->setDateEcheance(new \DateTime($factureFormData['dateEcheance'] !== '' ? $factureFormData['dateEcheance'] : $factureFormData['dateFacture']));
+                    $factureEntity->setService($serviceEntity instanceof ServiceEntity ? $serviceEntity : null);
+                    $factureEntity->setProduit($produitEntity instanceof Produit ? $produitEntity : null);
                     $factureEntity->setStatut($factureFormData['statut']);
                     $factureEntity->setNumeroFacture($factureFormData['numeroFacture']);
-                    // Note: service et produit sont gérés séparément car ils nécessitent les entités correspondantes
 
                     // Valider l'entité
                     $validator = $this->container->get('validator');
@@ -294,15 +329,7 @@ final class FactureController extends AbstractController
                         throw new ValidationFailedException($factureEntity, $violations);
                     }
 
-                    $entityManager->getConnection()->update('facture', [
-                        'montant' => number_format((float) str_replace(',', '.', $factureFormData['montant']), 2, '.', ''),
-                        'date_facture' => $factureFormData['dateFacture'],
-                        'date_echeance' => $factureFormData['dateEcheance'] !== '' ? $factureFormData['dateEcheance'] : $factureFormData['dateFacture'],
-                        'id_service' => $factureFormData['service'] !== '' ? (int) $factureFormData['service'] : null,
-                        'id_produit' => $factureFormData['produit'] !== '' ? (int) $factureFormData['produit'] : null,
-                        'statut' => $factureFormData['statut'],
-                        'numero_facture' => $factureFormData['numeroFacture'],
-                    ], ['id_facture' => $id, 'user_id' => $user->getId()]);
+                    $entityManager->flush();
 
                     $this->addFlash('success', 'Facture mise à jour avec succès.');
                     return $this->redirectToRoute('facture_index');
@@ -344,7 +371,8 @@ final class FactureController extends AbstractController
             $errors['montant'][] = 'Le montant doit être un nombre supérieur à 0.';
         }
 
-        if (!in_array($data['statut'], ['non_payee', 'payee', 'en_retard'], true)) {
+        $statutsValid = ['non_payee', 'payee', 'en_retard'];
+        if (!in_array($data['statut'], $statutsValid)) {
             $errors['statut'][] = 'Le statut sélectionné est invalide.';
         }
 
@@ -440,6 +468,107 @@ final class FactureController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/send-email', name: 'send_email', methods: ['POST'])]
+    public function sendEmail(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        InvoiceEmailService $invoiceEmailService,
+        PdfExportService $pdfExportService
+    ): Response {
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        if (!$this->isCsrfTokenValid('send_email' . $id, (string) $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Jeton de securite invalide.');
+
+            return $this->redirectToRoute('facture_show', ['id' => $id]);
+        }
+
+        $facture = $entityManager->getConnection()->fetchAssociative(
+            'SELECT f.id_facture AS id,
+                    f.montant,
+                    f.date_facture AS dateFacture,
+                    f.date_echeance AS dateEcheance,
+                    f.statut,
+                    f.numero_facture AS numeroFacture,
+                    s.nom_service AS serviceNom,
+                    p.nom_produit AS produitNom
+             FROM facture f
+             LEFT JOIN service s ON s.id_service = f.id_service
+             LEFT JOIN produit p ON p.id_produit = f.id_produit
+             WHERE f.id_facture = :id AND f.user_id = :user_id',
+            [
+                'id' => $id,
+                'user_id' => $user->getId(),
+            ]
+        );
+
+        if (!is_array($facture)) {
+            throw $this->createNotFoundException('Facture introuvable.');
+        }
+
+        $recipient = trim((string) $request->request->get('recipientEmail', ''));
+        if ($recipient === '' || !filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            $this->addFlash('danger', 'Veuillez saisir une adresse email valide.');
+
+            return $this->redirectToRoute('facture_show', ['id' => $id]);
+        }
+
+        try {
+            $html = $this->renderView('frontoffice/facture/email_invoice_pdf.html.twig', [
+                'facture' => $facture,
+                'user' => $user,
+                'generatedAt' => new \DateTimeImmutable(),
+            ]);
+
+            $filename = sprintf(
+                'facture-%s.pdf',
+                preg_replace('/[^A-Za-z0-9\-_]/', '-', (string) ($facture['numeroFacture'] ?? ('F-' . $id)))
+            );
+
+            $pdfResponse = $pdfExportService->renderPdfResponse($html, $filename);
+            $pdfContent = (string) $pdfResponse->getContent();
+
+            $invoiceNumber = (string) ($facture['numeroFacture'] ?? ('#' . $id));
+            $amount = (string) ($facture['montant'] ?? '');
+            $htmlContent = sprintf(
+                '<html><body><h2>Votre facture %s</h2><p>Veuillez trouver ci-joint votre facture au format PDF.</p><ul><li><strong>Montant:</strong> %s</li><li><strong>Statut:</strong> %s</li></ul><p>Cordialement,<br>FinTrack</p></body></html>',
+                htmlspecialchars($invoiceNumber, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($amount, ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars((string) ($facture['statut'] ?? ''), ENT_QUOTES, 'UTF-8')
+            );
+
+            $invoiceEmailService->sendInvoicePdf(
+                $recipient,
+                'Votre facture ' . $invoiceNumber,
+                $htmlContent,
+                $pdfContent,
+                $filename,
+                [
+                    'invoice_id' => $facture['id'] ?? $id,
+                    'invoice_number' => $invoiceNumber,
+                    'amount' => $amount,
+                    'status' => (string) ($facture['statut'] ?? ''),
+                    'recipient' => $recipient,
+                ],
+                $user
+            );
+
+            $this->addFlash('success', 'Facture envoyee par email avec succes a ' . $recipient . '.');
+        } catch (\Throwable $e) {
+            $this->addFlash('danger', 'Echec de l\'envoi email: ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('facture_show', ['id' => $id]);
+    }
+
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
     public function delete(int $id, Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -453,10 +582,15 @@ final class FactureController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         if ($this->isCsrfTokenValid('delete' . $id, $request->getPayload()->getString('_token'))) {
-            $entityManager->getConnection()->executeStatement(
-                'DELETE FROM facture WHERE id_facture = :id AND user_id = :user_id',
-                ['id' => $id, 'user_id' => $user->getId()]
-            );
+            $factureEntity = $entityManager->getRepository(Facture::class)->findOneBy([
+                'id' => $id,
+                'user' => $user,
+            ]);
+
+            if ($factureEntity instanceof Facture) {
+                $entityManager->remove($factureEntity);
+                $entityManager->flush();
+            }
         }
 
         return $this->redirectToRoute('facture_index');

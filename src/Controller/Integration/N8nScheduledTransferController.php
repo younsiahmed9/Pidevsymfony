@@ -15,12 +15,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class N8nScheduledTransferController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ScheduledTransferExecutionService $executionService,
-        private readonly ScheduledTransferEngineResolver $engineResolver,
-        private readonly LoggerInterface $logger,
-        private readonly string $internalToken,
-        private readonly string $symfonyBaseUrl,
+        private EntityManagerInterface $entityManager,
+        private ScheduledTransferExecutionService $executionService,
+        private ScheduledTransferEngineResolver $engineResolver,
+        private LoggerInterface $logger,
+        private string $internalToken,
+        private string $symfonyBaseUrl,
     ) {
     }
 

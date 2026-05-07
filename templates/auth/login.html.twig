@@ -46,9 +46,19 @@
                                 Se connecter
                             </button>
 
-                            <button type="button" class="btn btn-outline-dark w-100 mb-3" data-bs-toggle="modal" data-bs-target="#faceIdLoginModal">
-                                Se connecter avec Face ID
-                            </button>
+                            <div class="text-center text-muted small mb-3">ou continuez avec</div>
+
+                            <div class="d-grid gap-2 mb-3">
+                                <a href="{{ path('connect_google_start') }}" class="btn btn-outline-danger w-100 rounded-3">
+                                    <i class="fab fa-google me-2"></i>Continuer avec Google
+                                </a>
+                                <a href="{{ path('connect_github_start') }}" class="btn btn-outline-dark w-100 rounded-3">
+                                    <i class="fab fa-github me-2"></i>Continuer avec GitHub
+                                </a>
+                                <a href="{{ path('connect_facebook_start') }}" class="btn btn-outline-primary w-100 rounded-3">
+                                    <i class="fab fa-facebook-f me-2"></i>Continuer avec Facebook
+                                </a>
+                            </div>
                             
                             <div class="auth-footer">
                                 <p class="mb-0">Nouveau sur FinTrack ? <a href="{{ path('app_register') }}" class="auth-link">Créer un compte</a></p>
@@ -65,32 +75,6 @@
         </div>
     </div>
 </section>
-
-<div class="modal fade" id="faceIdLoginModal" tabindex="-1" aria-labelledby="faceIdLoginModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="faceIdLoginModalLabel">Connexion Face ID</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="post" action="{{ path('app_face_id_login') }}" data-face-id-form>
-                <div class="modal-body">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('face_id_login') }}">
-                    <input type="hidden" name="face_descriptor" data-face-id-input>
-                    <input type="hidden" name="face_email" data-face-id-email>
-                    <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
-                        <video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
-                    </div>
-                    <p class="text-muted mb-0" data-face-id-status>Autorisez la camera puis lancez le scan.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary" data-face-id-submit>Scanner et se connecter</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <script>
     (function () {
@@ -144,19 +128,6 @@
                 event.preventDefault();
             }
         });
-
-        var faceEmailInput = document.querySelector('[data-face-id-email]');
-        if (faceEmailInput) {
-            var syncEmail = function () {
-                var currentEmail = (form.querySelector('[name="email"]') || {}).value || '';
-                faceEmailInput.value = currentEmail.trim().toLowerCase();
-            };
-
-            syncEmail();
-            form.querySelector('[name="email"]').addEventListener('input', syncEmail);
-            document.getElementById('faceIdLoginModal').addEventListener('show.bs.modal', syncEmail);
-        }
     })();
 </script>
-<script src="{{ asset('frontoffice/js/face-id.js') }}"></script>
 {% endblock %}

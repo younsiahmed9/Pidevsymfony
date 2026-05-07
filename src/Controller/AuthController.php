@@ -19,6 +19,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use App\Security\LoginFormAuthenticator;
+use App\Security\AdminFaceAuthSession;
 
 class AuthController extends AbstractController
 {
@@ -113,6 +114,20 @@ class AuthController extends AbstractController
             $adminCode = trim((string) $form->get('adminCode')->getData());
             $faceDescriptorJson = trim((string) ($form->get('faceDescriptor')->getData() ?? ''));
 
+            if ($roleChoice === 'ADMIN' && $faceDescriptorJson === '') {
+                if ($isAjax) {
+                    return $this->json([
+                        'valid' => false,
+                        'errors' => [
+                            'faceDescriptor' => ['Face ID is required for administrators.'],
+                        ],
+                    ], 422);
+                }
+
+                $this->addFlash('error', 'Face ID is required for administrators.');
+                return $this->redirectToRoute('app_register');
+            }
+
             if ($roleChoice === 'ADMIN') {
                 $expectedAdminCode = trim((string) ($_ENV['ADMIN_CODE'] ?? $_SERVER['ADMIN_CODE'] ?? ''));
                 if ($expectedAdminCode === '' || !hash_equals($expectedAdminCode, $adminCode)) {
@@ -146,7 +161,7 @@ class AuthController extends AbstractController
                 'adminCode' => $adminCode,
                 'cin' => $cin,
                 'phone' => $phone,
-                'faceDescriptor' => $faceDescriptorJson,
+                'faceDescriptor' => $roleChoice === 'ADMIN' ? $faceDescriptorJson : '',
                 'verificationCode' => $verificationCode,
                 'expiresAt' => $expiresAt,
             ]);
@@ -200,7 +215,7 @@ class AuthController extends AbstractController
     #[Route('/face-id/enroll', name: 'app_face_id_enroll', methods: ['POST'])]
     public function enrollFaceId(Request $request): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         if (!$this->isCsrfTokenValid('face_id_enroll', (string) $request->request->get('_csrf_token'))) {
             $this->addFlash('error', 'Jeton Face ID invalide. Veuillez reessayer.');
@@ -316,8 +331,10 @@ class AuthController extends AbstractController
             $newUser->setPasswordHash((string) ($pendingRegistration['passwordHash'] ?? ''));
             $newUser->setIsActive(true);
 
+            $roleChoice = (string) ($pendingRegistration['roleChoice'] ?? 'CLIENT');
+
             $faceDescriptorJson = trim((string) ($pendingRegistration['faceDescriptor'] ?? ''));
-            if ($faceDescriptorJson !== '') {
+            if ($roleChoice === 'ADMIN' && $faceDescriptorJson !== '') {
                 $decodedDescriptor = json_decode($faceDescriptorJson, true);
                 if (is_array($decodedDescriptor) && count($decodedDescriptor) === 4096) {
                     $floatDescriptor = array_values(array_map(static fn ($value) => (float) $value, $decodedDescriptor));
@@ -326,7 +343,6 @@ class AuthController extends AbstractController
                 }
             }
 
-            $roleChoice = (string) ($pendingRegistration['roleChoice'] ?? 'CLIENT');
             $newUser->setRole($roleChoice === 'ADMIN' ? 'ADMIN' : 'CLIENT');
 
             $this->entityManager->persist($newUser);
@@ -375,6 +391,36 @@ class AuthController extends AbstractController
         throw new \LogicException('This route is handled by the FaceIdAuthenticator.');
     }
 
+    #[Route('/admin/face-id-challenge', name: 'app_admin_face_id_challenge', methods: ['GET'])]
+    public function adminFaceIdChallenge(Request $request): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $user->getRole() !== 'ADMIN') {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $session = $request->getSession();
+        $sessionData = $session->get(AdminFaceAuthSession::SESSION_KEY);
+        if (is_array($sessionData) && ($sessionData['verified'] ?? false) === true) {
+            return $this->redirectToRoute('admin_index');
+        }
+
+        $adminEmail = strtolower((string) $user->getUserIdentifier());
+        if (is_array($sessionData) && (string) ($sessionData['email'] ?? '') !== '') {
+            $adminEmail = strtolower((string) $sessionData['email']);
+        }
+
+        $session->set(AdminFaceAuthSession::SESSION_KEY, [
+            'email' => $adminEmail,
+            'verified' => false,
+            'startedAt' => is_array($sessionData) && isset($sessionData['startedAt']) ? (int) $sessionData['startedAt'] : time(),
+        ]);
+
+        return $this->render('auth/admin_face_id_challenge.html.twig', [
+            'adminEmail' => $adminEmail,
+        ]);
+    }
+
     #[Route('/logout', name: 'app_logout', methods: ['GET'])]
     public function logout(): Response
     {
@@ -387,6 +433,8 @@ class AuthController extends AbstractController
     public function adminDashboard(Request $request): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        return $this->redirectToRoute('admin_index');
 
         $userRepository = $this->entityManager->getRepository(User::class);
         $searchTerm = trim((string) $request->query->get('q', ''));
@@ -578,7 +626,7 @@ class AuthController extends AbstractController
             return $this->redirect($referer);
         }
 
-        return $this->redirectToRoute('app_admin_dashboard', $this->getDashboardRedirectParams($request));
+        return $this->redirectToRoute('admin_index', $this->getDashboardRedirectParams($request));
     }
 
     #[Route('/profile/update', name: 'app_profile_update', methods: ['POST'])]

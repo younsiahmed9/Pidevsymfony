@@ -1,0 +1,131 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Historique des Relevés - {{ compte.numeroCompte }} - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light-gradient min-vh-100">
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-5 gap-3">
+            <div class="d-flex align-items-center">
+                <a href="{{ path('compte_show', {id: compte.id}) }}" class="btn btn-back rounded-circle p-3 me-3 shadow-sm" title="Retour">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="h2 fw-bold text-dark mb-1">Historique des Relevés</h1>
+                    <p class="text-muted mb-0"><i class="fas fa-file-pdf me-1"></i>Compte {{ compte.numeroCompte }}</p>
+                </div>
+            </div>
+            <a href="{{ path('compte_show', {id: compte.id}) }}" class="btn btn-outline-primary rounded-pill px-4 shadow-sm fw-bold">
+                <i class="fas fa-arrow-right me-2"></i> Retour au compte
+            </a>
+        </div>
+
+        <!-- Bandeau info lecture seule -->
+        <div class="alert alert-info rounded-3 d-flex align-items-center gap-2 mb-4" role="alert">
+            <i class="fas fa-info-circle fa-lg"></i>
+            <div>
+                <strong>Consultation uniquement.</strong>
+                La suppression des relevés est réservée aux administrateurs.
+            </div>
+        </div>
+
+        <!-- Contenu -->
+        {% if releves|length > 0 %}
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 p-4">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-history me-2" style="color: #182d88;"></i>{{ releves|length }} relevé(s) généré(s)</h5>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="fw-bold text-uppercase small">Date</th>
+                                <th class="fw-bold text-uppercase small">Solde</th>
+                                <th class="fw-bold text-uppercase small">Crédits</th>
+                                <th class="fw-bold text-uppercase small">Type</th>
+                                <th class="fw-bold text-uppercase small text-center">Télécharger</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for releve in releves %}
+                                <tr class="releve-row">
+                                    <td>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            {{ releve.dateGeneration|date('d/m/Y à H:i') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">
+                                            {{ releve.soldeAuMoment|number_format(2, ',', ' ') }} DT
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ releve.nombreCreditsAuMoment }}
+                                            {% if releve.nombreCreditsAuMoment == 1 %}crédit{% else %}crédits{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-light text-dark">
+                                            {% if releve.typeReleve == 'compte_complet' %}
+                                                <i class="fas fa-file-pdf me-1"></i>Complet
+                                            {% else %}
+                                                <i class="fas fa-file me-1"></i>Personnalisé
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{{ path('compte_releve_telecharger', {releveId: releve.id}) }}"
+                                           class="btn btn-sm btn-primary rounded-pill px-3"
+                                           title="Télécharger le PDF">
+                                            <i class="fas fa-download me-1"></i> PDF
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block">
+                    <i class="fas fa-inbox text-muted fa-3x mb-3"></i>
+                    <h3 class="h5 fw-bold mb-2">Aucun relevé généré</h3>
+                    <p class="text-muted mb-4">Les relevés que vous générez apparaîtront ici.</p>
+                    <a href="{{ path('compte_show', {id: compte.id}) }}" class="btn btn-primary rounded-pill">
+                        <i class="fas fa-arrow-left me-2"></i>Retourner au compte
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .bg-light-gradient { background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%); }
+    .btn-back { background: white !important; border: 2px solid #f0f0f0; color: #182d88 !important; transition: all 0.3s ease; }
+    .btn-back:hover { border-color: #182d88; transform: translateX(-4px); }
+    .card { background: white; border: 1px solid rgba(24, 45, 136, 0.08) !important; }
+    .card-header { background: white !important; border-bottom: 1px solid rgba(24, 45, 136, 0.08) !important; }
+    .table { margin: 0; }
+    .releve-row { transition: background 0.2s ease; }
+    .releve-row:hover { background: rgba(24, 45, 136, 0.02) !important; }
+    .table-light { background: rgba(24, 45, 136, 0.05) !important; }
+    .table-light th { color: #182d88; border-bottom: 2px solid rgba(24, 45, 136, 0.1); }
+    .badge { font-weight: 600; padding: 0.45rem 0.75rem !important; }
+    .bg-info { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important; }
+    .btn-primary { background: linear-gradient(135deg, #182d88 0%, #2d4db3 100%) !important; border: none; font-weight: 600; transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(24, 45, 136, 0.3) !important; }
+    .btn-outline-primary { color: #182d88; border: 2px solid #182d88; font-weight: 600; transition: all 0.3s ease; }
+    .btn-outline-primary:hover { background: linear-gradient(135deg, #182d88 0%, #2d4db3 100%); color: white; transform: translateY(-2px); }
+    .alert-info { background: rgba(23, 162, 184, 0.08); border: 1px solid rgba(23, 162, 184, 0.3); color: #0c5460; }
+    @media (max-width: 768px) { .table { font-size: 0.85rem; } }
+</style>
+{% endblock %}

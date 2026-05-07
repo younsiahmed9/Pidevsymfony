@@ -8,10 +8,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class CurrencyRateService
 {
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
-        private readonly Connection $connection,
-        private readonly string $fcsApiKey,
-        private readonly int $cacheTtlSeconds = 300,
+        private HttpClientInterface $httpClient,
+        private Connection $connection,
+        private string $fcsApiKey,
+        private int $cacheTtlSeconds = 300,
     ) {
     }
 

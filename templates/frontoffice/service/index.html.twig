@@ -10,9 +10,14 @@
                 <h1 class="h2 fw-bold text-dark mb-1">Mes Services & Abonnements</h1>
                 <p class="text-muted mb-0">Suivez vos abonnements récurrents et services souscrits.</p>
             </div>
-            <a href="{{ path('service_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
-                <i class="fas fa-plus me-2"></i> Ajouter un service
-            </a>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ path('front_historique_index', {entity: 'service'}) }}" class="btn btn-outline-dark btn-lg rounded-pill shadow-sm px-4">
+                    <i class="fas fa-clock-rotate-left me-2"></i> Historique
+                </a>
+                <a href="{{ path('service_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
+                    <i class="fas fa-plus me-2"></i> Ajouter un service
+                </a>
+            </div>
         </div>
 
         <!-- Stats Cards -->
@@ -173,8 +178,8 @@
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
-                                        <li><a class="dropdown-item" href="{{ path('service_show', {id: service.id}) }}"><i class="fas fa-eye me-2 text-primary"></i> Voir</a></li>
-                                        <li><a class="dropdown-item" href="{{ path('service_edit', {id: service.id}) }}"><i class="fas fa-edit me-2 text-warning"></i> Modifier</a></li>
+                                        <li><a class="dropdown-item py-2" href="{{ path('service_show', {id: service.id}) }}" title="Voir"><i class="fas fa-fw fa-eye text-primary"></i><span class="visually-hidden">Voir</span></a></li>
+                                        <li><a class="dropdown-item py-2" href="{{ path('service_edit', {id: service.id}) }}" title="Modifier"><i class="fas fa-fw fa-pen text-warning"></i><span class="visually-hidden">Modifier</span></a></li>
                                     </ul>
                                 </div>
                             </div>

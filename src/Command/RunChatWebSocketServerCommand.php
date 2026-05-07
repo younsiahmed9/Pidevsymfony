@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class RunChatWebSocketServerCommand extends Command
 {
     public function __construct(
-        private readonly ChatMessageNotifier $notifier,
+        private ChatMessageNotifier $notifier,
     ) {
         parent::__construct();
     }

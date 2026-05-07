@@ -12,7 +12,7 @@ final class TransferFeeService
     private const DISCOUNT_THRESHOLD = 5;
 
     public function __construct(
-        private readonly Connection $connection,
+        private Connection $connection,
     ) {
     }
 

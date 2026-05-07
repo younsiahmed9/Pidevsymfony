@@ -1,0 +1,718 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Recommandations de Services - FinTrack{% endblock %}
+
+{% block stylesheets %}
+<style>
+.recommendations-page .page-header {
+    background: linear-gradient(160deg, #f1f5ff 0%, #ffffff 70%);
+    border: 1px solid #dce7ff;
+    border-radius: 1.25rem;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.recommendations-page .chat-shell {
+    border: 1px solid #dbe6ff;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.recommendations-page .chat-header {
+    background: linear-gradient(120deg, #1452c6, #1f6bff);
+    color: #fff;
+    padding: 0.95rem 1.2rem;
+}
+
+.recommendation-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #dfe6f4;
+    border-radius: 1rem;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.85rem 1.6rem rgba(35, 65, 118, 0.12);
+}
+
+.score-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #0d6efd;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.service-type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.type-abonnement {
+    background-color: #e8f1ff;
+    color: #1353c9;
+}
+
+.type-facture {
+    background-color: #e8f8f1;
+    color: #0f7e4f;
+}
+
+.interaction-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.interaction-btn {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background-color: #edf2f7;
+    color: #334155;
+}
+
+.btn-view:hover {
+    background-color: #dce4ef;
+}
+
+.btn-favorite {
+    background-color: #fff4df;
+    color: #935f00;
+}
+
+.btn-favorite:hover {
+    background-color: #ffe9bf;
+}
+
+.btn-purchase {
+    background-color: #dff5e8;
+    color: #166534;
+}
+
+.btn-purchase:hover {
+    background-color: #cbeed9;
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.category-filter {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    padding: 10px 20px;
+    border: 1px solid #d6dfef;
+    background: #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-btn:hover {
+    border-color: #0d6efd;
+    background-color: #f2f7ff;
+}
+
+.category-btn.active {
+    background-color: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+}
+
+.stats-card {
+    background: #fff;
+    color: #1f2937;
+    padding: 20px;
+    border-radius: 1rem;
+    border: 1px solid #dde5f3;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 22px rgba(16, 54, 122, 0.07);
+}
+
+.recommendation-type {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@media (max-width: 767px) {
+    #chatbot-container {
+        height: 350px !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+<div class="container py-4 recommendations-page">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header shadow-sm">
+                <h1 class="mb-2 h2 fw-bold">
+                    <i class="fas fa-star me-2 text-primary"></i>
+                    Recommandations de Services
+                </h1>
+                <p class="text-muted mb-0">Découvrez les services personnalisés pour vous.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm chat-shell">
+                <div class="chat-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-robot me-2"></i>
+                        Assistant de Recommandation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="chatbot-container" style="height: 400px; display: flex; flex-direction: column;">
+                        <!-- Messages -->
+                        <div id="chat-messages" style="flex: 1; overflow-y: auto; padding: 15px; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                            <div class="chat-message bot-message mb-3">
+                                <div class="d-flex align-items-start">
+                                    <div class="bot-avatar me-2">
+                                        <i class="fas fa-robot bg-primary text-white rounded-circle p-2"></i>
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="bg-white rounded p-3 shadow-sm">
+                                            <strong>Assistant</strong>
+                                            <p class="mb-0">Bonjour ! Je suis votre assistant de recommandation. Comment puis-je vous aider aujourd'hui ?</p>
+                                        </div>
+                                        <small class="text-muted">Maintenant</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestions -->
+                        <div id="chat-suggestions" class="mb-3">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="suggestion-btn btn btn-sm btn-outline-primary" onclick="sendSuggestion('Recommande-moi des services')">
+                                    <i class="fas fa-star me-1"></i> Recommande-moi des services
+                                </button>
+                                <button class="suggestion-btn btn btn-sm btn-outline-secondary" onclick="sendSuggestion('Montre les abonnements')">
+                                    <i class="fas fa-sync me-1"></i> Montre les abonnements
+                                </button>
+                                <button class="suggestion-btn btn btn-sm btn-outline-secondary" onclick="sendSuggestion('Compare les prix')">
+                                    <i class="fas fa-chart-line me-1"></i> Compare les prix
+                                </button>
+                                <button class="suggestion-btn btn btn-sm btn-outline-info" onclick="sendSuggestion('Aide')">
+                                    <i class="fas fa-question-circle me-1"></i> Aide
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Input -->
+                        <div class="input-group">
+                            <input type="text" id="chat-input" class="form-control" placeholder="Tapez votre message..." onkeypress="handleKeyPress(event)">
+                            <button class="btn btn-primary" type="button" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h3>{{ recommendations|length }}</h3>
+                <p class="mb-0">Services recommandés</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h3>{{ user.fullName }}</h3>
+                <p class="mb-0">Profil utilisateur</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card text-center">
+                <h3>Hybride</h3>
+                <p class="mb-0">Algorithme utilisé</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres par catégorie -->
+    <div class="category-filter">
+        <button class="category-btn active" data-category="all">
+            <i class="fas fa-th me-2"></i>Tous
+        </button>
+        {% for category in categories %}
+            <button class="category-btn" data-category="{{ category }}">
+                <i class="fas fa-{% if category == 'abonnement' %}sync{% else %}file-invoice{% endif %} me-2"></i>
+                {{ category == 'abonnement' ? 'Abonnements' : 'Factures' }}
+            </button>
+        {% endfor %}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-2">Chargement des recommandations...</p>
+    </div>
+
+    <!-- Recommandations -->
+    <div class="row" id="recommendationsContainer">
+        {% if recommendations|length > 0 %}
+            {% for recommendation in recommendations %}
+                <div class="col-md-6 col-lg-4 mb-4 recommendation-item" data-category="{{ recommendation.service.type }}">
+                    <div class="card recommendation-card h-100 position-relative">
+                        <div class="score-badge">
+                            {{ recommendation.recommendation.score * 100 }}%
+                        </div>
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recommendation.service.name }}</h5>
+                            
+                            <div class="mb-3">
+                                <span class="service-type-badge type-{{ recommendation.service.type }}">
+                                    {{ recommendation.service.type }}
+                                </span>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <strong>Tarif:</strong> {{ recommendation.service.tarif }} DT
+                                {% if recommendation.service.frequence %}
+                                    <span class="text-muted">/ {{ recommendation.service.frequence }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-2">
+                                <strong>Statut:</strong> 
+                                <span class="badge bg-{{ recommendation.service.statut == 'actif' ? 'success' : 'secondary' }}">
+                                    {{ recommendation.service.statut }}
+                                </span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="recommendation-type">
+                                    Type: {{ recommendation.recommendation.type }}
+                                </div>
+                                {% if recommendation.recommendation.reason %}
+                                    <div class="text-info small mb-1">
+                                        <i class="fas fa-lightbulb me-1"></i>
+                                        {{ recommendation.recommendation.reason }}
+                                    </div>
+                                {% endif %}
+                                {% if recommendation.recommendation.similarity_to %}
+                                    <div class="text-primary small mb-1">
+                                        <i class="fas fa-exchange-alt me-1"></i>
+                                        Alternative à: {{ recommendation.recommendation.similarity_to }}
+                                    </div>
+                                {% endif %}
+                                {% if recommendation.recommendation.content_score > 0 or recommendation.recommendation.similarity_score > 0 %}
+                                    <small class="text-muted">
+                                        {% if recommendation.recommendation.content_score > 0 %}
+                                            Contenu: {{ (recommendation.recommendation.content_score * 100)|round }}%
+                                        {% endif %}
+                                        {% if recommendation.recommendation.collaborative_score > 0 %}
+                                            | Collaboratif: {{ (recommendation.recommendation.collaborative_score * 100)|round }}%
+                                        {% endif %}
+                                        {% if recommendation.recommendation.similarity_score > 0 %}
+                                            | Similarité: {{ (recommendation.recommendation.similarity_score * 100)|round }}%
+                                        {% endif %}
+                                    </small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="interaction-buttons">
+                                <button class="interaction-btn btn-view" onclick="recordInteraction({{ recommendation.service.id }}, 'view')">
+                                    <i class="fas fa-eye me-1"></i> Voir
+                                </button>
+                                <button class="interaction-btn btn-favorite" onclick="recordInteraction({{ recommendation.service.id }}, 'favorite')">
+                                    <i class="fas fa-heart me-1"></i> Favori
+                                </button>
+                                <button class="interaction-btn btn-purchase" onclick="recordInteraction({{ recommendation.service.id }}, 'purchase')">
+                                    <i class="fas fa-shopping-cart me-1"></i> Acheter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>Aucune recommandation disponible</h4>
+                <p class="text-muted">Commencez à interagir avec des services pour obtenir des recommandations personnalisées.</p>
+                <a href="{{ path('produit_new') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-2"></i>Ajouter un service
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+let currentCategory = 'all';
+
+// Filtrage par catégorie
+document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Mettre à jour l'état actif
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        currentCategory = this.dataset.category;
+        filterRecommendations();
+    });
+});
+
+function filterRecommendations() {
+    const items = document.querySelectorAll('.recommendation-item');
+    
+    items.forEach(item => {
+        if (currentCategory === 'all' || item.dataset.category === currentCategory) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Enregistrer une interaction
+async function recordInteraction(serviceId, interactionType) {
+    try {
+        const response = await fetch(`/service/recommendations/interact/${serviceId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                interaction_type: interactionType,
+                rating: 4.0
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Afficher une notification
+            showNotification('Interaction enregistrée avec succès', 'success');
+            
+            // Mettre à jour les recommandations après un court délai
+            setTimeout(() => {
+                loadRecommendations();
+            }, 1000);
+        } else {
+            showNotification('Erreur lors de l\'enregistrement', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Erreur réseau', 'error');
+    }
+}
+
+// Charger les recommandations via AJAX
+async function loadRecommendations(category = null) {
+    const spinner = document.getElementById('loadingSpinner');
+    const container = document.getElementById('recommendationsContainer');
+    
+    spinner.style.display = 'block';
+    container.style.display = 'none';
+    
+    try {
+        const url = new URL('/service/recommendations/api', window.location.origin);
+        if (category) {
+            url.searchParams.set('category', category);
+        }
+        url.searchParams.set('limit', '9');
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success) {
+            // Mettre à jour le conteneur avec les nouvelles recommandations
+            updateRecommendationsContainer(data.data.recommendations);
+        } else {
+            showNotification('Erreur lors du chargement', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Erreur réseau', 'error');
+    } finally {
+        spinner.style.display = 'none';
+        container.style.display = 'flex';
+    }
+}
+
+function updateRecommendationsContainer(recommendations) {
+    const container = document.getElementById('recommendationsContainer');
+    
+    if (recommendations.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>Aucune recommandation disponible</h4>
+                <p class="text-muted">Aucun service trouvé pour cette catégorie.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    recommendations.forEach(rec => {
+        html += `
+            <div class="col-md-6 col-lg-4 mb-4 recommendation-item" data-category="${rec.service.type}">
+                <div class="card recommendation-card h-100 position-relative">
+                    <div class="score-badge">
+                        ${Math.round(rec.recommendation.score * 100)}%
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">${rec.service.name}</h5>
+                        
+                        <div class="mb-3">
+                            <span class="service-type-badge type-${rec.service.type}">
+                                ${rec.service.type}
+                            </span>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <strong>Tarif:</strong> ${rec.service.tarif} DT
+                            ${rec.service.frequence ? `<span class="text-muted">/ ${rec.service.frequence}</span>` : ''}
+                        </div>
+                        
+                        <div class="mb-2">
+                            <strong>Statut:</strong> 
+                            <span class="badge bg-${rec.service.statut == 'actif' ? 'success' : 'secondary'}">
+                                ${rec.service.statut}
+                            </span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="recommendation-type">
+                                Type: ${rec.recommendation.type}
+                            </div>
+                            ${rec.recommendation.reason ? `
+                                <div class="text-info small mb-1">
+                                    <i class="fas fa-lightbulb me-1"></i>
+                                    ${rec.recommendation.reason}
+                                </div>
+                            ` : ''}
+                            ${rec.recommendation.similarity_to ? `
+                                <div class="text-primary small mb-1">
+                                    <i class="fas fa-exchange-alt me-1"></i>
+                                    Alternative à: ${rec.recommendation.similarity_to}
+                                </div>
+                            ` : ''}
+                            ${(rec.recommendation.content_score > 0 || rec.recommendation.similarity_score > 0) ? `
+                                <small class="text-muted">
+                                    ${rec.recommendation.content_score ? `Contenu: ${Math.round(rec.recommendation.content_score * 100)}%` : ''}
+                                    ${rec.recommendation.collaborative_score ? ` | Collaboratif: ${Math.round(rec.recommendation.collaborative_score * 100)}%` : ''}
+                                    ${rec.recommendation.similarity_score ? ` | Similarité: ${Math.round(rec.recommendation.similarity_score * 100)}%` : ''}
+                                </small>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="interaction-buttons">
+                            <button class="interaction-btn btn-view" onclick="recordInteraction(${rec.service.id}, 'view')">
+                                <i class="fas fa-eye me-1"></i> Voir
+                            </button>
+                            <button class="interaction-btn btn-favorite" onclick="recordInteraction(${rec.service.id}, 'favorite')">
+                                <i class="fas fa-heart me-1"></i> Favori
+                            </button>
+                            <button class="interaction-btn btn-purchase" onclick="recordInteraction(${rec.service.id}, 'purchase')">
+                                <i class="fas fa-shopping-cart me-1"></i> Acheter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Système de notifications
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-supprimer après 5 secondes
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Chatbot functions
+async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
+    
+    if (message === '') return;
+    
+    // Ajouter le message utilisateur
+    addMessage(message, 'user');
+    
+    // Vider l'input
+    input.value = '';
+    
+    // Envoyer au chatbot
+    await sendToChatbot(message);
+}
+
+async function sendSuggestion(message) {
+    addMessage(message, 'user');
+    await sendToChatbot(message);
+}
+
+async function sendToChatbot(message) {
+    try {
+        const response = await fetch("{{ path('service_recommendations_chat') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
+
+        let data = null;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            data = null;
+        }
+
+        if (!response.ok || !data || !data.success) {
+            const backendMessage = data && data.message ? data.message : 'Le chatbot est momentanément indisponible.';
+            addMessage(backendMessage, 'bot');
+            return;
+        }
+
+        addMessage(data.data.message, 'bot', data.data.services || []);
+    } catch (error) {
+        console.error('Chatbot error:', error);
+        addMessage('Erreur réseau. Vérifiez votre connexion puis réessayez.', 'bot');
+    }
+}
+
+function addMessage(message, sender, services = []) {
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'chat-message mb-3';
+    
+    const timestamp = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    
+    if (sender === 'user') {
+        messageDiv.innerHTML = `
+            <div class="d-flex align-items-start justify-content-end">
+                <div class="message-content">
+                    <div class="bg-primary text-white rounded p-3 shadow-sm">
+                        <strong>Vous</strong>
+                        <p class="mb-0">${message}</p>
+                    </div>
+                    <small class="text-muted">${timestamp}</small>
+                </div>
+                <div class="user-avatar ms-2">
+                    <i class="fas fa-user bg-secondary text-white rounded-circle p-2"></i>
+                </div>
+            </div>
+        `;
+    } else {
+        let messageContent = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        messageContent = messageContent.replace(/\n/g, '<br>');
+        
+        let servicesHtml = '';
+        if (services.length > 0) {
+            servicesHtml = '<div class="mt-2"><strong>Services recommandés :</strong><div class="mt-2">';
+            services.forEach(service => {
+                servicesHtml += `
+                    <div class="small p-2 bg-light rounded mb-1">
+                        <strong>${service.name}</strong> - ${service.tarif} DT (${service.type}) 
+                        ${service.score ? '- Score: ' + service.score + '%' : ''}
+                    </div>
+                `;
+            });
+            servicesHtml += '</div></div>';
+        }
+        
+        messageDiv.innerHTML = `
+            <div class="d-flex align-items-start">
+                <div class="bot-avatar me-2">
+                    <i class="fas fa-robot bg-primary text-white rounded-circle p-2"></i>
+                </div>
+                <div class="message-content">
+                    <div class="bg-white rounded p-3 shadow-sm">
+                        <strong>Assistant</strong>
+                        <div class="message-text">${messageContent}</div>
+                        ${servicesHtml}
+                    </div>
+                    <small class="text-muted">${timestamp}</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Charger les recommandations initiales
+    loadRecommendations();
+    
+    // Focus sur l'input du chatbot
+    document.getElementById('chat-input').focus();
+});
+</script>
+{% endblock %}

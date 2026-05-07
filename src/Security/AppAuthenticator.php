@@ -78,7 +78,7 @@ class AppAuthenticator extends AbstractAuthenticator implements AuthenticationEn
 
         // Redirect based on role
         if ($user->getRole() === 'ADMIN') {
-            return new RedirectResponse($this->urlGenerator->generate('app_admin_dashboard'));
+            return new RedirectResponse($this->urlGenerator->generate('admin_index'));
         }
 
         // Default for CLIENT or other roles

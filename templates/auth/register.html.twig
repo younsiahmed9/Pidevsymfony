@@ -10,7 +10,7 @@
                 <div class="block pe-0 pe-xl-5">
                     <p class="text-primary text-uppercase fw-bold mb-3">Sign Up</p>
                     <h1 class="mb-4">Create your FinTrack account</h1>
-                    <p class="mb-4">Choose CLIENT or ADMIN. After submit, you receive a verification code by email. Your account is created only after code validation.</p>
+                    <p class="mb-4">Choose CLIENT or ADMIN. After submit, you receive a verification code by email. Administrators must also capture Face ID during signup.</p>
                     <a href="{{ path('app_login') }}" class="btn btn-outline-primary">Already have an account?</a>
                 </div>
             </div>
@@ -72,15 +72,16 @@
                             {{ form_widget(form.phone, {'attr': {'class': 'form-control shadow-none', 'placeholder': 'Optional', 'data-field': 'phone'}}) }}
                             <div class="text-danger small mt-1" data-error-for="phone"></div>
                         </div>
-                        <div class="col-12">
+                        <div class="col-12" id="faceIdSignupWrap">
                             <div class="border rounded-3 p-3 bg-light">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div>
-                                        <strong>Face ID (Optional)</strong>
-                                        <div class="small text-muted" data-face-signup-status>You can add Face ID now, or skip and add it later from profile.</div>
+                                        <strong>Face ID for administrators</strong>
+                                        <div class="small text-muted" data-face-signup-status>Face ID is required for admin accounts and hidden for clients.</div>
                                     </div>
                                     <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#signupFaceIdModal">Capture Face ID</button>
                                 </div>
+                                <div class="text-danger small mt-2" data-error-for="faceDescriptor"></div>
                             </div>
                         </div>
                     </div>
@@ -124,6 +125,8 @@ function toggleAdminFields() {
     const adminFieldWrap = document.getElementById('adminFieldWrap');
     const cinFieldWrap = document.getElementById('cinFieldWrap');
     const phoneFieldWrap = document.getElementById('phoneFieldWrap');
+    const faceIdSignupWrap = document.getElementById('faceIdSignupWrap');
+    const faceDescriptorInput = document.getElementById('{{ form.faceDescriptor.vars.id }}');
 
     if (!roleChoiceElement) {
         return;
@@ -133,6 +136,12 @@ function toggleAdminFields() {
     adminFieldWrap.style.display = isAdmin ? 'block' : 'none';
     cinFieldWrap.style.display = isAdmin ? 'none' : 'block';
     phoneFieldWrap.style.display = isAdmin ? 'none' : 'block';
+    if (faceIdSignupWrap) {
+        faceIdSignupWrap.style.display = isAdmin ? 'block' : 'none';
+    }
+    if (!isAdmin && faceDescriptorInput) {
+        faceDescriptorInput.value = '';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', toggleAdminFields);
@@ -143,6 +152,22 @@ document.addEventListener('faceid:capture-success', function () {
         statusElement.textContent = 'Face ID captured successfully. It will be linked after email verification.';
         statusElement.classList.remove('text-muted');
         statusElement.classList.add('text-success');
+    }
+});
+
+document.addEventListener('submit', function (event) {
+    const roleChoiceElement = document.getElementById('{{ form.roleChoice.vars.id }}');
+    const faceDescriptorInput = document.getElementById('{{ form.faceDescriptor.vars.id }}');
+    if (!roleChoiceElement || !faceDescriptorInput) {
+        return;
+    }
+
+    if (roleChoiceElement.value === 'ADMIN' && !faceDescriptorInput.value.trim()) {
+        event.preventDefault();
+        const errorBox = document.querySelector('[data-error-for="faceDescriptor"]');
+        if (errorBox) {
+            errorBox.textContent = 'Face ID is required for administrators.';
+        }
     }
 });
 

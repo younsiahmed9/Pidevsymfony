@@ -238,25 +238,32 @@
     const hiddenInput = getHiddenInput(form);
     const submitButton = getSubmitButton(form);
 
-    if (!modalElement || !videoElement || !hiddenInput || !submitButton) {
+    if (!videoElement || !hiddenInput || !submitButton) {
       return;
     }
 
     form.dataset.faceIdBound = "1";
 
-    modalElement.addEventListener("shown.bs.modal", function () {
+    if (modalElement) {
+      modalElement.addEventListener("shown.bs.modal", function () {
+        setStatus(form, "Allow camera access, then capture your face to continue.", false);
+        startCamera(videoElement).catch(function (error) {
+          setStatus(form, error.message, true);
+        });
+      });
+
+      modalElement.addEventListener("hidden.bs.modal", function () {
+        stopCamera(videoElement);
+        hiddenInput.value = "";
+        submitButton.disabled = false;
+        form.dataset.faceIdSubmitting = "0";
+      });
+    } else {
       setStatus(form, "Allow camera access, then capture your face to continue.", false);
       startCamera(videoElement).catch(function (error) {
         setStatus(form, error.message, true);
       });
-    });
-
-    modalElement.addEventListener("hidden.bs.modal", function () {
-      stopCamera(videoElement);
-      hiddenInput.value = "";
-      submitButton.disabled = false;
-      form.dataset.faceIdSubmitting = "0";
-    });
+    }
 
     form.addEventListener("submit", async function (event) {
       if (form.dataset.faceIdSubmitting === "1") {

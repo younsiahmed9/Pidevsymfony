@@ -17,12 +17,20 @@
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ path('produit_edit', {id: produit.id}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-edit me-2"></i> Modifier
+                <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm" onclick="downloadInvoicePdf({{ produit.id }})">
+                    <i class="fas fa-file-pdf me-2"></i> Télécharger facture PDF
+                </button>
+                <a href="{{ path('api_invoice_product_qr', {id: produit.id}) }}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-qrcode me-2"></i> QR Code facture
+                </a>
+                <a href="{{ path('produit_edit', {id: produit.id}) }}" class="btn btn-warning btn-action-icon text-white shadow-sm" title="Modifier">
+                    <i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span>
                 </a>
                 {{ include('frontoffice/produit/_delete_form.html.twig') }}
             </div>
         </div>
+
+        <div id="invoiceResult" class="alert d-none mb-4" role="alert"></div>
 
         <div class="row g-4 justify-content-center">
             <div class="col-lg-8">
@@ -102,4 +110,62 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+function setInvoiceMessage(type, message) {
+    const box = document.getElementById('invoiceResult');
+    if (!box) {
+        return;
+    }
+
+    box.className = 'alert mb-4';
+    box.classList.add(type === 'success' ? 'alert-success' : 'alert-danger');
+    box.textContent = message;
+    box.classList.remove('d-none');
+}
+
+async function downloadInvoicePdf(productId) {
+    setInvoiceMessage('success', 'Generation de la facture en cours...');
+
+    try {
+        // Call the Symfony endpoint, then convert the PDF response into a browser download.
+        const response = await fetch(`/api/invoices/product/${productId}/pdf`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            let apiMessage = 'Erreur lors de la generation du PDF.';
+            try {
+                const data = await response.json();
+                apiMessage = data.message || apiMessage;
+            } catch (e) {
+                // Keep default message when response is not JSON.
+            }
+
+            setInvoiceMessage('error', apiMessage);
+            return;
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `facture-produit-${productId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        setInvoiceMessage('success', 'Facture PDF generee et telechargee avec succes.');
+    } catch (error) {
+        setInvoiceMessage('error', 'Erreur reseau lors de la generation de la facture.');
+    }
+}
+</script>
 {% endblock %}

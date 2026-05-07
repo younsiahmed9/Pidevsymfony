@@ -22,8 +22,8 @@ final class VirementController extends AbstractController
     private const APP_TIMEZONE = 'Africa/Tunis';
 
     public function __construct(
-        private readonly BrevoEmailService $brevoEmailService,
-        private readonly LoggerInterface $logger,
+        private BrevoEmailService $brevoEmailService,
+        private LoggerInterface $logger,
     ) {
     }
 

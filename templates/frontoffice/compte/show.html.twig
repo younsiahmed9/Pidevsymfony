@@ -17,8 +17,8 @@
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ path('compte_edit', {id: compte.id}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-edit me-2"></i> Modifier
+                <a href="{{ path('compte_edit', {id: compte.id}) }}" class="btn btn-warning btn-action-icon text-white shadow-sm" title="Modifier">
+                    <i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span>
                 </a>
                 <a href="{{ path('credit_index', {compte_id: compte.id}) }}" class="btn btn-outline-info rounded-pill px-4 shadow-sm">
                     <i class="fas fa-hand-holding-usd me-2"></i> Crédits liés

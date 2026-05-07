@@ -31,20 +31,18 @@ class Service
     #[Assert\Positive(message: 'Tarif doit être positif')]
     private ?string $tarif = null;
 
-    #[ORM\Column(name: 'type_service', length: 100, nullable: true)]
-    #[Assert\NotBlank(message: 'Le type est obligatoire')]
-    #[Assert\Choice(choices: ['ponctuel', 'abonnement'], message: 'Type invalide')]
+    #[ORM\Column(name: 'type_service', type: 'string', columnDefinition: "ENUM('abonnement', 'facture') NOT NULL")]
+    #[Assert\NotBlank(message: 'Le type de service est obligatoire')]
     private ?string $typeService = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    #[Assert\Choice(choices: ['mensuel', 'annuel', 'unique'], message: 'Fréquence invalide')]
     private ?string $frequence = null;
 
-    #[ORM\Column(name: 'date_debut', type: 'date_mutable')]
+    #[ORM\Column(name: 'date_debut', type: 'datetime')]
     #[Assert\Type(type: '\DateTimeInterface', message: 'Date invalide')]
     private ?\DateTimeInterface $dateDebut = null;
 
-    #[ORM\Column(name: 'date_fin', type: 'date_mutable', nullable: true)]
+    #[ORM\Column(name: 'date_fin', type: 'datetime', nullable: true)]
     #[Assert\Type(type: '\DateTimeInterface', message: 'Date invalide')]
     #[Assert\Expression(
         "this.getDateFin() == null or this.getDateFin() >= this.getDateDebut()",
@@ -52,8 +50,8 @@ class Service
     )]
     private ?\DateTimeInterface $dateFin = null;
 
-    #[ORM\Column(length: 20)]
-    #[Assert\Choice(choices: ['actif', 'inactif', 'suspendu'], message: 'Statut invalide')]
+    #[ORM\Column(length: 20, type: 'string', columnDefinition: "ENUM('actif', 'suspendu', 'expire') NOT NULL DEFAULT 'actif'")]
+    #[Assert\NotBlank(message: 'Le statut est obligatoire')]
     private string $statut = 'actif';
 
     /** @var Collection<int, Facture> */

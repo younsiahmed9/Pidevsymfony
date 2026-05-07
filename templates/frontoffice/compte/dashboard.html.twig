@@ -1,0 +1,811 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Dashboard Comptes - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="mb-5">
+            <h1 class="h2 fw-bold text-dark mb-1">Dashboard de Mes Comptes</h1>
+            <p class="text-muted mb-0">Visualisez le résumé global de vos comptes bancaires et crédits.</p>
+        </div>
+
+        <!-- Top Stats Cards -->
+        <div class="row g-4 mb-5">
+            <!-- Score Global -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-gradient-primary position-relative overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title text-white text-opacity-75 small mb-0">Score Global</h5>
+                            </div>
+                            <i class="fas fa-chart-pie text-white text-opacity-50 fa-lg"></i>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-2">
+                            <div class="h2 fw-bold text-white mb-0">{{ scoreGlobal|round(0) }}%</div>
+                        </div>
+                        <div class="progress mt-3 bg-white bg-opacity-25" style="height: 8px;">
+                            <div class="progress-bar bg-white" role="progressbar" style="width: {{ scoreGlobal }}%" aria-valuenow="{{ scoreGlobal }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small class="text-white text-opacity-75 mt-2 d-block">Score de confiance moyen</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Solde Total -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-gradient-success position-relative overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title text-white text-opacity-75 small mb-0">Solde Total</h5>
+                            </div>
+                            <i class="fas fa-wallet text-white text-opacity-50 fa-lg"></i>
+                        </div>
+                        <div class="h3 fw-bold text-white mb-0">{{ soldeTotal|number_format(0, ',', ' ') }} DT</div>
+                        <small class="text-white text-opacity-75 mt-2 d-block">Tous les comptes confondus</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crédits Approuvés -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-gradient-info position-relative overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title text-white text-opacity-75 small mb-0">Crédits Approuvés</h5>
+                            </div>
+                            <i class="fas fa-handshake text-white text-opacity-50 fa-lg"></i>
+                        </div>
+                        <div class="h3 fw-bold text-white mb-0">{{ totalCreditsApprouves|number_format(0, ',', ' ') }} DT</div>
+                        <small class="text-white text-opacity-75 mt-2 d-block">Montant total disponible</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fiabilité Paiement -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-gradient-warning position-relative overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title text-white text-opacity-75 small mb-0">Fiabilité Paiement</h5>
+                            </div>
+                            <i class="fas fa-check-circle text-white text-opacity-50 fa-lg"></i>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-2">
+                            <div class="h2 fw-bold text-white mb-0">{{ fiabilitePayment|round(0) }}%</div>
+                        </div>
+                        <div class="progress mt-3 bg-white bg-opacity-25" style="height: 8px;">
+                            <div class="progress-bar bg-white" role="progressbar" style="width: {{ fiabilitePayment }}" aria-valuenow="{{ fiabilitePayment }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small class="text-white text-opacity-75 mt-2 d-block">Taux de remboursement</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Section: Scores par Compte et Statistiques -->
+        <div class="row g-4 mb-5">
+            <!-- Scores de Confiance par Compte -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold text-dark mb-0">Scores de Confiance par Compte</h5>
+                        <i class="fas fa-chart-bar text-muted"></i>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if compteStats|length > 0 %}
+                            <div class="score-list">
+                                {% for compteId, stat in compteStats %}
+                                    <div class="mb-4 pb-4 border-bottom{% if loop.last %} border-0 mb-0 pb-0{% endif %}">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% if stat.compte.typeCompte == 'courant' %}
+                                                    <div class="badge bg-primary-subtle text-primary px-2 py-1 rounded">
+                                                        <i class="fas fa-university me-1"></i> Courant
+                                                    </div>
+                                                {% else %}
+                                                    <div class="badge bg-success-subtle text-success px-2 py-1 rounded">
+                                                        <i class="fas fa-piggy-bank me-1"></i> Épargne
+                                                    </div>
+                                                {% endif %}
+                                                <h6 class="mb-0 fw-bold text-dark">{{ stat.compte.numeroCompte }}</h6>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="badge rounded-pill {% if stat.scoreConfiance >= 70 %}bg-success{% elseif stat.scoreConfiance >= 50 %}bg-warning{% else %}bg-danger{% endif %} px-3 py-2">
+                                                    {{ stat.scoreConfiance|round(0) }}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="progress rounded-pill" style="height: 10px; background-color: #e9ecef;">
+                                            <div class="progress-bar {% if stat.scoreConfiance >= 70 %}bg-success{% elseif stat.scoreConfiance >= 50 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ stat.scoreConfiance }}%" aria-valuenow="{{ stat.scoreConfiance }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <div class="small text-muted mt-2">
+                                            Solde: <span class="fw-bold text-dark">{{ stat.compte.solde|number_format(2, ',', ' ') }} DT</span> 
+                                            {% if stat.creditsApprouvesCount > 0 %}
+                                                | Crédits approuvés: <span class="fw-bold text-info">{{ stat.creditsApprouvesCount }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox text-muted fa-3x mb-3"></i>
+                                <p class="text-muted">Aucun compte disponible</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques de Risque -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold text-dark mb-0">Statistiques de Risque</h5>
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Utilisation Crédit -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="fw-bold text-dark small text-uppercase">Utilisation Crédit</label>
+                                <span class="badge bg-light text-dark px-3 py-2">{{ utilisationCredit|round(0) }}%</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 12px;">
+                                <div class="progress-bar {% if utilisationCredit < 50 %}bg-success{% elseif utilisationCredit < 75 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ utilisationCredit }}%" aria-valuenow="{{ utilisationCredit }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted mt-2 d-block">Ratio crédits approuvés / solde total</small>
+                        </div>
+
+                        <!-- Fiabilité Paiement Detail -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="fw-bold text-dark small text-uppercase">Fiabilité de Paiement</label>
+                                <span class="badge bg-light text-dark px-3 py-2">{{ fiabilitePayment|round(0) }}%</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 12px;">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ fiabilitePayment }}%" aria-valuenow="{{ fiabilitePayment }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted mt-2 d-block">Taux de remboursement des crédits</small>
+                        </div>
+
+                        <hr>
+
+                        <!-- Résumé des Comptes -->
+                        <div class="mt-4">
+                            <h6 class="fw-bold text-dark mb-3">Résumé des Comptes</h6>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="p-3 rounded-3 text-center border-2 border-primary">
+                                        <div class="text-primary fw-bold h4 mb-1">{{ comptesCourants }}</div>
+                                        <small class="text-muted">Compte(s) Courant</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-3 rounded-3 text-center border-2 border-success">
+                                        <div class="text-success fw-bold h4 mb-1">{{ comptesEpargne }}</div>
+                                        <small class="text-muted">Compte(s) Épargne</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Répartition des Comptes et Crédits Charts -->
+        <div class="row g-4 mb-5">
+            <!-- Pie Chart: Répartition des Comptes -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold text-dark mb-0">Répartition des Comptes</h5>
+                        <i class="fas fa-chart-pie text-muted"></i>
+                    </div>
+                    <div class="card-body p-3 d-flex justify-content-center align-items-center chart-wrapper">
+                        {% if compteStats|length > 0 %}
+                            <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+                                <canvas id="repartitionChart" style="width: 100% !important; height: 100% !important;"></canvas>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox text-muted fa-3x mb-3"></i>
+                                <p class="text-muted">Aucun compte pour afficher le graphique</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar Chart: Crédits par Compte -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title fw-bold text-dark mb-0">Crédits par Compte</h5>
+                        <i class="fas fa-chart-bar text-muted"></i>
+                    </div>
+                    <div class="card-body p-3 d-flex justify-content-center align-items-center chart-wrapper">
+                        {% if compteStats|length > 0 %}
+                            <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+                                <canvas id="creditsChart" style="width: 100% !important; height: 100% !important;"></canvas>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox text-muted fa-3x mb-3"></i>
+                                <p class="text-muted">Aucun compte pour afficher les crédits</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulateur de Prêt -->
+            <div class="col-lg-12">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title fw-bold text-dark mb-0">Simulateur de Crédit</h5>
+                            <small class="text-muted">Ajustez les curseurs pour simuler vos mensualités</small>
+                        </div>
+                        <i class="fas fa-calculator text-primary fa-lg"></i>
+                    </div>
+                    <div class="card-body p-5">
+                        <!-- Montant du prêt -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label for="loanAmount" class="fw-bold text-dark">Montant du prêt</label>
+                                <span class="badge bg-light text-primary px-3 py-2" id="loanAmountDisplay">{{ (maxBorrowableAmount * 0.5)|number_format(0, ',', ' ') }} DT</span>
+                            </div>
+                            <input type="range" class="form-range slider-primary" id="loanAmount" 
+                                   min="0" max="{{ maxBorrowableAmount }}" 
+                                   value="{{ (maxBorrowableAmount * 0.5)|round(0) }}" 
+                                   step="100">
+                            <div class="row mt-2 text-muted small">
+                                <div class="col-6 text-start">Min: 0 DT</div>
+                                <div class="col-6 text-end">Max: {{ maxBorrowableAmount|number_format(0, ',', ' ') }} DT</div>
+                            </div>
+                        </div>
+
+                        <!-- Durée en mois -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label for="loanDuration" class="fw-bold text-dark">Durée (mois)</label>
+                                <span class="badge bg-light text-info px-3 py-2" id="loanDurationDisplay">24 mois</span>
+                            </div>
+                            <input type="range" class="form-range slider-info" id="loanDuration" 
+                                   min="1" max="360" value="24" step="1">
+                            <div class="row mt-2 text-muted small">
+                                <div class="col-6 text-start">1 mois</div>
+                                <div class="col-6 text-end">360 mois (30 ans)</div>
+                            </div>
+                        </div>
+
+                        <!-- Taux d'intérêt -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label for="interestRate" class="fw-bold text-dark">Taux d'intérêt annuel</label>
+                                <span class="badge bg-light text-warning px-3 py-2" id="interestRateDisplay">5%</span>
+                            </div>
+                            <input type="range" class="form-range slider-warning" id="interestRate" 
+                                   min="0.5" max="15" value="5" step="0.1">
+                            <div class="row mt-2 text-muted small">
+                                <div class="col-6 text-start">0.5%</div>
+                                <div class="col-6 text-end">15%</div>
+                            </div>
+                        </div>
+
+                        <!-- Résultat: Mensualité estimée -->
+                        <div class="rounded-3 p-4 text-center border-2 border-success mt-5">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-2">Mensualité estimée</small>
+                            <div class="h2 fw-bold text-success mb-0" id="monthlyPaymentDisplay">{{ ((maxBorrowableAmount * 0.5) / 24)|number_format(2, ',', ' ') }} DT</div>
+                            <small class="text-muted mt-2 d-block">Coût total estimé: <strong id="totalCostDisplay">{{ (maxBorrowableAmount * 0.5)|number_format(0, ',', ' ') }} DT</strong></small>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="d-flex gap-2 mt-5">
+                            <a href="{{ path('credit_new') }}?amount={{ (maxBorrowableAmount * 0.5)|round(0) }}&duration=24" class="btn btn-primary w-100 rounded-pill fw-bold">
+                                <i class="fas fa-plus me-2"></i> Demander ce Crédit
+                            </a>
+                            <button type="button" class="btn btn-outline-secondary w-100 rounded-pill fw-bold" id="resetSimulator">
+                                <i class="fas fa-redo me-2"></i> Réinitialiser
+                            </button>
+                        </div>
+
+                        <!-- Note de score -->
+                        <div class="alert alert-info mt-4 mb-0 rounded-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Montant maximum empruntable :</strong> {{ maxBorrowableAmount|number_format(0, ',', ' ') }} DT (basé sur votre score de {{ scoreGlobal|round(0) }}%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    :root {
+        --color-orange: #f78f34;
+        --color-yellow: #fecf47;
+        --color-blue-dark: #182d88;
+        --color-green-light: #8dbc71;
+        --color-green-dark: #3e893e;
+        --color-blue-light: #d2e7fe;
+    }
+
+    /* ========== GRADIENTS MODERNES ========== */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #182d88 0%, #2d4db3 100%) !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bg-gradient-primary::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(247, 143, 52, 0.1);
+        border-radius: 50%;
+        filter: blur(40px);
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #3e893e 0%, #5aa85a 100%) !important;
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #d2e7fe 0%, #b8d8ff 100%) !important;
+        color: #182d88 !important;
+    }
+
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #f78f34 0%, #fecf47 100%) !important;
+        color: #182d88 !important;
+    }
+
+    /* ========== CARTES GÉNÉRALES ========== */
+    .card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(24, 45, 136, 0.08);
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    }
+
+    .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(24, 45, 136, 0.15) !important;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, rgba(24, 45, 136, 0.02) 0%, rgba(247, 143, 52, 0.02) 100%) !important;
+        border-color: rgba(24, 45, 136, 0.08) !important;
+    }
+
+    /* ========== STAT CARDS EN HAUT ========== */
+    .card-body {
+        position: relative;
+    }
+
+    .bg-gradient-primary .card-body,
+    .bg-gradient-success .card-body,
+    .bg-gradient-info .card-body,
+    .bg-gradient-warning .card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ========== BADGES ET LABELS ========== */
+    .badge {
+        transition: all 0.2s ease;
+        font-weight: 600;
+    }
+
+    .bg-primary-subtle {
+        background-color: rgba(24, 45, 136, 0.1) !important;
+        color: #182d88 !important;
+    }
+
+    .bg-success-subtle {
+        background-color: rgba(62, 137, 62, 0.1) !important;
+        color: #3e893e !important;
+    }
+
+    .badge-success {
+        background: linear-gradient(135deg, #3e893e 0%, #5aa85a 100%) !important;
+    }
+
+    .badge-warning {
+        background: linear-gradient(135deg, #f78f34 0%, #fecf47 100%) !important;
+        color: #182d88 !important;
+    }
+
+    .badge-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%) !important;
+    }
+
+    /* ========== SCORES ET LISTES ========== */
+    .score-list > div {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 12px;
+        border-radius: 12px;
+        margin: -12px;
+    }
+
+    .score-list > div:hover {
+        transform: translateX(8px);
+        background: linear-gradient(135deg, rgba(24, 45, 136, 0.05) 0%, rgba(247, 143, 52, 0.05) 100%);
+        border-left: 3px solid #f78f34;
+        padding-left: 15px;
+    }
+
+    /* ========== BARRE DE PROGRESSION MODERNE ========== */
+    .progress {
+        background-color: #e9ecef;
+        border-radius: 999px;
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, #182d88 0%, #3e893e 100%) !important;
+        transition: width 0.6s ease;
+        box-shadow: 0 2px 8px rgba(24, 45, 136, 0.3);
+    }
+
+    /* ========== SLIDERS MODERNES ========== */
+    .form-range {
+        height: 8px;
+        border-radius: 999px;
+        background: linear-gradient(to right, #d2e7fe, #e9ecef);
+        padding: 0;
+    }
+
+    .form-range::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f78f34 0%, #fecf47 100%);
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(247, 143, 52, 0.4);
+        border: 2px solid white;
+        transition: all 0.2s ease;
+    }
+
+    .form-range::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(247, 143, 52, 0.6);
+    }
+
+    .form-range::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f78f34 0%, #fecf47 100%);
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 2px 8px rgba(247, 143, 52, 0.4);
+        transition: all 0.2s ease;
+    }
+
+    .form-range::-moz-range-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(247, 143, 52, 0.6);
+    }
+
+    .slider-primary {
+        accent-color: #f78f34;
+    }
+
+    .slider-info {
+        accent-color: #182d88;
+    }
+
+    .slider-warning {
+        accent-color: #3e893e;
+    }
+
+    /* ========== RÉSULTAT SIMULATEUR ========== */
+    .bg-light.rounded-3 {
+        background: linear-gradient(135deg, #d2e7fe 0%, #f0f4ff 100%) !important;
+        border: 2px solid #3e893e !important;
+        animation: pulse-light 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-light {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(62, 137, 62, 0.2);
+        }
+        50% {
+            box-shadow: 0 0 0 8px rgba(62, 137, 62, 0);
+        }
+    }
+
+    /* ========== BOUTONS MODERNES ========== */
+    .btn-primary {
+        background: linear-gradient(135deg, #182d88 0%, #2d4db3 100%) !important;
+        border: none;
+        color: white !important;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(24, 45, 136, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(24, 45, 136, 0.4);
+        background: linear-gradient(135deg, #1a2460 0%, #2a3d99 100%) !important;
+    }
+
+    .btn-outline-secondary {
+        color: #182d88;
+        border: 2px solid #182d88;
+        font-weight: 600;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #182d88;
+        border-color: #182d88;
+    }
+
+    /* ========== ALERTE MODERNE ========== */
+    .alert-info {
+        background: linear-gradient(135deg, #d2e7fe 0%, #e3f2fd 100%) !important;
+        border: 1px solid rgba(24, 45, 136, 0.2) !important;
+        color: #182d88 !important;
+        border-radius: 16px !important;
+        font-weight: 500;
+    }
+
+    /* ========== TRANSITIONS GÉNÉRALES ========== */
+    .transition-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .transition-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(24, 45, 136, 0.15) !important;
+    }
+
+    /* ========== ICÔNES ========== */
+    .fa-lg {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover .fa-lg {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    /* ========== TEXTES ========== */
+    .h2, .h3, .h4, .h5 {
+        color: #182d88;
+        font-weight: 700;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+
+    /* ========== SECTION HEADER ========== */
+    section.py-5 {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    }
+
+    /* ========== RÉPARTITION COMPTES (PIE CHART) ========== */
+    .chart-container {
+        animation: fadeInScale 0.6s ease;
+    }
+
+    .chart-wrapper {
+        min-height: 340px !important;
+        position: relative;
+    }
+
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+        .card {
+            margin-bottom: 15px;
+        }
+
+        .score-list > div:hover {
+            transform: translateX(4px);
+        }
+
+        .btn-primary, .btn-outline-secondary {
+            width: 100% !important;
+        }
+    }
+</style>
+
+{% if compteStats|length > 0 %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ============ Répartition des Comptes - Pie Chart ============
+        const ctx = document.getElementById('repartitionChart');
+        if (ctx) {
+            const comptesCourants = {{ comptesCourants }};
+            const comptesEpargne = {{ comptesEpargne }};
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Courant (' + comptesCourants + ')', 'Épargne (' + comptesEpargne + ')'],
+                    datasets: [{
+                        data: [comptesCourants, comptesEpargne],
+                        backgroundColor: ['#182d88', '#3e893e'],
+                        borderColor: ['#182d88', '#3e893e'],
+                        borderWidth: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============ Crédits par Compte - Bar Chart ============
+        const creditsCtx = document.getElementById('creditsChart');
+        if (creditsCtx) {
+            const compteLabels = [
+                {% for compteId, stat in compteStats %}
+                    '{{ stat.compte.numeroCompte }}'{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ];
+            const creditsData = [
+                {% for compteId, stat in compteStats %}
+                    {{ stat.creditsApprouvesCount }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ];
+
+            new Chart(creditsCtx, {
+                type: 'bar',
+                data: {
+                    labels: compteLabels,
+                    datasets: [{
+                        label: 'Crédits approuvés',
+                        data: creditsData,
+                        backgroundColor: '#f78f34',
+                        borderColor: '#d97d2a',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============ Simulateur de Prêt ============
+        const loanAmountInput = document.getElementById('loanAmount');
+        const loanDurationInput = document.getElementById('loanDuration');
+        const interestRateInput = document.getElementById('interestRate');
+        
+        const loanAmountDisplay = document.getElementById('loanAmountDisplay');
+        const loanDurationDisplay = document.getElementById('loanDurationDisplay');
+        const interestRateDisplay = document.getElementById('interestRateDisplay');
+        const monthlyPaymentDisplay = document.getElementById('monthlyPaymentDisplay');
+        const totalCostDisplay = document.getElementById('totalCostDisplay');
+        const resetBtn = document.getElementById('resetSimulator');
+
+        // Fonction de formatage monétaire
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('fr-TN', {
+                style: 'currency',
+                currency: 'TND',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        // Fonction de calcul de mensualité (formule amortissement)
+        function calculateMonthlyPayment(principal, annualRate, months) {
+            if (months === 0 || principal === 0) return 0;
+            
+            const monthlyRate = annualRate / 100 / 12;
+            
+            if (monthlyRate === 0) {
+                return principal / months;
+            }
+            
+            const monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
+                                   (Math.pow(1 + monthlyRate, months) - 1);
+            
+            return monthlyPayment;
+        }
+
+        // Fonction de mise à jour des affichages
+        function updateSimulator() {
+            const amount = parseFloat(loanAmountInput.value);
+            const duration = parseFloat(loanDurationInput.value);
+            const rate = parseFloat(interestRateInput.value);
+
+            // Mise à jour des affichages des valeurs
+            loanAmountDisplay.textContent = new Intl.NumberFormat('fr-FR').format(Math.round(amount)) + ' DT';
+            loanDurationDisplay.textContent = Math.round(duration) + ' mois';
+            interestRateDisplay.textContent = rate.toFixed(1) + '%';
+
+            // Calcul de la mensualité
+            const monthlyPayment = calculateMonthlyPayment(amount, rate, duration);
+            const totalCost = monthlyPayment * duration;
+
+            monthlyPaymentDisplay.textContent = formatCurrency(monthlyPayment);
+            totalCostDisplay.textContent = formatCurrency(totalCost);
+        }
+
+        // Écouteurs d'événement
+        loanAmountInput.addEventListener('input', updateSimulator);
+        loanDurationInput.addEventListener('input', updateSimulator);
+        interestRateInput.addEventListener('input', updateSimulator);
+
+        // Bouton réinitialiser
+        resetBtn.addEventListener('click', function() {
+            loanAmountInput.value = {{ (maxBorrowableAmount * 0.5)|round(0) }};
+            loanDurationInput.value = 24;
+            interestRateInput.value = 5;
+            updateSimulator();
+        });
+
+        // Initialisation
+        updateSimulator();
+    });
+</script>
+{% endif %}
+</section>
+{% endblock %}

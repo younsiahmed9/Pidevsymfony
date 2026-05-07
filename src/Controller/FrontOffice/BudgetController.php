@@ -3,6 +3,9 @@
 namespace App\Controller\FrontOffice;
 
 use App\Entity\User;
+use App\Service\BudgetManagementService;
+use App\Service\SmsService;
+use App\Service\VerificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,8 +16,25 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/budget', name: 'budget_')]
 final class BudgetController extends AbstractController
 {
+    private BudgetManagementService $budgetService;
+    private VerificationService $verificationService;
+    private SmsService $smsService;
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(
+        BudgetManagementService $budgetService,
+        VerificationService $verificationService,
+        SmsService $smsService,
+        EntityManagerInterface $entityManager
+    ) {
+        $this->budgetService = $budgetService;
+        $this->verificationService = $verificationService;
+        $this->smsService = $smsService;
+        $this->entityManager = $entityManager;
+    }
+
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): Response
+    public function index(): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -25,7 +45,7 @@ final class BudgetController extends AbstractController
 
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $budgets = $entityManager->getConnection()->fetchAllAssociative(
+        $budgets = $this->entityManager->getConnection()->fetchAllAssociative(
             'SELECT id_budget, nom_budget, montant_total, periode, statut, date_creation,
                     (SELECT COALESCE(SUM(montant), 0) FROM depense WHERE id_budget = budget.id_budget) as total_depense
              FROM budget
@@ -40,7 +60,7 @@ final class BudgetController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -71,11 +91,33 @@ final class BudgetController extends AbstractController
 
             $formErrors = $this->validateBudgetInput($budgetFormData);
 
+            // Calcul de Capacité : Si le montant dépasse le solde bancaire total
+            $totalBalance = $this->budgetService->getTotalUserBalance($user);
+            $totalAllocated = $this->budgetService->getTotalAllocatedBudget($user);
+            $newAmount = (float) str_replace(',', '.', $budgetFormData['montant_total']);
+            
+            if ($formErrors === [] && ($totalAllocated + $newAmount) > $totalBalance) {
+                $available = max(0, $totalBalance - $totalAllocated);
+                $formErrors['montant_total'][] = sprintf(
+                    "Capacité insuffisante ! Votre solde total est de %.2f TND. Il vous reste %.2f TND à allouer.",
+                    $totalBalance,
+                    $available
+                );
+                
+                // On ajoute un flag spécial pour le template
+                $overflowContext = [
+                    'available_balance' => $totalBalance,
+                    'remaining_allocation' => $available,
+                    'overflow_amount' => ($totalAllocated + $newAmount) - $totalBalance,
+                    'budgets' => $this->budgetService->getAvailableBudgetsForReallocation($user)
+                ];
+            }
+
             if ($formErrors === []) {
-                $entityManager->getConnection()->insert('budget', [
+                $this->entityManager->getConnection()->insert('budget', [
                     'user_id' => $user->getId(),
                     'nom_budget' => $budgetFormData['nom_budget'],
-                    'montant_total' => number_format((float) str_replace(',', '.', $budgetFormData['montant_total']), 2, '.', ''),
+                    'montant_total' => number_format($newAmount, 2, '.', ''),
                     'periode' => $budgetFormData['periode'],
                     'statut' => $budgetFormData['statut'],
                     'date_creation' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
@@ -98,11 +140,121 @@ final class BudgetController extends AbstractController
         return $this->render('frontoffice/budget/new.html.twig', [
             'budget' => $budgetFormData,
             'formErrors' => $formErrors,
+            'overflowContext' => $overflowContext ?? null,
         ]);
     }
 
+    #[Route('/reallocate', name: 'reallocate', methods: ['POST'])]
+    public function reallocate(Request $request): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->json(['error' => 'Vous devez être connecté.'], 401);
+        }
+
+        $fromId = (int) $request->request->get('from_id');
+        $amount = (float) $request->request->get('amount');
+
+        if ($fromId <= 0 || $amount <= 0) {
+            return $this->json(['error' => 'Données de transfert invalides.'], 400);
+        }
+
+        // Initier la vérification 2FA
+        $data = [
+            'from_id' => $fromId,
+            'amount' => $amount,
+            'user_id' => $user->getId(),
+            'pending_budget' => [
+                'nom_budget' => $request->request->get('nom_budget'),
+                'montant_total' => $request->request->get('montant_total'),
+                'periode' => $request->request->get('periode'),
+                'statut' => $request->request->get('statut'),
+            ]
+        ];
+
+        $code = $this->verificationService->initiateVerification($data);
+        
+        // Envoyer le SMS via Twilio
+        $message = "Votre code de vérification FinTrack pour la réallocation de budget est : $code. Ce code expire dans 10 minutes.";
+        $phone = trim((string) ($user->getClient()?->getPhone() ?? ''));
+        if ($phone === '') {
+            return $this->json(['error' => 'Aucun numéro de téléphone renseigné sur votre profil.'], 400);
+        }
+
+        if (!$this->smsService->sendSms($phone, $message)) {
+            return $this->json([
+                'error' => $this->smsService->getLastFailureHintFr()
+                    ?? 'Impossible d\'envoyer le SMS. Réessayez plus tard ou contactez le support.',
+            ], 500);
+        }
+
+        return $this->json([
+            'success' => true,
+            'needs_verification' => true,
+            'message' => 'Un code de vérification a été envoyé par SMS.',
+        ]);
+    }
+
+    #[Route('/reallocate/confirm', name: 'reallocate_confirm', methods: ['POST'])]
+    public function reallocateConfirm(Request $request): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->json(['error' => 'Vous devez être connecté.'], 401);
+        }
+
+        $code = (string) $request->request->get('code');
+        
+        if ($this->verificationService->verifyCode($code)) {
+            $data = $this->verificationService->getStoredData();
+            
+            if ($data) {
+                try {
+                    $connection = $this->entityManager->getConnection();
+                    $connection->beginTransaction();
+
+                    // 1. Créer le nouveau budget
+                    $budgetData = $data['pending_budget'];
+                    $connection->insert('budget', [
+                        'user_id' => $user->getId(),
+                        'nom_budget' => $budgetData['nom_budget'],
+                        'montant_total' => number_format((float) str_replace(',', '.', $budgetData['montant_total']), 2, '.', ''),
+                        'periode' => $budgetData['periode'],
+                        'statut' => $budgetData['statut'],
+                        'date_creation' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+                    ]);
+                    $newBudgetId = $connection->lastInsertId();
+
+                    // 2. Réallouer les fonds depuis le budget source vers le nouveau budget
+                    if ($this->budgetService->reallocate($data['from_id'], (int)$newBudgetId, $data['amount'], $user)) {
+                        $connection->commit();
+                        $this->verificationService->clearVerification();
+                        
+                        return $this->json([
+                            'success' => true,
+                            'redirect' => $this->generateUrl('budget_index')
+                        ]);
+                    }
+
+                    $connection->rollBack();
+                } catch (\Exception $e) {
+                    if ($connection->isTransactionActive()) {
+                        $connection->rollBack();
+                    }
+                    return $this->json(['error' => 'Erreur technique: ' . $e->getMessage()], 500);
+                }
+            }
+
+            return $this->json(['error' => 'Erreur lors de la réallocation. Vérifiez les fonds disponibles.'], 400);
+        }
+
+        return $this->json(['error' => 'Code de vérification invalide ou expiré.'], 400);
+    }
+
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(int $id, Request $request): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -113,7 +265,7 @@ final class BudgetController extends AbstractController
 
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $budget = $entityManager->getConnection()->fetchAssociative(
+        $budget = $this->entityManager->getConnection()->fetchAssociative(
             'SELECT b.*, 
                     (SELECT COALESCE(SUM(d.montant), 0) FROM depense d WHERE d.id_budget = b.id_budget) AS total_depense
              FROM budget b
@@ -146,7 +298,7 @@ final class BudgetController extends AbstractController
             $formErrors = $this->validateBudgetInput($budgetFormData);
 
             if ($formErrors === []) {
-                $entityManager->getConnection()->update('budget', [
+                $this->entityManager->getConnection()->update('budget', [
                     'nom_budget' => $budgetFormData['nom_budget'],
                     'montant_total' => number_format((float) str_replace(',', '.', $budgetFormData['montant_total']), 2, '.', ''),
                     'periode' => $budgetFormData['periode'],
@@ -206,9 +358,27 @@ final class BudgetController extends AbstractController
             $formErrors['general'][] = 'Les champs obligatoires ne peuvent pas être vides.';
         }
 
+        if ($formErrors === []) {
+            $totalBalance = $this->budgetService->getTotalUserBalance($user);
+            $excludeId = $budgetFormData['id_budget'] !== '' ? (int)$budgetFormData['id_budget'] : null;
+            $totalAllocated = $this->budgetService->getTotalAllocatedBudget($user, $excludeId);
+            $newAmount = (float) str_replace(',', '.', $budgetFormData['montant_total']);
+
+            if (($totalAllocated + $newAmount) > $totalBalance) {
+                $available = max(0, $totalBalance - $totalAllocated);
+                $formErrors['montant_total'][] = sprintf(
+                    "Capacité insuffisante (Solde: %.2f TND, Dispo: %.2f TND).",
+                    $totalBalance,
+                    $available
+                );
+            }
+        }
+
         return $this->json([
             'valid' => $formErrors === [],
             'errors' => $formErrors,
+            'overflow' => $formErrors['montant_total'] ?? null ? true : false,
+            'available_budgets' => ($formErrors['montant_total'] ?? null) ? $this->budgetService->getAvailableBudgetsForReallocation($user) : []
         ], $formErrors === [] ? 200 : 422);
     }
 
@@ -241,7 +411,7 @@ final class BudgetController extends AbstractController
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(int $id, EntityManagerInterface $entityManager): Response
+    public function show(int $id): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -252,7 +422,7 @@ final class BudgetController extends AbstractController
 
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $budget = $entityManager->getConnection()->fetchAssociative(
+        $budget = $this->entityManager->getConnection()->fetchAssociative(
             'SELECT b.*, 
                     (SELECT COALESCE(SUM(d.montant), 0) FROM depense d WHERE d.id_budget = b.id_budget) AS total_depense
              FROM budget b
@@ -264,7 +434,7 @@ final class BudgetController extends AbstractController
             throw $this->createNotFoundException('Budget introuvable.');
         }
 
-        $depenses = $entityManager->getConnection()->fetchAllAssociative(
+        $depenses = $this->entityManager->getConnection()->fetchAllAssociative(
             'SELECT * FROM depense WHERE id_budget = :budget_id ORDER BY date_depense DESC',
             ['budget_id' => $id]
         );
@@ -276,7 +446,7 @@ final class BudgetController extends AbstractController
     }
 
     #[Route('/{id}', name: 'delete', methods: ['POST'])]
-    public function delete(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    public function delete(int $id, Request $request): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -288,7 +458,7 @@ final class BudgetController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         if ($this->isCsrfTokenValid('delete' . $id, $request->getPayload()->getString('_token'))) {
-            $entityManager->getConnection()->executeStatement(
+            $this->entityManager->getConnection()->executeStatement(
                 'DELETE FROM budget WHERE id_budget = :id AND user_id = :user_id',
                 ['id' => $id, 'user_id' => $user->getId()]
             );

@@ -7,7 +7,7 @@ final class ScheduledTransferEngineResolver
     public const ENGINE_SYMFONY = 'symfony';
     public const ENGINE_N8N = 'n8n';
 
-    public function __construct(private readonly string $configuredEngine)
+    public function __construct(private string $configuredEngine)
     {
     }
 

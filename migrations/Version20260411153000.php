@@ -19,7 +19,7 @@ final class Version20260411153000 extends AbstractMigration
         $schemaManager = $this->connection->createSchemaManager();
 
         if (!$schemaManager->tablesExist(['transfer_fee_rule'])) {
-            $this->addSql('CREATE TABLE IF NOT EXISTS transfer_fee_rule (
+            $this->connection->executeStatement('CREATE TABLE IF NOT EXISTS transfer_fee_rule (
             id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
             name VARCHAR(100) NOT NULL,
             transfer_type VARCHAR(20) NOT NULL DEFAULT "TRANSFERT",
@@ -38,7 +38,7 @@ final class Version20260411153000 extends AbstractMigration
         }
 
         if (!$schemaManager->tablesExist(['transfer_fee_event'])) {
-            $this->addSql('CREATE TABLE IF NOT EXISTS transfer_fee_event (
+            $this->connection->executeStatement('CREATE TABLE IF NOT EXISTS transfer_fee_event (
             id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
             transaction_id BIGINT DEFAULT NULL,
             virement_programme_id BIGINT DEFAULT NULL,
@@ -66,7 +66,7 @@ final class Version20260411153000 extends AbstractMigration
         }
 
         if (!$schemaManager->tablesExist(['transfer_execution_log'])) {
-            $this->addSql('CREATE TABLE IF NOT EXISTS transfer_execution_log (
+            $this->connection->executeStatement('CREATE TABLE IF NOT EXISTS transfer_execution_log (
             id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
             virement_programme_id BIGINT NOT NULL,
             execution_type VARCHAR(20) NOT NULL DEFAULT "AUTO",
@@ -88,7 +88,7 @@ final class Version20260411153000 extends AbstractMigration
         }
 
         if (!$schemaManager->tablesExist(['exchange_rate_cache'])) {
-            $this->addSql('CREATE TABLE IF NOT EXISTS exchange_rate_cache (
+            $this->connection->executeStatement('CREATE TABLE IF NOT EXISTS exchange_rate_cache (
             id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
             provider VARCHAR(50) NOT NULL,
             base_currency VARCHAR(10) NOT NULL,
@@ -104,7 +104,7 @@ final class Version20260411153000 extends AbstractMigration
         }
 
         if (!$schemaManager->tablesExist(['transfer_risk_log'])) {
-            $this->addSql('CREATE TABLE IF NOT EXISTS transfer_risk_log (
+            $this->connection->executeStatement('CREATE TABLE IF NOT EXISTS transfer_risk_log (
             id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
             transaction_id BIGINT DEFAULT NULL,
             virement_programme_id BIGINT DEFAULT NULL,

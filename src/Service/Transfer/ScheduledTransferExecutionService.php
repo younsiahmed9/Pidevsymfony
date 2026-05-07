@@ -10,11 +10,11 @@ use Psr\Log\LoggerInterface;
 final class ScheduledTransferExecutionService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly CurrencyRateService $currencyRateService,
-        private readonly BrevoEmailService $brevoEmailService,
-        private readonly TransferFeeService $transferFeeService,
-        private readonly LoggerInterface $logger,
+        private EntityManagerInterface $entityManager,
+        private CurrencyRateService $currencyRateService,
+        private BrevoEmailService $brevoEmailService,
+        private TransferFeeService $transferFeeService,
+        private LoggerInterface $logger,
     ) {
     }
 

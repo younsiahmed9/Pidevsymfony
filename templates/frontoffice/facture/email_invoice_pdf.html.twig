@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ facture.numeroFacture ?: ('#' ~ facture.id) }}</title>
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            color: #1f2937;
+            margin: 24px;
+            font-size: 12px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #dbeafe;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .brand {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1d4ed8;
+        }
+        .small {
+            color: #6b7280;
+            font-size: 10px;
+        }
+        .meta {
+            text-align: right;
+            font-size: 11px;
+        }
+        .box {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        th {
+            background: #f8fafc;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #334155;
+        }
+        .total {
+            text-align: right;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <div class="brand">FinTrack</div>
+            <div class="small">Facture envoyee par email</div>
+        </div>
+        <div class="meta">
+            <div><strong>Facture:</strong> {{ facture.numeroFacture ?: ('#' ~ facture.id) }}</div>
+            <div><strong>Generee le:</strong> {{ generatedAt|date('d/m/Y H:i') }}</div>
+        </div>
+    </div>
+
+    <div class="box">
+        <div><strong>Client:</strong> {{ user.fullName ?: user.email }}</div>
+        <div class="small">{{ user.email }}</div>
+    </div>
+
+    <div class="box">
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Date facture</th>
+                    <th>Echeance</th>
+                    <th>Statut</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        {% if facture.serviceNom %}
+                            Service: {{ facture.serviceNom }}
+                        {% elseif facture.produitNom %}
+                            Produit: {{ facture.produitNom }}
+                        {% else %}
+                            Facture diverse
+                        {% endif %}
+                    </td>
+                    <td>{{ facture.dateFacture ? facture.dateFacture|date('d/m/Y') : '-' }}</td>
+                    <td>{{ facture.dateEcheance ? facture.dateEcheance|date('d/m/Y') : '-' }}</td>
+                    <td>{{ facture.statut|default('-')|replace({'_': ' '})|capitalize }}</td>
+                    <td>{{ facture.montant|number_format(2, ',', ' ') }} TND</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total">Total: {{ facture.montant|number_format(2, ',', ' ') }} TND</div>
+    </div>
+
+    <div class="small">Merci pour votre confiance.</div>
+</body>
+</html>

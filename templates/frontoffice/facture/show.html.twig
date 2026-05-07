@@ -20,8 +20,22 @@
                 <button onclick="window.print()" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
                     <i class="fas fa-print me-2"></i> Imprimer
                 </button>
-                <a href="{{ path('facture_edit', {id: facture.id}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-edit me-2"></i> Modifier
+                <form method="post" action="{{ path('facture_send_email', {id: facture.id}) }}" class="d-flex align-items-center gap-2 flex-wrap">
+                    <input type="hidden" name="_token" value="{{ csrf_token('send_email' ~ facture.id) }}">
+                    <input
+                        type="email"
+                        name="recipientEmail"
+                        class="form-control rounded-pill"
+                        style="min-width: 260px;"
+                        placeholder="Adresse email du destinataire"
+                        required
+                    >
+                    <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">
+                        <i class="fas fa-paper-plane me-2"></i> Envoyer
+                    </button>
+                </form>
+                <a href="{{ path('facture_edit', {id: facture.id}) }}" class="btn btn-warning btn-action-icon text-white shadow-sm" title="Modifier">
+                    <i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span>
                 </a>
                 {{ include('frontoffice/facture/_delete_form.html.twig') }}
             </div>

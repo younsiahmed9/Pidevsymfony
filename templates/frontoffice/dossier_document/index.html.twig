@@ -27,10 +27,10 @@
                                 <div class="dropdown">
                                     <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
                                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
-                                        <li><a class="dropdown-item py-2" href="{{ path('dossier_document_show', {id: dossier.id}) }}"><i class="fas fa-eye me-2 text-primary small"></i> Détails</a></li>
-                                        <li><a class="dropdown-item py-2" href="{{ path('dossier_document_edit', {id: dossier.id}) }}"><i class="fas fa-edit me-2 text-warning small"></i> Modifier</a></li>
+                                        <li><a class="dropdown-item py-2" href="{{ path('dossier_document_show', {id: dossier.id}) }}" title="Détails"><i class="fas fa-fw fa-eye text-primary"></i><span class="visually-hidden">Détails</span></a></li>
+                                        <li><a class="dropdown-item py-2" href="{{ path('dossier_document_edit', {id: dossier.id}) }}" title="Modifier"><i class="fas fa-fw fa-pen text-warning"></i><span class="visually-hidden">Modifier</span></a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li>{% include 'frontoffice/dossier_document/_delete_form.html.twig' with {action: path('dossier_document_delete', {id: dossier.id}), dossier: dossier} %}</li>
+                                        <li>{% include 'frontoffice/dossier_document/_delete_form.html.twig' with {action: path('dossier_document_delete', {id: dossier.id}), dossier: dossier, is_dropdown: true} %}</li>
                                     </ul>
                                 </div>
                             </div>

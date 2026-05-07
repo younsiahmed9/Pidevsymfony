@@ -2,8 +2,108 @@
 
 {% block title %}Mon Dashboard - FinTrack{% endblock %}
 
+{% block stylesheets %}
+    <style>
+        html:not([data-theme='dark']) .dashboard-page .dashboard-stat-value {
+            color: #0f172a !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-stat-card {
+            border: 1px solid #374151;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-stat-value {
+            color: #f8fafc !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-stat-card small,
+        html[data-theme='dark'] .dashboard-page .dashboard-stat-card .card-footer,
+        html[data-theme='dark'] .dashboard-page .dashboard-stat-card .text-muted {
+            color: #cbd5e1 !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-stat-card .dashboard-stat-link {
+            color: #93c5fd !important;
+        }
+        .dashboard-page .dashboard-stat-value {
+            font-variant-numeric: tabular-nums;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        /* Dernières Transactions : texte lisible clair / sombre selon le bouton Thème */
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .card-header {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .card-header h4,
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .card-header .h5 {
+            color: #0f172a !important;
+        }
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .table,
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .table tbody td,
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .table thead th {
+            color: #111827 !important;
+        }
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .table thead.table-light th {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-color: #e2e8f0 !important;
+        }
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .table tbody tr {
+            border-color: #e2e8f0 !important;
+        }
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .table-hover tbody tr:hover {
+            background-color: rgba(15, 23, 42, 0.04) !important;
+        }
+        html:not([data-theme='dark']) .dashboard-page .dashboard-transactions-card .dashboard-trx-empty {
+            color: #475569 !important;
+        }
+
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card {
+            border: 1px solid #374151 !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .card-header {
+            background-color: #1f2937 !important;
+            border-bottom-color: #374151 !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .card-header h4,
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .card-header .h5 {
+            color: #f8fafc !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .table,
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .table tbody td,
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .table thead th {
+            color: #e5e7eb !important;
+            border-color: #374151 !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .table thead.table-light th {
+            background-color: #111827 !important;
+            color: #e5e7eb !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .table-hover tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.06) !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .dashboard-trx-empty {
+            color: #94a3b8 !important;
+        }
+        /* Badges / montants : garder le contraste malgré les règles globales sur span */
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .badge.bg-success {
+            color: #fff !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .badge.bg-danger {
+            color: #fff !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card .badge.bg-warning.text-dark {
+            color: #212529 !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card td.text-success {
+            color: #4ade80 !important;
+        }
+        html[data-theme='dark'] .dashboard-page .dashboard-transactions-card td.text-danger {
+            color: #f87171 !important;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<section class="section py-5">
+<section class="section py-5 dashboard-page">
     <div class="container mt-5">
         <div class="row mb-5 align-items-center">
             <div class="col-md-6">
@@ -18,7 +118,7 @@
         <!-- Statistiques Résumé -->
         <div class="row mb-5">
             <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                <div class="card shadow-sm border-0 h-100">
+                <div class="card shadow-sm border-0 h-100 dashboard-stat-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title text-muted mb-0">Solde Total</h5>
@@ -26,13 +126,13 @@
                                 <i class="fas fa-money-bill-wave"></i>
                             </div>
                         </div>
-                        <h2 class="mb-0 fw-bold">{{ balanceTotal|default(0)|number_format(2, ',', ' ') }} EUR</h2>
+                        <p class="mb-0 fs-3 fw-bold dashboard-stat-value">{{ balanceTotal|default(0)|number_format(2, ',', ' ') }} EUR</p>
                     </div>
                 </div>
             </div>
             
             <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                <div class="card shadow-sm border-0 h-100">
+                <div class="card shadow-sm border-0 h-100 dashboard-stat-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title text-muted mb-0">Portefeuilles</h5>
@@ -40,14 +140,14 @@
                                 <i class="fas fa-wallet"></i>
                             </div>
                         </div>
-                        <h2 class="mb-0 fw-bold">{{ portefeuilles|default([])|length }}</h2>
-                        <a href="{{ path('front_portefeuille_index') }}" class="text-decoration-none small mt-2 d-inline-block">Gérer <i class="fas fa-arrow-right fa-sm"></i></a>
+                        <p class="mb-0 fs-3 fw-bold dashboard-stat-value">{{ nb_portefeuilles }}</p>
+                        <a href="{{ path('front_portefeuille_index') }}" class="text-decoration-none small mt-2 d-inline-block dashboard-stat-link">Gérer <i class="fas fa-arrow-right fa-sm"></i></a>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                <div class="card shadow-sm border-0 h-100">
+                <div class="card shadow-sm border-0 h-100 dashboard-stat-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title text-muted mb-0">Cartes Actives</h5>
@@ -55,14 +155,14 @@
                                 <i class="fas fa-credit-card"></i>
                             </div>
                         </div>
-                        <h2 class="mb-0 fw-bold">{{ cartes_actives|default([])|length }}</h2>
-                        <a href="{{ path('front_carte_index') }}" class="text-decoration-none small mt-2 d-inline-block">Voir les cartes <i class="fas fa-arrow-right fa-sm"></i></a>
+                        <p class="mb-0 fs-3 fw-bold dashboard-stat-value">{{ nb_cartes_actives }}</p>
+                        <a href="{{ path('front_carte_index') }}" class="text-decoration-none small mt-2 d-inline-block dashboard-stat-link">Voir les cartes <i class="fas fa-arrow-right fa-sm"></i></a>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                <div class="card shadow-sm border-0 h-100">
+                <div class="card shadow-sm border-0 h-100 dashboard-stat-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="card-title text-muted mb-0">Virements Prog.</h5>
@@ -70,8 +170,8 @@
                                 <i class="fas fa-sync-alt"></i>
                             </div>
                         </div>
-                        <h2 class="mb-0 fw-bold">{{ virements_actifs|default([])|length }}</h2>
-                        <a href="{{ path('front_virement_index') }}" class="text-decoration-none small mt-2 d-inline-block">Gérer <i class="fas fa-arrow-right fa-sm"></i></a>
+                        <p class="mb-0 fs-3 fw-bold dashboard-stat-value">{{ nb_virements_actifs }}</p>
+                        <a href="{{ path('front_virement_index') }}" class="text-decoration-none small mt-2 d-inline-block dashboard-stat-link">Gérer <i class="fas fa-arrow-right fa-sm"></i></a>
                     </div>
                 </div>
             </div>
@@ -80,8 +180,8 @@
         <!-- Dernières Transactions -->
         <div class="row">
             <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white pt-4 pb-3 px-4 d-flex justify-content-between align-items-center border-bottom-0">
+                <div class="card shadow-sm border-0 dashboard-transactions-card">
+                    <div class="card-header pt-4 pb-3 px-4 d-flex justify-content-between align-items-center border-bottom-0">
                         <h4 class="mb-0 h5"><i class="fas fa-history me-2 text-primary"></i>Dernières Transactions</h4>
                         <a href="{{ path('front_transaction_index') }}" class="btn btn-sm btn-outline-secondary">Voir tout</a>
                     </div>
@@ -113,7 +213,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    {% if trx.statut == 'COMPLETED' or trx.statut == 'TERMINE' %}
+                                                    {% if trx.statut == 'COMPLETED' or trx.statut == 'TERMINE' or trx.statut == 'SUCCESS' %}
                                                         <span class="badge bg-success">Réussi</span>
                                                     {% elseif trx.statut == 'PENDING' or trx.statut == 'EN_ATTENTE' %}
                                                         <span class="badge bg-warning text-dark">En attente</span>
@@ -130,7 +230,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted text-center py-4 mb-0">Aucune transaction récente à afficher.</p>
+                            <p class="text-muted text-center py-4 mb-0 dashboard-trx-empty">Aucune transaction récente à afficher.</p>
                         {% endif %}
                     </div>
                 </div>

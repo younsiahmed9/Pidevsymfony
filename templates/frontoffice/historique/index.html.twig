@@ -1,0 +1,168 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Historique - FinTrack{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h1 class="h3 fw-bold mb-1">Historique des modifications</h1>
+                <p class="text-muted mb-0">Suivi des changements sur Produit, Service et Facture.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ path('service_recommendations') }}" class="btn btn-primary rounded-pill px-4">
+                    <i class="fas fa-star me-2"></i> Recommandations
+                </a>
+                <a href="{{ path('front_home_index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fas fa-arrow-left me-2"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-3 d-flex flex-wrap gap-2">
+                <a href="{{ path('front_historique_index', {entity: 'all'}) }}" class="btn {{ entityFilter == 'all' ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill">Tout</a>
+                <a href="{{ path('front_historique_index', {entity: 'produit'}) }}" class="btn {{ entityFilter == 'produit' ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill">Produit</a>
+                <a href="{{ path('front_historique_index', {entity: 'service'}) }}" class="btn {{ entityFilter == 'service' ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill">Service</a>
+                <a href="{{ path('front_historique_index', {entity: 'facture'}) }}" class="btn {{ entityFilter == 'facture' ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill">Facture</a>
+            </div>
+        </div>
+
+        {% if historyRows is empty %}
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-5 text-center">
+                    <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+                        <i class="fas fa-clock-rotate-left fa-2x text-muted"></i>
+                    </div>
+                    <h5 class="fw-bold">Aucun historique disponible</h5>
+                    <p class="text-muted mb-0">Aucune entrée d'audit n'a été trouvée pour ce filtre.</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 historique-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3">Entité</th>
+                                <th class="px-4 py-3">Action</th>
+                                <th class="px-4 py-3">ID Objet</th>
+                                <th class="px-4 py-3">Utilisateur</th>
+                                <th class="px-4 py-3">Date</th>
+                                <th class="px-4 py-3">Diffs</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in historyRows %}
+                                <tr>
+                                    <td class="px-4">
+                                        <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-2 fw-semibold">{{ row.entity_label }}</span>
+                                    </td>
+                                    <td class="px-4">
+                                        <span class="badge bg-{{ row.actionClass }} rounded-pill px-3 py-2 fw-semibold">{{ row.actionLabel }}</span>
+                                    </td>
+                                    <td class="px-4 fw-semibold">#{{ row.object_id }}</td>
+                                    <td class="px-4 text-muted">{{ row.actor }}</td>
+                                    <td class="px-4">{{ row.createdAtFormatted }}</td>
+                                    <td class="px-4" style="max-width: 360px;">
+                                        <div class="small text-muted mb-2">{{ row.changeCount }} changement(s)</div>
+                                        {% if row.changedFields is not empty %}
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% for field in row.changedFields|slice(0, 6) %}
+                                                    <span class="badge field-chip">{{ field }}</span>
+                                                {% endfor %}
+                                                {% if row.changedFields|length > 6 %}
+                                                    <span class="badge bg-secondary">+{{ row.changedFields|length - 6 }}</span>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted small">Aucun champ visible</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .historique-table {
+        color: #111827;
+    }
+
+    .historique-table th {
+        font-size: 0.78rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #334155;
+        white-space: nowrap;
+    }
+
+    .historique-table td {
+        vertical-align: top;
+        border-color: #e5e7eb;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .historique-table tbody tr:nth-child(odd) {
+        background: #fcfdff;
+    }
+
+    .historique-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .field-chip {
+        background: #eef2ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+        border-radius: 0.6rem;
+        font-size: 0.74rem;
+        font-weight: 600;
+        padding: 0.35rem 0.55rem;
+    }
+
+    html[data-theme='dark'] .historique-table {
+        color: #e5e7eb !important;
+    }
+
+    html[data-theme='dark'] .historique-table th {
+        color: #cbd5e1 !important;
+        background-color: #111827 !important;
+    }
+
+    html[data-theme='dark'] .historique-table td {
+        color: #e5e7eb !important;
+        border-color: #374151 !important;
+    }
+
+    html[data-theme='dark'] .historique-table tbody tr:nth-child(odd),
+    html[data-theme='dark'] .historique-table tbody tr:nth-child(even) {
+        background: #1f2937 !important;
+    }
+
+    html[data-theme='dark'] .historique-table tbody tr:hover {
+        background: #273449 !important;
+    }
+
+    html[data-theme='dark'] .field-chip {
+        background: #312e81 !important;
+        color: #e0e7ff !important;
+        border-color: #6366f1 !important;
+    }
+
+    html[data-theme='dark'] .historique-table .text-muted,
+    html[data-theme='dark'] .historique-table .small {
+        color: #cbd5e1 !important;
+    }
+</style>
+{% endblock %}

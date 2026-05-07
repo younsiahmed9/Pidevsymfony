@@ -17,8 +17,8 @@
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ path('depense_edit', {id: depense.id_depense}) }}" class="btn btn-warning rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-edit me-2"></i> Modifier
+                <a href="{{ path('depense_edit', {id: depense.id_depense}) }}" class="btn btn-warning btn-action-icon text-white shadow-sm" title="Modifier">
+                    <i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span>
                 </a>
                 {{ include('frontoffice/depense/_delete_form.html.twig') }}
             </div>

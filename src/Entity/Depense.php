@@ -28,7 +28,7 @@ class Depense
     #[ORM\Column(type: 'decimal', precision: 15, scale: 2)]
     private ?string $montant = null;
 
-    #[ORM\Column(name: 'date_depense', type: 'date_mutable')]
+    #[ORM\Column(name: 'date_depense', type: 'datetime')]
     private ?\DateTimeInterface $dateDepense = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

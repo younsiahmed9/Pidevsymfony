@@ -28,6 +28,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::STRING, length: 120, nullable: true)]
     private ?string $fullName = null;
 
+    #[ORM\Column(type: Types::STRING, length: 20, nullable: true)]
+    private ?string $oauthProvider = null;
+
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $oauthId = null;
+
     #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]
     private ?string $profilePhoto = null;
 
@@ -43,11 +49,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::BOOLEAN)]
     private ?bool $isActive = true;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
+    private int $moderationWarningCount = 0;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $updatedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $moderationBlockedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $updatedAt;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'], targetEntity: Admin::class)]
     private ?Admin $admin = null;
@@ -57,8 +69,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
         $this->isActive = true;
     }
 
@@ -99,6 +111,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFullName(?string $fullName): static
     {
         $this->fullName = $fullName;
+
+        return $this;
+    }
+
+    public function getOauthProvider(): ?string
+    {
+        return $this->oauthProvider;
+    }
+
+    public function setOauthProvider(?string $oauthProvider): static
+    {
+        $this->oauthProvider = $oauthProvider;
+
+        return $this;
+    }
+
+    public function getOauthId(): ?string
+    {
+        return $this->oauthId;
+    }
+
+    public function setOauthId(?string $oauthId): static
+    {
+        $this->oauthId = $oauthId;
 
         return $this;
     }
@@ -205,6 +241,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getModerationWarningCount(): int
+    {
+        return $this->moderationWarningCount;
+    }
+
+    public function setModerationWarningCount(int $moderationWarningCount): static
+    {
+        $this->moderationWarningCount = max(0, $moderationWarningCount);
+
+        return $this;
+    }
+
+    public function incrementModerationWarningCount(): static
+    {
+        $this->moderationWarningCount = max(0, $this->moderationWarningCount + 1);
+
+        return $this;
+    }
+
+    public function getModerationBlockedAt(): ?\DateTimeImmutable
+    {
+        return $this->moderationBlockedAt;
+    }
+
+    public function setModerationBlockedAt(?\DateTimeImmutable $moderationBlockedAt): static
+    {
+        $this->moderationBlockedAt = $moderationBlockedAt;
+
+        return $this;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
@@ -212,7 +279,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $createdAt instanceof \DateTimeImmutable
+            ? $createdAt
+            : \DateTimeImmutable::createFromMutable($createdAt);
 
         return $this;
     }
@@ -224,7 +293,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
-        $this->updatedAt = $updatedAt;
+        $this->updatedAt = $updatedAt instanceof \DateTimeImmutable
+            ? $updatedAt
+            : \DateTimeImmutable::createFromMutable($updatedAt);
 
         return $this;
     }

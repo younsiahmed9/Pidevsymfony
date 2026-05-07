@@ -23,32 +23,30 @@ class Produit
 
     #[ORM\Column(name: 'nom_produit', length: 255)]
     #[Assert\NotBlank(message: 'Le nom est obligatoire')]
-    #[Assert\Length(min: 3, max: 100, minMessage: 'Minimum 3 caractères', maxMessage: 'Maximum 100 caractères')]
+    #[Assert\Length(min: 3, max: 100)]
     private ?string $nomProduit = null;
 
     #[ORM\Column(type: 'decimal', precision: 15, scale: 2)]
     #[Assert\NotBlank(message: 'Montant obligatoire')]
     #[Assert\Positive(message: 'Montant positif')]
-    #[Assert\Range(min: 1, max: 100000, minMessage: 'Le montant doit être au moins 1 DT', maxMessage: 'Le montant ne peut pas dépasser 100000 DT')]
+    #[Assert\Range(min: 1, max: 100000, notInRangeMessage: 'Le montant doit être entre 1 DT et 100000 DT')]
     private ?string $montant = null;
 
     #[ORM\Column(name: 'code_unique', length: 100, nullable: true, unique: true)]
-    #[Assert\NotBlank(message: 'Code obligatoire')]
-    #[Assert\Regex(pattern: '/^[A-Z0-9]{4,20}$', message: 'Uniquement majuscules et chiffres (4-20 caractères)')]
+    #[Assert\Length(min: 4, max: 20, minMessage: 'Minimum 4 caractères', maxMessage: 'Maximum 20 caractères')]
     #[Assert\Unique(message: 'Ce code existe déjà')]
     private ?string $codeUnique = null;
 
-    #[ORM\Column(name: 'type_produit', length: 100, nullable: true)]
-    #[Assert\NotBlank(message: 'Le type est obligatoire')]
-    #[Assert\Choice(choices: ['physique', 'numerique', 'service'], message: 'Type invalide')]
+    #[ORM\Column(name: 'type_produit', type: 'string', columnDefinition: "ENUM('carte_prepaye', 'carte_cadeaux', 'carte_abonnement') NOT NULL")]
+    #[Assert\NotBlank(message: 'Le type de produit est obligatoire')]
     private ?string $typeProduit = null;
 
-    #[ORM\Column(length: 20)]
-    #[Assert\Choice(choices: ['disponible', 'indisponible', 'archive'], message: 'Statut invalide')]
+    #[ORM\Column(length: 20, type: 'string', columnDefinition: "ENUM('vendu', 'expire', 'disponible') NOT NULL DEFAULT 'disponible'")]
+    #[Assert\NotBlank(message: 'Le statut est obligatoire')]
     private string $statut = 'disponible';
 
-    #[ORM\Column(name: 'date_creation', type: 'datetime_mutable')]
-    private ?\DateTimeInterface $dateCreation = null;
+    #[ORM\Column(name: 'date_creation', type: 'datetime')]
+    private ?\DateTime $dateCreation = null;
 
     /** @var Collection<int, Facture> */
     #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Facture::class)]

@@ -8,7 +8,9 @@
                 <input type="text" id="nomProduit" name="nomProduit" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ produitData.nomProduit|default('') }}" placeholder="Ex: Ordinateur portable, Bureau..." required>
                 <div class="form-text">Quel est le nom de cet actif ou produit ?</div>
                 {% for error in formErrors.nomProduit|default([]) %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
+                    <div class="invalid-feedback d-block mt-1">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ error }}
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -22,17 +24,26 @@
                 </div>
                 <div class="form-text">La valeur estimée ou le prix d'achat.</div>
                 {% for error in formErrors.montant|default([]) %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
+                    <div class="invalid-feedback d-block mt-1">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ error }}
+                    </div>
                 {% endfor %}
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="form-group">
-                <label for="typeProduit" class="form-label fw-bold text-muted small text-uppercase">Type de produit</label>
-                <input type="text" id="typeProduit" name="typeProduit" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ produitData.typeProduit|default('') }}" placeholder="Ex: Électronique, Immobilier..." required>
+                <label for="typeProduit" class="form-label fw-bold text-muted small text-uppercase">Type de carte</label>
+                <select id="typeProduit" name="typeProduit" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="">Sélectionner un type</option>
+                    <option value="carte_prepaye" {{ produitData.typeProduit|default('') == 'carte_prepaye' ? 'selected' : '' }}>Carte Prépayée</option>
+                    <option value="carte_cadeaux" {{ produitData.typeProduit|default('') == 'carte_cadeaux' ? 'selected' : '' }}>Carte Cadeaux</option>
+                    <option value="carte_abonnement" {{ produitData.typeProduit|default('') == 'carte_abonnement' ? 'selected' : '' }}>Carte Abonnement</option>
+                </select>
                 {% for error in formErrors.typeProduit|default([]) %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
+                    <div class="invalid-feedback d-block mt-1">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ error }}
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -43,7 +54,9 @@
                 <input type="text" id="codeUnique" name="codeUnique" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ produitData.codeUnique|default('') }}" placeholder="Ex: SN-123456">
                 <div class="form-text">Laissez vide pour une génération automatique.</div>
                 {% for error in formErrors.codeUnique|default([]) %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
+                    <div class="invalid-feedback d-block mt-1">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ error }}
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -54,11 +67,12 @@
                 <select id="statut" name="statut" class="form-select form-select-lg border-0 bg-light shadow-none" required>
                     <option value="disponible" {{ produitData.statut|default('') == 'disponible' ? 'selected' : '' }}>Disponible</option>
                     <option value="vendu" {{ produitData.statut|default('') == 'vendu' ? 'selected' : '' }}>Vendu</option>
-                    <option value="hors_service" {{ produitData.statut|default('') == 'hors_service' ? 'selected' : '' }}>Hors Service</option>
-                    <option value="en_reparation" {{ produitData.statut|default('') == 'en_reparation' ? 'selected' : '' }}>En Réparation</option>
+                    <option value="expire" {{ produitData.statut|default('') == 'expire' ? 'selected' : '' }}>Expiré</option>
                 </select>
                 {% for error in formErrors.statut|default([]) %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
+                    <div class="invalid-feedback d-block mt-1">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ error }}
+                    </div>
                 {% endfor %}
             </div>
         </div>

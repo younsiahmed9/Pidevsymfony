@@ -1,123 +1,83 @@
-{% extends 'frontoffice/base.html.twig' %}
+﻿{% extends 'frontoffice/base.html.twig' %}
 
-{% block title %}Mes Échéances{% endblock %}
+{% block title %}Mes échéances{% endblock %}
 
 {% block body %}
-<section class="py-5 bg-light min-vh-100">
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-5 bg-white p-4 rounded-4 shadow-sm">
-            <div>
-                <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-calendar-alt text-primary me-2"></i>Mes Échéances</h1>
-                <p class="text-muted mb-0">Ne manquez plus aucun paiement. Suivez vos échéances et rappels.</p>
-            </div>
-            <a href="{{ path('echeance_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
-                <i class="fas fa-plus me-2"></i> Nouvelle Échéance
-            </a>
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Mes échéances</h1>
+            <p class="text-muted mb-0">Suivez les rappels de paiement et de renouvellement.</p>
         </div>
+        <a href="{{ path('echeance_new') }}" class="btn btn-primary">Nouvelle échéance</a>
+    </div>
 
-        <!-- Filters -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4">
-                <form method="GET" action="{{ path('echeance_index') }}" class="row g-3 align-items-end">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Recherche</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
-                            <input type="text" name="q" value="{{ q }}" class="form-control bg-light border-0 shadow-none" placeholder="Titre, document...">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Statut</label>
-                        <select name="statut" class="form-select bg-light border-0 shadow-none">
-                            <option value="">Tous les statuts</option>
-                            {% for s in ['pending', 'notified', 'completed', 'overdue'] %}
-                                <option value="{{ s }}" {{ statut == s ? 'selected' : '' }}>{{ s|capitalize }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">Filtrer</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small class="text-muted">Total</small><div class="h5 mb-0">{{ stats.total|default(0) }}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small class="text-muted">En attente</small><div class="h5 mb-0">{{ stats.pending|default(0) }}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small class="text-muted">En retard</small><div class="h5 mb-0">{{ stats.overdue|default(0) }}</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card"><div class="card-body"><small class="text-muted">Complétées</small><div class="h5 mb-0">{{ stats.completed|default(0) }}</div></div></div></div>
+    </div>
 
-        <div class="row g-4">
-            {% for echeance in echeances %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover overflow-hidden">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-4">
-                                <div class="bg-primary bg-opacity-10 p-3 rounded-4">
-                                    <i class="fas fa-clock fa-2x text-primary"></i>
-                                </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-link text-muted p-0 shadow-none" type="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
-                                        <li><a class="dropdown-item py-2" href="{{ path('echeance_show', {id: echeance.id}) }}"><i class="fas fa-eye me-2 text-primary small"></i> Détails</a></li>
-                                        <li><a class="dropdown-item py-2" href="{{ path('echeance_edit', {id: echeance.id}) }}"><i class="fas fa-edit me-2 text-warning small"></i> Modifier</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            {% include 'frontoffice/echeance/_delete_form.html.twig' with {action: path('echeance_delete', {id: echeance.id}), echeance: echeance} %}
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <h5 class="card-title fw-bold text-dark mb-1">{{ echeance.titre }}</h5>
-                            <p class="text-muted small mb-3"><i class="fas fa-file-invoice me-1"></i> {{ echeance.document.titre }}</p>
-
-                            <div class="bg-light p-3 rounded-3 mb-4">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted small">Montant</span>
-                                    <span class="fw-bold text-primary">{{ echeance.montant|default('0.00')|number_format(2, ',', ' ') }} TND</span>
-                                </div>
-                            </div>
-
-                            <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto">
-                                {% set status_colors = {
-                                    'pending': 'warning',
-                                    'notified': 'info',
-                                    'completed': 'success',
-                                    'overdue': 'danger'
-                                } %}
-                                {% set color = status_colors[echeance.statut]|default('secondary') %}
-                                <span class="badge bg-{{ color }} bg-opacity-10 text-{{ color }} rounded-pill px-3 py-2 small text-capitalize">
-                                    {{ echeance.statut }}
-                                </span>
-                                <span class="small {{ echeance.dateEcheance and echeance.dateEcheance < date() and echeance.statut != 'completed' ? 'text-danger fw-bold' : 'text-muted' }}">
-                                    <i class="far fa-calendar-alt me-1"></i> {{ echeance.dateEcheance ? echeance.dateEcheance|date('d/m/Y') : '-' }}
-                                </span>
-                            </div>
-                        </div>
-                        <a href="{{ path('echeance_show', {id: echeance.id}) }}" class="stretched-link"></a>
-                    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ path('echeance_index') }}" class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label">Recherche</label>
+                    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Titre, document...">
                 </div>
-            {% else %}
-                <div class="col-12 text-center py-5">
-                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block border">
-                        <i class="fas fa-calendar-check fa-4x text-light mb-4 d-block"></i>
-                        <h3 class="fw-bold text-dark">Aucune échéance</h3>
-                        <p class="text-muted mb-4">Planifiez vos futurs paiements pour recevoir des notifications.</p>
-                        <a href="{{ path('echeance_new') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
-                            Créer ma première échéance
-                        </a>
-                    </div>
+                <div class="col-md-4">
+                    <label class="form-label">Statut</label>
+                    <select name="statut" class="form-select">
+                        <option value="">Tous</option>
+                        {% for s in ['pending', 'notified', 'completed', 'overdue'] %}
+                            <option value="{{ s }}" {{ statut == s ? 'selected' : '' }}>{{ s|capitalize }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-            {% endfor %}
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Filtrer</button>
+                </div>
+            </form>
         </div>
     </div>
-</section>
 
-<style>
-    .transition-hover {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .transition-hover:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.1) !important;
-    }
-</style>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Document</th>
+                        <th>Montant</th>
+                        <th>Échéance</th>
+                        <th>Statut</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for echeance in echeances %}
+                    <tr>
+                        <td>{{ echeance.titre }}</td>
+                        <td>{{ echeance.document ? echeance.document.titre : '-' }}</td>
+                        <td>{{ echeance.montant is not null ? echeance.montant|number_format(2, ',', ' ') ~ ' TND' : '-' }}</td>
+                        <td>{{ echeance.dateEcheance ? echeance.dateEcheance|date('d/m/Y') : '-' }}</td>
+                        <td><span class="badge text-bg-light border text-capitalize">{{ echeance.statut }}</span></td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm btn-action-toolbar" role="group" aria-label="Actions échéance">
+                                <a href="{{ path('echeance_show', {id: echeance.id}) }}" class="btn btn-outline-secondary btn-action-icon btn-sm" title="Voir"><i class="fas fa-eye" aria-hidden="true"></i><span class="visually-hidden">Voir</span></a>
+                                <a href="{{ path('echeance_edit', {id: echeance.id}) }}" class="btn btn-outline-primary btn-action-icon btn-sm" title="Modifier"><i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">Aucune échéance trouvée.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

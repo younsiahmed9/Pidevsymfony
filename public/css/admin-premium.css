@@ -1,0 +1,221 @@
+/**
+ * FinTrack — couche UI premium (back office)
+ * Complète admin.css sans le remplacer.
+ */
+
+:root {
+  --ft-admin-radius: 0.75rem;
+  --ft-admin-radius-sm: 0.5rem;
+  --ft-admin-shadow: 0 4px 14px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --ft-admin-shadow-hover: 0 12px 28px rgba(15, 23, 42, 0.1);
+  --ft-admin-border: #e2e8f0;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ——— Topbar ——— */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: -0.5rem -0.5rem 1.25rem;
+  background: #ffffff;
+  border: 1px solid var(--ft-admin-border);
+  border-radius: var(--ft-admin-radius);
+  box-shadow: var(--ft-admin-shadow);
+}
+
+.topbar .badge {
+  font-weight: 600;
+  padding: 0.45em 0.75em;
+  border-radius: var(--ft-admin-radius-sm);
+}
+
+/* ——— Zone principale ——— */
+.main-content > main.container-fluid {
+  padding-left: clamp(1rem, 2vw, 1.5rem);
+  padding-right: clamp(1rem, 2vw, 1.5rem);
+  padding-bottom: 2rem;
+}
+
+/* ——— Sidebar (affinement) ——— */
+.sidebar {
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.logo-container {
+  padding: 1.5rem 1.25rem;
+}
+
+.nav-link {
+  min-height: 44px;
+}
+
+.nav-link.active {
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+/* ——— Cartes Bootstrap & KPI ——— */
+.card {
+  border-radius: var(--ft-admin-radius);
+  border: 1px solid var(--ft-admin-border);
+  box-shadow: var(--ft-admin-shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--ft-admin-shadow-hover);
+}
+
+.card-header {
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--ft-admin-border);
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.kpi-card {
+  border-radius: var(--ft-admin-radius);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ft-admin-shadow-hover);
+}
+
+/* Aligné front office : boutons d’action icône seule */
+.btn-action-icon {
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ft-admin-radius-sm);
+  line-height: 1;
+}
+
+.btn-action-icon.btn-sm {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.875rem;
+}
+
+/* ——— Boutons ——— */
+.btn {
+  font-weight: 600;
+  border-radius: var(--ft-admin-radius-sm);
+  padding: 0.5rem 1rem;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.35);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+}
+
+.btn-primary {
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+/* ——— Formulaires ——— */
+.form-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 0.35rem;
+}
+
+.form-control,
+.form-select {
+  border-radius: var(--ft-admin-radius-sm);
+  padding: 0.5rem 0.85rem;
+  border-color: var(--ft-admin-border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+}
+
+/* ——— Tableaux ——— */
+.table-responsive {
+  border-radius: var(--ft-admin-radius-sm);
+  border: 1px solid var(--ft-admin-border);
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #64748b;
+  padding: 0.85rem 1rem;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.table-hover tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+/* ——— Alertes ——— */
+.alert {
+  border-radius: var(--ft-admin-radius-sm);
+  border: none;
+  box-shadow: var(--ft-admin-shadow);
+}
+
+/* ——— Modales ——— */
+.modal-content {
+  border-radius: var(--ft-admin-radius);
+  border: 1px solid var(--ft-admin-border);
+  box-shadow: var(--ft-admin-shadow-hover);
+}
+
+/* ——— Pagination ——— */
+.pagination .page-link {
+  border-radius: var(--ft-admin-radius-sm);
+  margin: 0 0.125rem;
+}
+
+/* ——— Mobile ——— */
+@media (max-width: 991.98px) {
+  .main-content {
+    padding: 1rem;
+  }
+
+  .topbar {
+    margin: 0 0 1rem;
+  }
+}

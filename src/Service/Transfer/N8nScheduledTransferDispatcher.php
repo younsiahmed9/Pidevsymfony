@@ -9,14 +9,14 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class N8nScheduledTransferDispatcher
 {
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ScheduledTransferExecutionService $executionService,
-        private readonly LoggerInterface $logger,
-        private readonly string $webhookUrl,
-        private readonly string $internalToken,
-        private readonly int $timeoutSeconds,
-        private readonly string $symfonyBaseUrl,
+        private HttpClientInterface $httpClient,
+        private EntityManagerInterface $entityManager,
+        private ScheduledTransferExecutionService $executionService,
+        private LoggerInterface $logger,
+        private string $webhookUrl,
+        private string $internalToken,
+        private int $timeoutSeconds,
+        private string $symfonyBaseUrl,
     ) {
     }
 

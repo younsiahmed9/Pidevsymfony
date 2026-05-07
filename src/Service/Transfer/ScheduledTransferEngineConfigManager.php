@@ -4,7 +4,7 @@ namespace App\Service\Transfer;
 
 final class ScheduledTransferEngineConfigManager
 {
-    public function __construct(private readonly string $projectDir)
+    public function __construct(private string $projectDir)
     {
     }
 

@@ -20,7 +20,7 @@
 
         <div class="col-md-6 mb-3">
             {{ form_label(form.typeService, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-            {{ form_widget(form.typeService, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Télécom, Maintenance...'}}) }}
+            {{ form_widget(form.typeService, {'attr': {'class': 'form-select'}}) }}
             {{ form_errors(form.typeService) }}
         </div>
 

@@ -16,10 +16,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class RunScheduledTransfersCommand extends Command
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly ScheduledTransferEngineResolver $engineResolver,
-        private readonly ScheduledTransferExecutionService $executionService,
-        private readonly N8nScheduledTransferDispatcher $n8nDispatcher,
+        private EntityManagerInterface $entityManager,
+        private ScheduledTransferEngineResolver $engineResolver,
+        private ScheduledTransferExecutionService $executionService,
+        private N8nScheduledTransferDispatcher $n8nDispatcher,
     ) {
         parent::__construct();
     }

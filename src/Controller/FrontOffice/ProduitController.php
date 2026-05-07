@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Form\Exception\TransformationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/produit', name: 'produit_')]
 final class ProduitController extends AbstractController
@@ -95,6 +96,11 @@ final class ProduitController extends AbstractController
             'SELECT DISTINCT type_produit FROM produit WHERE user_id = :user_id AND type_produit IS NOT NULL ORDER BY type_produit',
             ['user_id' => $user->getId()]
         );
+        
+        // S'assurer que c'est bien un tableau
+        if (!is_array($typesProduits)) {
+            $typesProduits = [];
+        }
 
         return $this->render('frontoffice/produit/index.html.twig', [
             'produits' => $produits,
@@ -111,7 +117,7 @@ final class ProduitController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -143,15 +149,16 @@ final class ProduitController extends AbstractController
             $formErrors = $this->validateProduitInput($produitFormData);
 
             if ($formErrors === []) {
-                $entityManager->getConnection()->insert('produit', [
-                    'user_id' => $user->getId(),
-                    'nom_produit' => $produitFormData['nomProduit'],
-                    'montant' => number_format((float) str_replace(',', '.', $produitFormData['montant']), 2, '.', ''),
-                    'code_unique' => $produitFormData['codeUnique'] !== '' ? $produitFormData['codeUnique'] : uniqid('PRD-'),
-                    'type_produit' => $produitFormData['typeProduit'],
-                    'statut' => $produitFormData['statut'],
-                    'date_creation' => (new \DateTime())->format('Y-m-d H:i:s'),
-                ]);
+                $produitEntity = new Produit();
+                $produitEntity->setUser($user);
+                $produitEntity->setNomProduit($produitFormData['nomProduit']);
+                $produitEntity->setMontant(number_format((float) str_replace(',', '.', $produitFormData['montant']), 2, '.', ''));
+                $produitEntity->setCodeUnique($produitFormData['codeUnique'] !== '' ? $produitFormData['codeUnique'] : uniqid('PRD-'));
+                $produitEntity->setTypeProduit($produitFormData['typeProduit']);
+                $produitEntity->setStatut($produitFormData['statut']);
+
+                $entityManager->persist($produitEntity);
+                $entityManager->flush();
 
                 $this->addFlash('success', 'Produit créé avec succès.');
                 return $this->redirectToRoute('produit_index');
@@ -167,7 +174,7 @@ final class ProduitController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(int $id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -178,32 +185,32 @@ final class ProduitController extends AbstractController
 
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $produit = $entityManager->getConnection()->fetchAssociative(
-            'SELECT id_produit AS id, user_id, nom_produit AS nomProduit, montant, code_unique AS codeUnique, type_produit AS typeProduit, statut, date_creation AS dateCreation FROM produit WHERE id_produit = :id AND user_id = :user_id',
-            ['id' => $id, 'user_id' => $user->getId()]
-        );
+        $produitEntity = $entityManager->getRepository(Produit::class)->findOneBy([
+            'id' => $id,
+            'user' => $user,
+        ]);
 
-        if (!$produit) {
+        if (!$produitEntity instanceof Produit) {
             throw $this->createNotFoundException('Produit introuvable.');
         }
 
         $produitFormData = [
-            'id' => (string) ($produit['id'] ?? $id),
-            'nomProduit' => (string) ($produit['nomProduit'] ?? ''),
-            'montant' => (string) ($produit['montant'] ?? ''),
-            'codeUnique' => (string) ($produit['codeUnique'] ?? ''),
-            'typeProduit' => (string) ($produit['typeProduit'] ?? ''),
-            'statut' => (string) ($produit['statut'] ?? 'disponible'),
+            'id' => (string) ($produitEntity->getId() ?? $id),
+            'nomProduit' => (string) ($produitEntity->getNomProduit() ?? ''),
+            'montant' => (string) ($produitEntity->getMontant() ?? ''),
+            'codeUnique' => (string) ($produitEntity->getCodeUnique() ?? ''),
+            'typeProduit' => (string) ($produitEntity->getTypeProduit() ?? ''),
+            'statut' => (string) ($produitEntity->getStatut() ?? 'disponible'),
         ];
         $formErrors = [];
 
         if ($request->isMethod('POST')) {
             try {
                 $produitFormData = [
-                    'id' => (string) ($produit['id'] ?? $id),
+                    'id' => (string) ($produitEntity->getId() ?? $id),
                     'nomProduit' => trim((string) $request->request->get('nomProduit', '')),
                     'montant' => trim((string) $request->request->get('montant', '')),
-                    'codeUnique' => trim((string) $request->request->get('codeUnique', $produitFormData['codeUnique'])),
+                    'codeUnique' => trim((string) $request->request->get('codeUnique', (string) $produitEntity->getCodeUnique())),
                     'typeProduit' => trim((string) $request->request->get('typeProduit', '')),
                     'statut' => trim((string) $request->request->get('statut', 'disponible')),
                 ];
@@ -211,29 +218,20 @@ final class ProduitController extends AbstractController
                 $formErrors = $this->validateProduitInput($produitFormData);
 
                 if ($formErrors === []) {
-                    // Validation supplémentaire avec l'entité
-                    $produitEntity = new Produit();
                     $produitEntity->setNomProduit($produitFormData['nomProduit']);
-                    $produitEntity->setMontant($produitFormData['montant']);
-                    $produitEntity->setCodeUnique($produitFormData['codeUnique'] !== '' ? $produitFormData['codeUnique'] : $produit['codeUnique']);
+                    $produitEntity->setMontant(number_format((float) str_replace(',', '.', $produitFormData['montant']), 2, '.', ''));
+                    $produitEntity->setCodeUnique($produitFormData['codeUnique'] !== '' ? $produitFormData['codeUnique'] : $produitEntity->getCodeUnique());
                     $produitEntity->setTypeProduit($produitFormData['typeProduit']);
                     $produitEntity->setStatut($produitFormData['statut']);
 
                     // Valider l'entité
-                    $validator = $this->container->get('validator');
                     $violations = $validator->validate($produitEntity);
                     
                     if (count($violations) > 0) {
                         throw new ValidationFailedException($produitEntity, $violations);
                     }
 
-                    $entityManager->getConnection()->update('produit', [
-                        'nom_produit' => $produitFormData['nomProduit'],
-                        'montant' => number_format((float) str_replace(',', '.', $produitFormData['montant']), 2, '.', ''),
-                        'code_unique' => $produitEntity->getCodeUnique(),
-                        'type_produit' => $produitFormData['typeProduit'],
-                        'statut' => $produitFormData['statut'],
-                    ], ['id_produit' => $id, 'user_id' => $user->getId()]);
+                    $entityManager->flush();
 
                     $this->addFlash('success', 'Produit mis à jour avec succès.');
                     return $this->redirectToRoute('produit_index');
@@ -267,24 +265,33 @@ final class ProduitController extends AbstractController
         $errors = [];
 
         if ($data['nomProduit'] === '' || mb_strlen($data['nomProduit']) < 2) {
-            $errors['nomProduit'][] = 'Le nom du produit est obligatoire (minimum 2 caractères).';
+            $errors['nomProduit'] = ['Le nom du produit est obligatoire (minimum 2 caractères).'];
         }
 
         $montant = str_replace(',', '.', (string) $data['montant']);
         if ($montant === '' || !is_numeric($montant) || (float) $montant <= 0) {
-            $errors['montant'][] = 'Le montant doit être un nombre supérieur à 0.';
+            $errors['montant'] = ['Le montant doit être un nombre supérieur à 0.'];
         }
 
         if ($data['typeProduit'] === '' || mb_strlen($data['typeProduit']) < 2) {
-            $errors['typeProduit'][] = 'Le type de produit est obligatoire.';
+            $errors['typeProduit'] = ['Le type de produit est obligatoire.'];
+        }
+
+        $typesValid = ['carte_prepaye', 'carte_cadeaux', 'carte_abonnement'];
+        if (!in_array($data['typeProduit'], $typesValid, true)) {
+            if (!isset($errors['typeProduit'])) {
+                $errors['typeProduit'] = [];
+            }
+            $errors['typeProduit'][] = 'Le type sélectionné est invalide.';
         }
 
         if ($data['codeUnique'] !== '' && !preg_match('/^[A-Za-z0-9\-_]{3,60}$/', $data['codeUnique'])) {
-            $errors['codeUnique'][] = 'Le code unique doit contenir 3 à 60 caractères alphanumériques, tirets ou underscores.';
+            $errors['codeUnique'] = ['Le code unique doit contenir 3 à 60 caractères alphanumériques, tirets ou underscores.'];
         }
 
-        if (!in_array($data['statut'], ['disponible', 'vendu', 'hors_service', 'en_reparation'], true)) {
-            $errors['statut'][] = 'Le statut sélectionné est invalide.';
+        $statutsValid = ['disponible', 'vendu', 'expire'];
+        if (!in_array($data['statut'], $statutsValid, true)) {
+            $errors['statut'] = ['Le statut sélectionné est invalide.'];
         }
 
         return $errors;
@@ -329,10 +336,15 @@ final class ProduitController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         if ($this->isCsrfTokenValid('delete' . $id, $request->getPayload()->getString('_token'))) {
-            $entityManager->getConnection()->executeStatement(
-                'DELETE FROM produit WHERE id_produit = :id AND user_id = :user_id',
-                ['id' => $id, 'user_id' => $user->getId()]
-            );
+            $produitEntity = $entityManager->getRepository(Produit::class)->findOneBy([
+                'id' => $id,
+                'user' => $user,
+            ]);
+
+            if ($produitEntity instanceof Produit) {
+                $entityManager->remove($produitEntity);
+                $entityManager->flush();
+            }
         }
 
         return $this->redirectToRoute('produit_index');

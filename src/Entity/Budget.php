@@ -32,8 +32,8 @@ class Budget
     #[ORM\Column(length: 20)]
     private string $statut = 'actif';
 
-    #[ORM\Column(name: 'date_creation', type: 'datetime_mutable')]
-    private ?\DateTimeInterface $dateCreation = null;
+    #[ORM\Column(name: 'date_creation', type: 'datetime')]
+    private ?\DateTime $dateCreation = null;
 
     /** @var Collection<int, Depense> */
     #[ORM\OneToMany(mappedBy: 'budget', targetEntity: Depense::class)]

@@ -52,19 +52,19 @@
                                                     {{ portefeuille.solde_total|number_format(2, ',', ' ') }} {{ portefeuille.devise_principale }}
                                                 </td>
                                                 <td class="text-end pe-4">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1" 
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-action-icon btn-sm me-1"
                                                             onclick="showQrCode('{{ path('front_qrcode_wallet', {id: portefeuille.id}) }}', '{{ portefeuille.nom }}')"
                                                             title="Afficher QR Code">
-                                                        <i class="fas fa-qrcode"></i>
+                                                        <i class="fas fa-qrcode" aria-hidden="true"></i><span class="visually-hidden">QR Code</span>
                                                     </button>
-                                                    <a href="{{ path('front_portefeuille_show', {'id': portefeuille.id}) }}" class="btn btn-sm btn-outline-info me-1" title="Voir les détails">
-                                                        <i class="fas fa-eye"></i>
+                                                    <a href="{{ path('front_portefeuille_show', {'id': portefeuille.id}) }}" class="btn btn-sm btn-outline-info btn-action-icon btn-sm me-1" title="Voir les détails">
+                                                        <i class="fas fa-eye" aria-hidden="true"></i><span class="visually-hidden">Voir</span>
                                                     </a>
-                                                    <a href="{{ path('front_portefeuille_edit', {'id': portefeuille.id}) }}" class="btn btn-sm btn-outline-primary me-1" title="Modifier">
-                                                        <i class="fas fa-pen"></i>
+                                                    <a href="{{ path('front_portefeuille_edit', {'id': portefeuille.id}) }}" class="btn btn-sm btn-outline-primary btn-action-icon btn-sm me-1" title="Modifier">
+                                                        <i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span>
                                                     </a>
-                                                    <a href="{{ path('front_carte_new', {'portefeuille_id': portefeuille.id}) }}" class="btn btn-sm btn-outline-primary me-1" title="Créer une carte">
-                                                        <i class="fas fa-credit-card"></i>
+                                                    <a href="{{ path('front_carte_new', {'portefeuille_id': portefeuille.id}) }}" class="btn btn-sm btn-outline-primary btn-action-icon btn-sm me-1" title="Créer une carte">
+                                                        <i class="fas fa-credit-card" aria-hidden="true"></i><span class="visually-hidden">Créer une carte</span>
                                                     </a>
                                                     
                                                     {% include 'frontoffice/portefeuille/_delete_form.html.twig' with { portefeuille: portefeuille } %}

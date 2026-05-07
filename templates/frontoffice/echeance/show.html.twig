@@ -7,7 +7,7 @@
     <div class="container py-4">
         <div class="d-flex gap-2 mb-4">
             <a href="{{ path('echeance_index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i> Retour</a>
-            <a href="{{ path('echeance_edit', {id: echeance.id}) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Modifier</a>
+            <a href="{{ path('echeance_edit', {id: echeance.id}) }}" class="btn btn-primary btn-action-icon" title="Modifier"><i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span></a>
             {% include 'frontoffice/echeance/_delete_form.html.twig' with {action: path('echeance_delete', {id: echeance.id}), echeance: echeance} %}
         </div>
 

@@ -26,8 +26,27 @@
     
     <!-- Main Style Sheet (Asset Symfony) -->
     <link rel="stylesheet" href="{{ asset('frontoffice/css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 
     <style>
+        html, body {
+            width: 100%;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        main {
+            padding: 1rem 0 2rem;
+        }
+
+        @media (max-width: 576px) {
+            main {
+                padding: 0.75rem 0 1.5rem;
+            }
+        }
+
         html:not([data-theme='dark']) .form-control,
         html:not([data-theme='dark']) .form-select,
         html:not([data-theme='dark']) .form-control:focus,
@@ -96,6 +115,9 @@
             border-color: #374151 !important;
         }
     </style>
+
+    {# Couche UI premium : espacements, ombres, navigation, formulaires, tableaux (sans changer la structure) #}
+    <link rel="stylesheet" href="{{ asset('frontoffice/css/fintrack-premium.css') }}">
 
     {% block stylesheets %}{% endblock %}
 </head>

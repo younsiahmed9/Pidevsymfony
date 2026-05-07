@@ -34,7 +34,7 @@ final class DashboardController extends AbstractController
             'nom' => 'u.full_name',
             'email' => 'u.email',
             'role' => 'u.role',
-            'solde' => 'u.solde',
+            'solde' => 'solde',
             'created_at' => 'u.created_at',
         ];
 
@@ -61,7 +61,11 @@ final class DashboardController extends AbstractController
                 u.email,
                 LOWER(u.role) AS role,
                 u.is_active,
-                u.solde,
+                (
+                    SELECT COALESCE(SUM(p.solde_total), 0)
+                    FROM portefeuille p
+                    WHERE p.user_id = u.id
+                ) AS solde,
                 u.created_at,
                 u.updated_at
             FROM users u

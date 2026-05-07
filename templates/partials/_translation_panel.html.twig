@@ -1,0 +1,411 @@
+{# Composant de traduction du contenu du document #}
+<div class="card border-0 shadow-lg rounded-4 mt-5 mb-5 overflow-hidden translation-premium-card">
+    <div class="card-header bg-gradient-primary-soft border-0 py-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 px-4">
+        <div>
+            <h5 class="text-primary fw-bold mb-0 d-flex align-items-center">
+                <span class="icon-circle bg-white text-primary me-3 shadow-sm">
+                    <i class="fas fa-globe-americas"></i>
+                </span>
+                Intelligence Linguistique
+            </h5>
+            <p class="text-muted small mb-0 mt-1 ms-5 d-none d-md-block">Analyse et traduction instantanée de vos documents précieux</p>
+        </div>
+        <div class="position-relative">
+            <select class="form-select border-0 bg-white rounded-pill px-4 py-3 fw-bold text-dark shadow-sm custom-select-lang" id="translationLanguage" style="min-width: 280px; cursor: pointer; border-left: 4px solid #0d6efd !important;">
+                <option value="">-- Choisir une langue cible --</option>
+            </select>
+            <i class="fas fa-magic position-absolute text-primary" style="right: 45px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 0.9rem;"></i>
+        </div>
+    </div>
+
+    <div class="card-body p-4 p-md-5 bg-white">
+        <div id="translationStatus" class="alert border-0 rounded-4 p-5 mb-0 d-none flex-column align-items-center justify-content-center text-center glass-loader" role="alert">
+            <div class="loader-container mb-4">
+                <div class="spinner-grow text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                <div class="spinner-grow text-primary-light" role="status" style="width: 2rem; height: 2rem; animation-delay: 0.2s;"></div>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Traduction Intelligente en cours...</h5>
+            <p class="text-muted mb-0">Nos algorithmes analysent la structure et le contexte de votre document.</p>
+        </div>
+
+        <div id="translationError" class="alert alert-danger border-0 rounded-4 p-4 d-none shadow-sm animate-shake" role="alert"></div>
+
+        <div id="translationResult" class="d-none result-animation-staggered">
+            <div class="row g-4 overflow-hidden">
+                <div class="col-lg-6">
+                    <div class="text-panel-wrapper original-panel h-100">
+                        <div class="panel-header d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge-premium-light shadow-sm">
+                                <i class="fas fa-file-alt me-2"></i> Document Source
+                            </span>
+                            <span class="text-muted small fw-bold">
+                                <i class="fas fa-font me-1"></i> <span id="originalWordCount">0</span> mots
+                            </span>
+                        </div>
+                        <div class="text-content-area shadow-sm rounded-4 scroll-premium border border-light">
+                            <div id="originalText" class="document-text text-muted p-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="text-panel-wrapper translated-panel h-100">
+                        <div class="panel-header d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge-premium-primary shadow-sm">
+                                <i class="fas fa-language me-2"></i> <span id="translatedLanguageLabel">Traduction</span>
+                            </span>
+                            <span class="text-primary small fw-bold">
+                                <i class="fas fa-check-circle me-1"></i> <span id="translatedWordCount">0</span> mots
+                            </span>
+                        </div>
+                        <div class="text-content-area shadow-lg rounded-4 border-primary-soft scroll-premium-primary highlight-bg">
+                            <div id="translatedText" class="document-text-translated text-dark p-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-5 pt-4 border-top border-light-subtle">
+                <button class="btn btn-glass-secondary rounded-pill px-5 py-3 fw-bold transition-all w-100 w-sm-auto mb-2 mb-sm-0" onclick="copyTranslation()">
+                    <i class="fas fa-copy me-2"></i> Copier
+                </button>
+                <button class="btn btn-premium-primary rounded-pill px-5 py-3 shadow-lg fw-bold transition-all w-100 w-sm-auto" onclick="downloadTranslation()">
+                    <i class="fas fa-cloud-download-alt me-2"></i> Télécharger (.txt)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+    :root {
+        --premium-primary: #0d6efd;
+        --premium-bg-soft: #f8fbff;
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --panel-height: 550px;
+    }
+
+    .translation-premium-card {
+        border: 1px solid rgba(13, 110, 253, 0.1);
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+    }
+
+    .bg-gradient-primary-soft {
+        background: linear-gradient(90deg, #f8fbff 0%, #eef6ff 100%);
+    }
+
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: white;
+        color: #0d6efd;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.12);
+    }
+
+    .custom-select-lang {
+        border-left: 5px solid #0d6efd !important;
+        transition: all 0.3s ease;
+    }
+
+    .custom-select-lang:focus {
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+        border-color: #0d6efd;
+    }
+
+    .text-panel-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .text-content-area {
+        background: #ffffff;
+        padding: 1.5rem;
+        height: var(--panel-height);
+        overflow-y: auto;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .text-content-area:hover {
+        border-color: rgba(13, 110, 253, 0.2) !important;
+    }
+
+    .highlight-bg {
+        background: linear-gradient(180deg, rgba(13, 110, 253, 0.01) 0%, rgba(13, 110, 253, 0.03) 100%);
+    }
+
+    .border-primary-soft {
+        border: 2px solid rgba(13, 110, 253, 0.1);
+    }
+
+    .document-text, .document-text-translated {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        letter-spacing: -0.01em;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .document-text-translated {
+        font-weight: 400;
+        color: #1e293b;
+    }
+
+    /* RTL Support */
+    .rtl-text {
+        direction: rtl;
+        text-align: right;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 1.25rem;
+        line-height: 2;
+    }
+
+    .badge-premium-light {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .badge-premium-primary {
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        padding: 0.6rem 1.2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    /* Scrollbars Premium */
+    .scroll-premium::-webkit-scrollbar, .scroll-premium-primary::-webkit-scrollbar {
+        width: 6px;
+    }
+    .scroll-premium::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+    .scroll-premium-primary::-webkit-scrollbar-thumb {
+        background: rgba(13, 110, 253, 0.3);
+        border-radius: 10px;
+    }
+
+    /* Loader */
+    .glass-loader {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        min-height: 300px;
+    }
+
+    .btn-premium-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #004dc5 100%);
+        color: white;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .btn-premium-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(13, 110, 253, 0.35);
+        color: white;
+    }
+
+    @media (max-width: 991.98px) {
+        .text-content-area {
+            height: 400px;
+        }
+    }
+</style>
+
+{% include 'partials/_common_js.html.twig' %}
+
+<script>
+let currentDocumentId = {{ document.id }};
+let translationData = null;
+
+// Charger les langues supportées au chargement de la page
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadAvailableLanguages();
+    
+    // Event listener pour le changement de langue
+    const select = document.getElementById('translationLanguage');
+    if (select) {
+        select.addEventListener('change', translateDocument);
+    }
+});
+
+/**
+ * Charge les langues supportées
+ */
+async function loadAvailableLanguages() {
+    try {
+        const response = await fetch('/api/translation/languages');
+        const data = await response.json();
+        
+        if (data.success) {
+            const select = document.getElementById('translationLanguage');
+            if (select) {
+                Object.entries(data.languages).sort((a, b) => a[1].localeCompare(b[1])).forEach(([code, name]) => {
+                    const option = document.createElement('option');
+                    option.value = code;
+                    option.textContent = name;
+                    select.appendChild(option);
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement des langues:', error);
+    }
+}
+
+/**
+ * Traduit le document
+ */
+async function translateDocument() {
+    const targetLanguage = document.getElementById('translationLanguage').value;
+    
+    if (!targetLanguage) {
+        return;
+    }
+
+    const statusDiv = document.getElementById('translationStatus');
+    const errorDiv = document.getElementById('translationError');
+    const resultDiv = document.getElementById('translationResult');
+
+    // Afficher le statut et masquer les anciens résultats
+    statusDiv.classList.remove('d-none');
+    statusDiv.classList.add('d-flex');
+    errorDiv.classList.add('d-none');
+    resultDiv.classList.add('d-none');
+
+    try {
+        const response = await fetch(`/api/translation/document/${currentDocumentId}/translate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                targetLanguage: targetLanguage,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Afficher les résultats
+            translationData = data;
+            displayTranslationResults(data);
+            statusDiv.classList.add('d-none');
+            statusDiv.classList.remove('d-flex');
+            resultDiv.classList.remove('d-none');
+            
+            // Animation de scroll vers le résultat
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            showError(data.message || 'Erreur lors de la traduction');
+            statusDiv.classList.add('d-none');
+            statusDiv.classList.remove('d-flex');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Une erreur s\'est produite. Vérifiez votre connexion.');
+        statusDiv.classList.add('d-none');
+        statusDiv.classList.remove('d-flex');
+    }
+}
+
+/**
+ * Affiche les résultats de la traduction
+ */
+function displayTranslationResults(data) {
+    const originalContainer = document.getElementById('originalText');
+    const translatedContainer = document.getElementById('translatedText');
+    const targetLanguage = data.translated.language;
+
+    // Nettoyage des textes (enlever les + si présents)
+    const cleanOrig = data.original.text.replace(/\+/g, ' ');
+    const cleanTrans = data.translated.text.replace(/\+/g, ' ');
+
+    // Original text
+    originalContainer.textContent = cleanOrig;
+    document.getElementById('originalWordCount').textContent = data.original.wordCount;
+
+    // Translated text
+    translatedContainer.textContent = cleanTrans;
+    document.getElementById('translatedWordCount').textContent = data.translated.wordCount;
+    
+    // Support RTL pour l'Arabe et autres
+    const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+    if (rtlLanguages.includes(targetLanguage)) {
+        translatedContainer.classList.add('rtl-text');
+    } else {
+        translatedContainer.classList.remove('rtl-text');
+    }
+
+    // Label de langue
+    const langSelect = document.getElementById('translationLanguage');
+    const selectedOption = langSelect.options[langSelect.selectedIndex];
+    document.getElementById('translatedLanguageLabel').textContent = selectedOption.textContent;
+}
+
+/**
+ * Affiche une erreur
+ */
+function showError(message) {
+    const errorDiv = document.getElementById('translationError');
+    errorDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+            <div>
+                <h6 class="fw-bold mb-0">Attention</h6>
+                <p class="mb-0 small">${message}</p>
+            </div>
+        </div>
+    `;
+    errorDiv.classList.remove('d-none');
+    document.getElementById('translationResult').classList.add('d-none');
+}
+
+/**
+ * Copie la traduction
+ */
+function copyTranslation() {
+    if (!translationData) return;
+    
+    const text = translationData.translated.text.replace(/\+/g, ' ');
+    navigator.clipboard.writeText(text).then(() => {
+        if (typeof showNotification === 'function') {
+            showNotification('✓ Traduction copiée avec succès!', 'success');
+        } else {
+            alert('Traduction copiée avec succès!');
+        }
+    });
+}
+
+/**
+ * Télécharge la traduction
+ */
+function downloadTranslation() {
+    if (!translationData) return;
+    
+    const text = translationData.translated.text.replace(/\+/g, ' ');
+    const langCode = translationData.translated.language;
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', `traduction_${currentDocumentId}_${langCode}.txt`);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+</script>

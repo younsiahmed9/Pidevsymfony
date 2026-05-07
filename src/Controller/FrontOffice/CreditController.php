@@ -3,8 +3,10 @@
 namespace App\Controller\FrontOffice;
 
 use App\Entity\Credit;
+use App\Entity\User;
 use App\Repository\CreditRepository;
 use App\Repository\CompteRepository;
+use App\Service\SmsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -74,10 +76,15 @@ class CreditController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, CompteRepository $compteRepository): Response
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        CompteRepository $compteRepository,
+        SmsService $smsService,
+    ): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
+        /** @var User|null $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');
@@ -142,6 +149,22 @@ class CreditController extends AbstractController
                 $creditErrors['montant'][] = 'Le montant doit être un nombre positif supérieur à 0.';
             }
 
+            // Capacité d'emprunt (règle simple et stable) : max = 3x le solde du compte courant
+            if ($compte && $compte->getUtilisateur() === $user && is_numeric($normalizedMontant)) {
+                $solde = (float) $compte->getSolde();
+                $requested = (float) $normalizedMontant;
+                $maxBorrowable = max(0.0, $solde) * 3;
+                if ($solde <= 0) {
+                    $creditErrors['montant'][] = 'Solde insuffisant : votre compte doit avoir un solde positif pour demander un crédit.';
+                } elseif ($requested > $maxBorrowable) {
+                    $creditErrors['montant'][] = sprintf(
+                        'Montant trop élevé selon votre solde. Solde: %.2f DT, montant maximum autorisé: %.2f DT.',
+                        $solde,
+                        $maxBorrowable
+                    );
+                }
+            }
+
             // Vérification durée
             $dureeMois = (int) ($data['duree_mois'] ?? 0);
             if ($dureeMois <= 0) {
@@ -198,7 +221,28 @@ class CreditController extends AbstractController
                 $entityManager->persist($credit);
                 $entityManager->flush();
 
-                $this->addFlash('success', 'Votre demande de crédit a été soumise.');
+                $phone = trim((string) ($user->getClient()?->getPhone() ?? ''));
+                if ($phone !== '') {
+                    $msg = sprintf(
+                        'FinTrack: votre demande de crédit de %s DT est enregistrée (en attente). Nous vous informerons après traitement.',
+                        $credit->getMontant()
+                    );
+                    // Crédit: envoi SMS via Twilio uniquement (comme demandé)
+                    if ($smsService->sendSmsTwilioOnly($phone, $msg)) {
+                        // SMS envoyé avec succès
+                        $this->addFlash('success', '✅ Votre demande de crédit a été soumise. SMS de confirmation envoyé à ' . substr($phone, -4));
+                    } else {
+                        $hint = $smsService->getLastFailureHintFr();
+                        $detail = ($hint !== null && $hint !== '') ? ' Erreur: ' . $hint : ' Vérifiez votre numéro et réessayez.';
+                        $this->addFlash('danger', '❌ Demande enregistrée, mais le SMS n\'a pas pu être envoyé.' . $detail);
+                    }
+                } else {
+                    $this->addFlash(
+                        'warning',
+                        '⚠️ Demande enregistrée. Ajoutez un numéro de téléphone dans votre profil pour recevoir les confirmations par SMS.'
+                    );
+                }
+                
                 return $this->redirectToRoute('credit_index');
             }
 

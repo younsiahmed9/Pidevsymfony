@@ -36,7 +36,7 @@ class Echeance
     private ?\DateTimeInterface $dateRappel = null;
 
     #[ORM\Column(type: 'string', columnDefinition: "ENUM('pending','notified','completed','overdue') NOT NULL DEFAULT 'pending'")]
-    #[Assert\Choice(choices: ['pending', 'notified', 'completed', 'overdue'], message: 'Statut invalide.')]
+    #[Assert\NotBlank(message: 'Le statut est obligatoire.')]
     private string $statut = 'pending';
 
     #[ORM\Column(type: 'text', nullable: true)]

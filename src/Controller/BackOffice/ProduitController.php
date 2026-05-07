@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Form\Exception\TransformationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/admin/produit', name: 'admin_produit_')]
 final class ProduitController extends AbstractController
@@ -77,6 +78,12 @@ final class ProduitController extends AbstractController
         $sql .= ' ORDER BY p.' . $sortBy . ' ' . $sortOrder;
 
         $produits = $entityManager->getConnection()->fetchAllAssociative($sql, $params);
+        $produits = array_map(function (array $produit): array {
+            $produit['typeProduitLabel'] = $this->getTypeProduitLabel($produit['typeProduit'] ?? null);
+            $produit['codeUniqueDisplay'] = $this->getCodeUniqueDisplay($produit['codeUnique'] ?? null, (int) ($produit['id'] ?? 0));
+
+            return $produit;
+        }, $produits);
 
         // Statistiques
         $stats = $entityManager->getConnection()->fetchAllAssociative(
@@ -99,10 +106,12 @@ final class ProduitController extends AbstractController
              FROM users ORDER BY full_name ASC'
         );
 
-        // Types de produits uniques pour le filtre
-        $typesProduits = $entityManager->getConnection()->fetchAllAssociative(
-            'SELECT DISTINCT type_produit FROM produit WHERE type_produit IS NOT NULL ORDER BY type_produit'
-        );
+        // Types autorisés côté backoffice
+        $typesProduits = [
+            ['value' => 'carte_prepaye', 'label' => 'Carte Prépayée'],
+            ['value' => 'carte_cadeaux', 'label' => 'Carte Cadeaux'],
+            ['value' => 'carte_abonnement', 'label' => 'Carte Abonnement'],
+        ];
 
         return $this->render('backoffice/produit/index.html.twig', [
             'produits' => $produits,
@@ -121,7 +130,7 @@ final class ProduitController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -140,7 +149,7 @@ final class ProduitController extends AbstractController
             'nomProduit' => '',
             'montant' => '',
             'codeUnique' => '',
-            'typeProduit' => '',
+            'typeProduit' => 'carte_prepaye',
             'statut' => 'disponible',
         ];
 
@@ -152,17 +161,21 @@ final class ProduitController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $data = $form->getData();
+                $typeProduit = $this->normalizeTypeProduitValue($data['typeProduit'] ?? null);
+                $codeUnique = $this->normalizeCodeUnique($data['codeUnique'] ?? null);
+                if ($codeUnique === '') {
+                    $codeUnique = $this->generateUniqueCode($entityManager);
+                }
 
                 // Validation supplémentaire
                 $produit = new Produit();
                 $produit->setNomProduit($data['nomProduit']);
                 $produit->setMontant($data['montant']);
-                $produit->setCodeUnique($data['codeUnique'] !== '' ? $data['codeUnique'] : uniqid('PRD-'));
-                $produit->setTypeProduit($data['typeProduit']);
+                $produit->setCodeUnique($codeUnique);
+                $produit->setTypeProduit($typeProduit);
                 $produit->setStatut($data['statut']);
 
                 // Valider l'entité
-                $validator = $this->container->get('validator');
                 $violations = $validator->validate($produit);
                 
                 if (count($violations) > 0) {
@@ -173,8 +186,8 @@ final class ProduitController extends AbstractController
                     'user_id' => (int) $data['user_id'],
                     'nom_produit' => $data['nomProduit'],
                     'montant' => $data['montant'],
-                    'code_unique' => $produit->getCodeUnique(),
-                    'type_produit' => $data['typeProduit'],
+                    'code_unique' => $codeUnique,
+                    'type_produit' => $typeProduit,
                     'statut' => $data['statut'],
                     'date_creation' => (new \DateTime())->format('Y-m-d H:i:s'),
                 ]);
@@ -203,7 +216,7 @@ final class ProduitController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(int $id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -234,17 +247,22 @@ final class ProduitController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $data = $form->getData();
+                $typeProduit = $this->normalizeTypeProduitValue($data['typeProduit'] ?? null);
+                $codeUnique = $this->normalizeCodeUnique($data['codeUnique'] ?? null);
+                if ($codeUnique === '') {
+                    $existingCode = $this->normalizeCodeUnique($produit['codeUnique'] ?? null);
+                    $codeUnique = $existingCode !== '' ? $existingCode : $this->generateUniqueCode($entityManager);
+                }
 
                 // Validation supplémentaire
                 $produitEntity = new Produit();
                 $produitEntity->setNomProduit($data['nomProduit']);
                 $produitEntity->setMontant($data['montant']);
-                $produitEntity->setCodeUnique($data['codeUnique'] !== '' ? $data['codeUnique'] : $produit['codeUnique']);
-                $produitEntity->setTypeProduit($data['typeProduit']);
+                $produitEntity->setCodeUnique($codeUnique);
+                $produitEntity->setTypeProduit($typeProduit);
                 $produitEntity->setStatut($data['statut']);
 
                 // Valider l'entité
-                $validator = $this->container->get('validator');
                 $violations = $validator->validate($produitEntity);
                 
                 if (count($violations) > 0) {
@@ -255,8 +273,8 @@ final class ProduitController extends AbstractController
                     'user_id' => (int) $data['user_id'],
                     'nom_produit' => $data['nomProduit'],
                     'montant' => $data['montant'],
-                    'code_unique' => $produitEntity->getCodeUnique(),
-                    'type_produit' => $data['typeProduit'],
+                    'code_unique' => $codeUnique,
+                    'type_produit' => $typeProduit,
                     'statut' => $data['statut'],
                 ], ['id_produit' => $id]);
 
@@ -318,6 +336,9 @@ final class ProduitController extends AbstractController
             throw $this->createNotFoundException('Produit introuvable.');
         }
 
+        $produit['typeProduitLabel'] = $this->getTypeProduitLabel($produit['typeProduit'] ?? null);
+        $produit['codeUniqueDisplay'] = $this->getCodeUniqueDisplay($produit['codeUnique'] ?? null, (int) ($produit['id'] ?? 0));
+
         return $this->render('backoffice/produit/show.html.twig', [
             'produit' => $produit,
         ]);
@@ -357,5 +378,66 @@ final class ProduitController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_produit_index');
+    }
+
+    private function getTypeProduitLabel(?string $type): string
+    {
+        $normalizedType = $this->normalizeTypeProduitValue($type);
+
+        return match ($normalizedType) {
+            'carte_prepaye' => 'Carte Prépayée',
+            'carte_cadeaux' => 'Carte Cadeaux',
+            'carte_abonnement' => 'Carte Abonnement',
+            default => 'Non défini',
+        };
+    }
+
+    private function normalizeTypeProduitValue(mixed $type): string
+    {
+        $value = strtolower(trim((string) $type));
+
+        return match ($value) {
+            'carte_prepaye', 'carte_prepayee', 'carte prepayee', 'carte prepayee', 'carte prepaye', 'prepayee', 'prepayee carte' => 'carte_prepaye',
+            'carte_cadeaux', 'carte cadeau', 'carte cadeaux', 'cadeau', 'cadeaux' => 'carte_cadeaux',
+            'carte_abonnement', 'carte abonnement', 'abonnement' => 'carte_abonnement',
+            default => 'carte_prepaye',
+        };
+    }
+
+    private function normalizeCodeUnique(mixed $codeUnique): string
+    {
+        $value = strtoupper(trim((string) $codeUnique));
+
+        // Ignore les entrées qui ressemblent à un type produit au lieu d'un code.
+        if ($value === '' || in_array($this->normalizeTypeProduitValue($value), ['carte_prepaye', 'carte_cadeaux', 'carte_abonnement'], true) && str_starts_with($value, 'CARTE')) {
+            return '';
+        }
+
+        return $value;
+    }
+
+    private function getCodeUniqueDisplay(?string $codeUnique, int $id): string
+    {
+        $normalized = $this->normalizeCodeUnique($codeUnique);
+        if ($normalized !== '') {
+            return $normalized;
+        }
+
+        return sprintf('PRD-%06d', max($id, 0));
+    }
+
+    private function generateUniqueCode(EntityManagerInterface $entityManager): string
+    {
+        $connection = $entityManager->getConnection();
+
+        do {
+            $candidate = 'PRD-' . strtoupper(bin2hex(random_bytes(4)));
+            $exists = (int) $connection->fetchOne(
+                'SELECT COUNT(*) FROM produit WHERE code_unique = :code',
+                ['code' => $candidate]
+            ) > 0;
+        } while ($exists);
+
+        return $candidate;
     }
 }

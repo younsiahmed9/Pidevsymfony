@@ -7,8 +7,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class GeoLocateService
 {
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
-        private readonly string $apiLocateApiKey,
+        private HttpClientInterface $httpClient,
+        private string $apiLocateApiKey,
     ) {
     }
 

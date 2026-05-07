@@ -1,0 +1,250 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Moisson de fin de mois - FinTrack{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row mb-5 animate__animated animate__fadeIn">
+        <div class="col-lg-8">
+            <h1 class="display-4 fw-bold text-dark mb-2">Moisson de fin de <span class="text-primary text-gradient">mois</span></h1>
+            <p class="lead text-muted">Récoltez les surplus de vos budgets pour faire grandir votre épargne.</p>
+        </div>
+        <div class="col-lg-4 d-flex align-items-center justify-content-lg-end">
+            <a href="{{ path('budget_index') }}" class="btn btn-outline-secondary rounded-pill px-4 me-2">
+                <i class="fas fa-arrow-left me-2"></i>Retour
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeInLeft">
+                <div class="card-header bg-white border-0 py-4 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Récolter mes surplus</h5>
+                        <span class="badge bg-soft-primary text-primary rounded-pill px-3 py-2">Moisson Automatique</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 custom-bundle-table">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 py-3 text-uppercase small fw-bold text-muted" style="width: 50px;">Sélec.</th>
+                                    <th class="py-3 text-uppercase small fw-bold text-muted">Budget</th>
+                                    <th class="py-3 text-uppercase small fw-bold text-muted text-center">Disponible à récolter</th>
+                                    <th class="py-3 text-uppercase small fw-bold text-muted" style="width: 200px;">Montant à moissonner</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for budget in budgets %}
+                                {% set residual = budget.montant_total - budget.total_depense %}
+                                <tr class="bundle-row transition-all {{ residual <= 0 ? 'opacity-50' : '' }}">
+                                    <td class="ps-4">
+                                        <div class="form-check custom-checkbox-lg">
+                                            <input class="form-check-input sweep-checkbox" type="checkbox" 
+                                                   {% if residual <= 0 %}disabled{% endif %}
+                                                   data-id="{{ budget.id_budget }}" 
+                                                   data-name="{{ budget.nom_budget }}"
+                                                   data-residual="{{ residual }}">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ budget.nom_budget }}</div>
+                                        <div class="small text-muted">Limite : {{ budget.montant_total }} TND</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge {{ residual > 0 ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger' }} rounded-pill px-3 py-2">
+                                            {{ residual|number_format(2, '.', '') }} TND
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control border-0 bg-light rounded-3 sweep-amount" 
+                                                   value="{{ residual > 0 ? (residual * 0.5)|number_format(2, '.', '') : 0 }}" 
+                                                   step="0.01" min="0.01" max="{{ residual }}" disabled>
+                                            <span class="input-group-text border-0 bg-light small">TND</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-lg rounded-4 animate__animated animate__fadeInRight mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 text-center">Grange d'épargne</h5>
+                    
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Compte de destination</label>
+                        <select id="target-account-select" class="form-select border-0 bg-light rounded-3 mb-3">
+                            <option value="">+ Créer un nouveau compte d'épargne</option>
+                            {% for account in existingSavings %}
+                                <option value="{{ account.id_compte }}">{{ account.numero_compte }} (Solde : {{ account.solde }} TND)</option>
+                            {% endfor %}
+                        </select>
+                        <div id="new-account-info" class="p-3 bg-soft-primary rounded-3 small text-primary mb-3">
+                            <i class="fas fa-info-circle me-2"></i> Un nouveau compte sera créé pour accueillir votre récolte avec un taux d'intérêt de 2.5%.
+                        </div>
+                    </div>
+
+                    <div class="text-center bg-light p-4 rounded-4 mb-4">
+                        <div class="small text-muted mb-1 text-uppercase fw-bold">Total de la Récolte</div>
+                        <div class="display-6 fw-bold text-primary"><span id="bundle-total">0.00</span> <small class="fs-6">TND</small></div>
+                    </div>
+
+                    <button id="apply-bundle-btn" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm transition-all py-3" disabled>
+                        <i class="fas fa-tractor me-2"></i>Lancer la Moisson
+                    </button>
+                </div>
+            </div>
+
+            <div class="card border-0 bg-primary text-white rounded-4 shadow-lg overflow-hidden position-relative">
+                <div class="card-body p-4 position-relative z-1">
+                    <h6 class="text-uppercase small fw-bold mb-3 opacity-75">Astuce FinTrack</h6>
+                    <p class="mb-0">Le regroupement automatique vous aide à isoler vos surplus pour éviter les tentations de d&eacute;penses inutiles.</p>
+                </div>
+                <div class="position-absolute top-0 end-0 opacity-10 mt-n3 me-n3">
+                    <i class="fas fa-shield-alt fa-8x rotate-12"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-primary { background-color: rgba(61, 90, 254, 0.1); }
+    .bg-soft-success { background-color: rgba(40, 167, 69, 0.1); }
+    .bg-soft-danger { background-color: rgba(220, 53, 69, 0.1); }
+    .custom-checkbox-lg .form-check-input { width: 1.5rem; height: 1.5rem; }
+    .bundle-row.active { background-color: rgba(61, 90, 254, 0.05); }
+    .transition-all { transition: all 0.3s ease; }
+    .rotate-12 { transform: rotate(12deg); }
+    .text-gradient { background: linear-gradient(45deg, #3d5afe, #8c9eff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+</style>
+ 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('.bundle-row');
+    const totalSpan = document.getElementById('bundle-total');
+    const applyBtn = document.getElementById('apply-bundle-btn');
+    const targetSelect = document.getElementById('target-account-select');
+    const newAccountInfo = document.getElementById('new-account-info');
+
+    function updateSummary() {
+        let total = 0;
+        let count = 0;
+
+        rows.forEach(row => {
+            const cb = row.querySelector('.sweep-checkbox');
+            const amountInput = row.querySelector('.sweep-amount');
+
+            if (cb && cb.checked) {
+                const amount = parseFloat(amountInput.value) || 0;
+                total += amount;
+                count++;
+                
+                row.classList.add('active');
+                amountInput.disabled = false;
+            } else if (cb) {
+                row.classList.remove('active');
+                amountInput.disabled = true;
+            }
+        });
+
+        totalSpan.textContent = total.toFixed(2);
+        applyBtn.disabled = count === 0;
+    }
+
+    targetSelect.addEventListener('change', function() {
+        newAccountInfo.style.display = this.value ? 'none' : 'block';
+    });
+
+    rows.forEach(row => {
+        const cb = row.querySelector('.sweep-checkbox');
+        const amountInput = row.querySelector('.sweep-amount');
+        if (cb) {
+            cb.addEventListener('change', updateSummary);
+            amountInput.addEventListener('input', updateSummary);
+        }
+    });
+
+    applyBtn.addEventListener('click', function() {
+        const sweeps = [];
+        const isNewAccount = !targetSelect.value;
+
+        rows.forEach(row => {
+            const cb = row.querySelector('.sweep-checkbox');
+            const amountInput = row.querySelector('.sweep-amount');
+
+            if (cb && cb.checked) {
+                sweeps.push({
+                    budget_id: cb.dataset.id,
+                    amount: amountInput.value
+                });
+            }
+        });
+
+        const confirmText = isNewAccount 
+            ? `Vous allez ouvrir une NOUVELLE grange (compte épargne) avec une récolte totale de ${totalSpan.textContent} TND.`
+            : `Vous allez verser votre récolte de ${totalSpan.textContent} TND dans votre grange sélectionnée.`;
+
+        Swal.fire({
+            title: isNewAccount ? 'Ouvrir une nouvelle grange ?' : 'Confirmer la récolte ?',
+            text: confirmText,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Lancer la Moisson',
+            cancelButtonText: 'Attendre encore',
+            confirmButtonColor: '#3d5afe',
+            customClass: { popup: 'rounded-4', confirmButton: 'rounded-pill', cancelButton: 'rounded-pill' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                applyBtn.disabled = true;
+                applyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Moisson en cours...';
+
+                fetch('{{ path("bundle_apply") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        sweeps: sweeps,
+                        target_account_id: targetSelect.value 
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Moisson Terminée !',
+                            text: data.message,
+                            customClass: { popup: 'rounded-4' }
+                        }).then(() => {
+                            window.location.href = '{{ path("compte_index") }}';
+                        });
+                    } else {
+                        throw new Error(data.error);
+                    }
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Échec de la récolte',
+                        text: err.message,
+                        customClass: { popup: 'rounded-4' }
+                    });
+                    applyBtn.disabled = false;
+                    applyBtn.innerHTML = '<i class="fas fa-tractor me-2"></i>Lancer la Moisson';
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport Documentaire Premium - FinTrack</title>
+    <style>
+        /* 
+           DESIGN SYSTEM PREMIUM POUR PDF (DOMPDF)
+        */
+        @page {
+            margin: 0cm 0cm;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 11px;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        /* Header & Brand */
+        .header-bg {
+            background: #1e293b;
+            height: 140px;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            z-index: -1;
+        }
+        .container {
+            padding: 40px 50px;
+        }
+        .brand-section {
+            color: #ffffff;
+            margin-bottom: 40px;
+        }
+        .brand-name {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .report-title {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: table;
+            width: 100%;
+            border-spacing: 15px 0;
+            margin: 0 -15px 30px -15px;
+        }
+        .stat-card {
+            display: table-cell;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            width: 25%;
+        }
+        .stat-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #0f172a;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* Section Titles */
+        .section-header {
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        /* Professional Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+            min-width: 70px;
+        }
+        .badge-valide { background-color: #dcfce7; color: #15803d; }
+        .badge-expire { background-color: #fee2e2; color: #b91c1c; }
+        .badge-a_renouveler { background-color: #fef3c7; color: #92400e; }
+        .badge-archive { background-color: #f1f5f9; color: #475569; }
+
+        /* Helpers */
+        .text-muted { color: #64748b; }
+        .text-primary { color: #51B56D; }
+        .footer {
+            position: fixed;
+            bottom: 30px;
+            left: 50px;
+            right: 50px;
+            text-align: center;
+            font-size: 9px;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
+        }
+        .page-number:after { content: counter(page); }
+
+        .doc-type {
+            font-weight: bold;
+            color: #475569;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-bg"></div>
+
+    <div class="container">
+        <div class="brand-section">
+            <div class="brand-name">FINTRACK <span style="font-weight: normal; opacity: 0.7;">GED</span></div>
+            <div class="report-title">Inventaire Documentaire Global</div>
+            <div style="margin-top: 15px; font-size: 10px; opacity: 0.9;">
+                Généré le {{ generatedAt|date('d/m/Y') }} à {{ generatedAt|date('H:i') }}<br>
+                Propriétaire : {{ user.fullName ?: user.email }}
+            </div>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+                <span class="stat-value">{{ stats.total }}</span>
+                <span class="stat-label">Documents Totaux</span>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #10b981;">
+                <span class="stat-value">{{ stats.valide }}</span>
+                <span class="stat-label">Fichiers Valides</span>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+                <span class="stat-value">{{ stats.a_renouveler }}</span>
+                <span class="stat-label">À Renouveler</span>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #ef4444;">
+                <span class="stat-value">{{ stats.expire }}</span>
+                <span class="stat-label">Expirés / Alertes</span>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <span class="section-title">Détails des Documents</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="35%">Titre du Document</th>
+                    <th width="15%">Type</th>
+                    <th width="15%">Catégorie</th>
+                    <th width="15%">Statut</th>
+                    <th width="20%">Date Échéance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td>
+                        <div style="font-weight: bold; color: #0f172a; font-size: 11px;">{{ doc.titre }}</div>
+                        <div style="font-size: 9px; color: #64748b; margin-top: 2px;">Ajouté le {{ doc.createdAt|date('d/m/Y') }}</div>
+                    </td>
+                    <td><span class="doc-type">{{ doc.typeDocument|upper }}</span></td>
+                    <td>{{ doc.categorie ? doc.categorie.nomCategorie : '-' }}</td>
+                    <td>
+                        <span class="badge badge-{{ doc.statut }}">
+                            {{ doc.statut|replace({'a_renouveler':'À RENOUVELER'})|upper }}
+                        </span>
+                    </td>
+                    <td style="font-weight: bold; color: {{ doc.dateEcheance and doc.dateEcheance < date('now') ? '#b91c1c' : '#1e293b' }}">
+                        {{ doc.dateEcheance ? doc.dateEcheance|date('d/m/Y') : '-' }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        Aucun document trouvé dans cet inventaire.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top: 50px; background: #f8fafc; border-radius: 8px; padding: 20px;">
+            <div style="font-weight: bold; color: #1e293b; margin-bottom: 10px;">Résumé Technique</div>
+            <div style="display: table; width: 100%;">
+                <div style="display: table-cell; width: 50%;">
+                    <span class="text-muted">Volume de stockage :</span> 
+                    <strong>{{ (stats.total_size / 1048576)|round(2) }} Mo</strong>
+                </div>
+                <div style="display: table-cell; width: 50%;">
+                    <span class="text-muted">Dernière mise à jour :</span> 
+                    <strong>{{ "now"|date('d/m/Y H:i') }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Document confidentiel - FinTrack GED &copy; {{ "now"|date('Y') }} - Page <span class="page-number"></span>
+    </div>
+</body>
+</html>

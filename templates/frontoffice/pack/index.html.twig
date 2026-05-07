@@ -1,0 +1,144 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Mes Packs de Documents{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light min-vh-100">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-5 bg-white p-4 rounded-4 shadow-sm border-start border-primary border-4">
+            <div>
+                <h1 class="h2 fw-bold text-dark mb-1">
+                    <i class="fas fa-layer-group text-primary me-2"></i>Mes Packs
+                </h1>
+                <p class="text-muted mb-0">Regroupez vos documents et partagez-les via un lien unique sécurisé.</p>
+            </div>
+            <button class="btn btn-primary btn-lg rounded-pill shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#newPackModal">
+                <i class="fas fa-plus-circle me-2"></i> Nouveau Pack
+            </button>
+        </div>
+
+        <div class="row g-4">
+            {% for pack in packs %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover overflow-hidden">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="p-3 bg-primary bg-opacity-10 rounded-4">
+                                    <i class="fas fa-box-open fa-2x text-primary"></i>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-link text-muted p-0 shadow-none" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
+                                        <li><a class="dropdown-item py-2" href="{{ path('pack_show', {id: pack.id}) }}"><i class="fas fa-eye me-2 text-primary small"></i> Gérer le pack</a></li>
+                                        <li><button class="dropdown-item py-2" onclick="copyShareLink('{{ url('app_public_pack_share', {token: pack.tokenPartage}) }}')"><i class="fas fa-share-alt me-2 text-success small"></i> Copier le lien</button></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="post" action="{{ path('pack_delete', {'id': pack.id}) }}" onsubmit="return confirm('Supprimer ce pack ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ pack.id) }}">
+                                                <button class="dropdown-item py-2 text-danger"><i class="fas fa-trash-alt me-2 small"></i> Supprimer</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-2">{{ pack.nomPack }}</h5>
+                            <p class="text-muted small mb-4 flex-grow-1">{{ pack.description ?: 'Aucune description.' }}</p>
+
+                            <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto">
+                                <span class="badge bg-light text-primary rounded-pill px-3 py-2 small">
+                                    <i class="fas fa-file-alt me-1"></i> {{ pack.documents|length }} documents
+                                </span>
+                                <span class="text-muted small">
+                                    <i class="far fa-calendar-alt me-1"></i> {{ pack.createdAt|date('d/m/Y') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block border">
+                        <i class="fas fa-layer-group fa-4x text-light mb-4 d-block"></i>
+                        <h3 class="fw-bold text-dark">Aucun pack de documents</h3>
+                        <p class="text-muted mb-4">Créez votre premier pack pour regrouper vos fichiers par projet.</p>
+                        <button class="btn btn-primary rounded-pill px-5 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#newPackModal">
+                            Créer mon premier pack
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Modal Nouveau Pack -->
+<div class="modal fade" id="newPackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 p-4">
+                <h5 class="modal-title fw-bold"><i class="fas fa-folder-plus text-primary me-2"></i>Nouveau Pack de Documents</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Nom du Pack</label>
+                    <input type="text" id="packName" class="form-control rounded-pill px-3" placeholder="Ex: Dossier Immobilier, Factures Q1...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Description (Optionnel)</label>
+                    <textarea id="packDesc" class="form-control rounded-4 px-3" rows="3" placeholder="A quoi sert ce pack ?"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="createPack()">Créer le Pack</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-hover { transition: all 0.3s ease; }
+    .transition-hover:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important; }
+</style>
+
+<script>
+async function createPack() {
+    const nom = document.getElementById('packName').value.trim();
+    const desc = document.getElementById('packDesc').value.trim();
+    
+    if (!nom) {
+        alert('Le nom du pack est obligatoire.');
+        return;
+    }
+
+    try {
+        const response = await fetch('{{ path("pack_new") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nom: nom, description: desc })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Erreur lors de la création du pack.');
+    }
+}
+
+function copyShareLink(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        alert('✓ Lien de partage copié dans le presse-papier !');
+    }).catch(err => {
+        console.error('Erreur lors de la copie du lien:', err);
+    });
+}
+</script>
+{% endblock %}

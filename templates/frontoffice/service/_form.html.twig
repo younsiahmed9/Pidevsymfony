@@ -46,7 +46,11 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="typeService" class="form-label fw-bold text-muted small text-uppercase">Type de service</label>
-                <input type="text" id="typeService" name="typeService" class="form-control form-control-lg border-0 bg-light shadow-none" value="{{ serviceData.typeService|default('') }}" placeholder="Ex: Divertissement, Santé, Logement..." required>
+                <select id="typeService" name="typeService" class="form-select form-select-lg border-0 bg-light shadow-none" required>
+                    <option value="">Sélectionner un type</option>
+                    <option value="abonnement" {{ serviceData.typeService|default('') == 'abonnement' ? 'selected' : '' }}>Abonnement</option>
+                    <option value="facture" {{ serviceData.typeService|default('') == 'facture' ? 'selected' : '' }}>Facture</option>
+                </select>
                 {% for error in formErrors.typeService|default([]) %}
                     <div class="text-danger small mt-1">{{ error }}</div>
                 {% endfor %}
@@ -59,7 +63,7 @@
                 <select id="statut" name="statut" class="form-select form-select-lg border-0 bg-light shadow-none" required>
                     <option value="actif" {{ serviceData.statut|default('') == 'actif' ? 'selected' : '' }}>Actif</option>
                     <option value="suspendu" {{ serviceData.statut|default('') == 'suspendu' ? 'selected' : '' }}>Suspendu</option>
-                    <option value="termine" {{ serviceData.statut|default('') == 'termine' ? 'selected' : '' }}>Terminé</option>
+                    <option value="expire" {{ serviceData.statut|default('') == 'expire' ? 'selected' : '' }}>Expiré</option>
                 </select>
                 {% for error in formErrors.statut|default([]) %}
                     <div class="text-danger small mt-1">{{ error }}</div>

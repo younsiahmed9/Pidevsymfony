@@ -42,20 +42,16 @@
                         </div>
                     </div>
                     <div class="card-footer bg-white border-0 p-4 pt-0">
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <a href="{{ path('categorie_edit', {id: categorie.id}) }}" class="btn btn-warning w-100 rounded-pill fw-bold text-white shadow-sm">
-                                    <i class="fas fa-edit me-2"></i> Modifier
-                                </a>
-                            </div>
-                            <div class="col-6">
-                                <form method="post" action="{{ path('categorie_delete', {'id': categorie.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer cette catégorie ?');">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ categorie.id) }}">
-                                    <button class="btn btn-danger w-100 rounded-pill fw-bold shadow-sm">
-                                        <i class="fas fa-trash-alt me-2"></i> Supprimer
-                                    </button>
-                                </form>
-                            </div>
+                        <div class="d-flex gap-2 justify-content-center align-items-center">
+                            <a href="{{ path('categorie_edit', {id: categorie.id}) }}" class="btn btn-warning btn-action-icon text-white shadow-sm" title="Modifier">
+                                <i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span>
+                            </a>
+                            <form method="post" action="{{ path('categorie_delete', {'id': categorie.id}) }}" class="mb-0" onsubmit="return confirm('Voulez-vous vraiment supprimer cette catégorie ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ categorie.id) }}">
+                                <button type="submit" class="btn btn-danger btn-action-icon shadow-sm" title="Supprimer">
+                                    <i class="fas fa-trash-alt" aria-hidden="true"></i><span class="visually-hidden">Supprimer</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

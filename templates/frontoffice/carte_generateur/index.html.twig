@@ -1,0 +1,352 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Personnalisation de Carte - FinTrack{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .generator-hero {
+            background: linear-gradient(135deg, #0d1b3a 0%, #182d88 100%);
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(24, 45, 136, 0.2);
+            margin-bottom: 60px;
+        }
+
+        .generator-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(24, 45, 136, 0.3);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: rgba(248, 249, 255, 0.8);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #182d88;
+            background: rgba(24, 45, 136, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #182d88;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-zone:hover .upload-icon {
+            transform: translateY(-5px);
+        }
+
+        .theme-input {
+            border: 2px solid #bae6fd;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+
+        .theme-input:focus {
+            border-color: #182d88;
+            box-shadow: 0 0 0 0.25rem rgba(24, 45, 136, 0.1);
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #182d88 0%, #2d4db3 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(24, 45, 136, 0.3);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(24, 45, 136, 0.4);
+            color: white;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-image-container {
+            position: relative;
+            padding-top: 63%; /* Ratio approx carte de crédit */
+            background: #f8f9fa;
+        }
+
+        .result-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .result-layer-base {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .result-layer-overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 2;
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        #preview-container {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="generator-hero text-center">
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill mb-3 fw-bold">Nouveau & Exclusif</span>
+                <h1 class="display-4 fw-bold mb-3 text-white" style="position: relative; z-index: 2;">Studio Créatif</h1>
+                <p class="lead mb-0 text-white" style="position: relative; z-index: 2;">Transformez votre carte bancaire standard en une œuvre d'art unique grâce à l'Intelligence Artificielle</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center position-relative z-index-1">
+        <!-- Formulaire -->
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-md-5">
+                    <h3 class="fw-bold text-dark mb-4"><i class="fas fa-magic text-warning me-2"></i>Concevez votre carte</h3>
+                    
+                    {% if error %}
+                        <div class="alert alert-danger rounded-3 border-0 shadow-sm mb-4">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" enctype="multipart/form-data" id="generator-form">
+                        
+                        <!-- Zone Upload -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary mb-3">1. Image de base (votre carte actuelle)</label>
+                            <div class="upload-zone" id="drop-zone" onclick="document.getElementById('card_image').click()">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <h5 class="text-dark mb-2">Glissez & Déposez votre image ici</h5>
+                                <p class="text-muted small mb-0">ou cliquez pour parcourir (PNG, JPG, JPEG)</p>
+                                <input type="file" name="card_image" id="card_image" class="d-none" accept="image/*" required>
+                                
+                                <div id="preview-container">
+                                    <img id="image-preview" src="#" alt="Aperçu">
+                                    <div class="mt-2 text-primary small fw-bold"><i class="fas fa-check-circle me-1"></i>Image chargée</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thème -->
+                        <div class="mb-4">
+                            <label for="theme" class="form-label fw-bold text-secondary mb-3">2. Thème ou style souhaité</label>
+                            <textarea name="theme" id="theme" rows="3" class="form-control theme-input" placeholder="Ex: Cyberpunk neon avec des tons violets, Nature luxuriante dorée, Minimalisme spatial..." required>{{ theme }}</textarea>
+                            <div class="form-text mt-2"><i class="fas fa-lightbulb text-warning me-1"></i>Plus vous êtes précis, meilleur sera le résultat.</div>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-generate w-100" id="submit-btn">
+                            <i class="fas fa-wand-magic-sparkles me-2"></i>Générer ma nouvelle carte
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résultat -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white" style="min-height: 500px;">
+                <div class="card-body p-4 p-md-5 d-flex flex-column justify-content-center">
+                    
+                    {% if generated_image_url %}
+                        <div class="text-center mb-4">
+                            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold"><i class="fas fa-check me-1"></i>Génération Réussie</span>
+                            <h4 class="fw-bold mt-3 text-dark">Votre Design Exclusif</h4>
+                        </div>
+                        
+                        <div class="result-card" id="card-result-visual">
+                            <div class="result-image-container" style="position: relative; border-radius: 12px; overflow: hidden;">
+                                <img src="{{ generated_image_url }}" alt="Carte générée par l'IA" class="result-image" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div class="p-4 text-center">
+                                <p class="mb-3 text-muted small"><i class="fas fa-robot me-1"></i>Thème <strong>"{{ theme }}"</strong> appliqué intelligemment sur votre carte originale.</p>
+                                <a href="{{ generated_image_url }}" download="Texture_Carte.jpg" target="_blank" rel="noreferrer" class="btn btn-outline-primary rounded-pill px-4">
+                                    <i class="fas fa-download me-2"></i>Télécharger le Thème
+                                </a>
+                            </div>
+                        </div>
+                    {% elseif theme_overlay_url is defined and theme_overlay_url and original_image %}
+                        <div class="text-center mb-4">
+                            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold"><i class="fas fa-check me-1"></i>Génération Réussie</span>
+                            <h4 class="fw-bold mt-3 text-dark">Votre Design Exclusif</h4>
+                        </div>
+                        <div class="alert alert-info border-0 rounded-3 small text-start mb-3">
+                            <i class="fas fa-info-circle me-1"></i>L'extension PHP <strong>GD</strong> n'est pas active dans Apache : la prévisualisation superpose le thème par-dessus votre image (effet proche de la fusion serveur). Pour une image PNG fusionnée, activez <code>extension=php_gd.dll</code> dans le <code>php.ini</code> d'Apache et redémarrez Apache.
+                        </div>
+                        <div class="result-card" id="card-result-visual">
+                            <div class="result-image-container" style="position: relative; border-radius: 12px; overflow: hidden;">
+                                <img src="{{ original_image }}" alt="Carte d'origine" class="result-layer-base">
+                                <img src="{{ theme_overlay_url }}" alt="Thème généré" class="result-layer-overlay" crossorigin="anonymous" referrerpolicy="no-referrer">
+                            </div>
+                            <div class="p-4 text-center">
+                                <p class="mb-3 text-muted small"><i class="fas fa-robot me-1"></i>Thème <strong>"{{ theme }}"</strong> superposé sur votre carte.</p>
+                                <a href="{{ theme_overlay_url }}" download="Theme_Carte.png" target="_blank" rel="noreferrer" class="btn btn-outline-primary rounded-pill px-4">
+                                    <i class="fas fa-download me-2"></i>Télécharger le visuel thème
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <div class="mb-4">
+                                <i class="fas fa-image fa-4x text-black-50 opacity-25"></i>
+                            </div>
+                            <h5 class="fw-bold text-secondary">Aucun résultat pour le moment</h5>
+                            <p class="mb-0">Remplissez le formulaire et lancez la génération pour voir apparaître votre carte ici.</p>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('card_image');
+            const previewContainer = document.getElementById('preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const form = document.getElementById('generator-form');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // Prévisualisation de l'image
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                        dropZone.querySelector('.upload-icon').style.display = 'none';
+                        dropZone.querySelector('h5').style.display = 'none';
+                        dropZone.querySelector('p').style.display = 'none';
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            // Drag and Drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                dropZone.classList.add('dragover');
+            }
+
+            function unhighlight(e) {
+                dropZone.classList.remove('dragover');
+            }
+
+            dropZone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                fileInput.files = files;
+                
+                // Déclencher l'événement change manuellement
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+
+            // Animation de chargement
+            form.addEventListener('submit', function() {
+                if (fileInput.files.length > 0 && document.getElementById('theme').value.trim() !== '') {
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Création en cours...';
+                    submitBtn.classList.add('disabled');
+                }
+            });
+        });
+    </script>
+{% endblock %}

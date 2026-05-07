@@ -41,7 +41,6 @@ class Credit
 
     #[ORM\Column(name: 'status', length: 20)]
     #[Assert\NotBlank(message: 'Le statut est obligatoire.')]
-    #[Assert\Choice(choices: ['en_attente', 'approuve', 'refuse', 'rembourse'], message: 'Statut invalide.')]
     private string $status = 'en_attente';
 
     public function __construct()

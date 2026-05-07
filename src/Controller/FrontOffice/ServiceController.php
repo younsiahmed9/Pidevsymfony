@@ -14,6 +14,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Form\Exception\TransformationFailedException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Service\Recommendation\EnhancedHybridRecommendationService;
 
 #[Route('/service', name: 'service_')]
 final class ServiceController extends AbstractController
@@ -127,7 +129,7 @@ final class ServiceController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -165,16 +167,18 @@ final class ServiceController extends AbstractController
             $formErrors = $this->validateServiceInput($serviceFormData);
 
             if ($formErrors === []) {
-                $entityManager->getConnection()->insert('service', [
-                    'user_id' => $user->getId(),
-                    'nom_service' => $serviceFormData['nomService'],
-                    'tarif' => number_format((float) str_replace(',', '.', $serviceFormData['tarif']), 2, '.', ''),
-                    'type_service' => $serviceFormData['typeService'],
-                    'frequence' => $serviceFormData['frequence'],
-                    'date_debut' => $serviceFormData['dateDebut'],
-                    'date_fin' => $serviceFormData['dateFin'] !== '' ? $serviceFormData['dateFin'] : null,
-                    'statut' => $serviceFormData['statut'],
-                ]);
+                $serviceEntity = new Service();
+                $serviceEntity->setUser($user);
+                $serviceEntity->setNomService($serviceFormData['nomService']);
+                $serviceEntity->setTarif(number_format((float) str_replace(',', '.', $serviceFormData['tarif']), 2, '.', ''));
+                $serviceEntity->setTypeService($serviceFormData['typeService']);
+                $serviceEntity->setFrequence($serviceFormData['frequence'] !== '' ? $serviceFormData['frequence'] : null);
+                $serviceEntity->setDateDebut(new \DateTime($serviceFormData['dateDebut']));
+                $serviceEntity->setDateFin($serviceFormData['dateFin'] !== '' ? new \DateTime($serviceFormData['dateFin']) : null);
+                $serviceEntity->setStatut($serviceFormData['statut']);
+
+                $entityManager->persist($serviceEntity);
+                $entityManager->flush();
 
                 $this->addFlash('success', 'Service créé avec succès.');
                 return $this->redirectToRoute('service_index');
@@ -190,7 +194,7 @@ final class ServiceController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
-    public function edit(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    public function edit(int $id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         /** @var User|null $user */
         $user = $this->getUser();
@@ -201,31 +205,31 @@ final class ServiceController extends AbstractController
 
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        $service = $entityManager->getConnection()->fetchAssociative(
-            'SELECT id_service AS id, user_id, nom_service AS nomService, tarif, type_service AS typeService, frequence, date_debut AS dateDebut, date_fin AS dateFin, statut FROM service WHERE id_service = :id AND user_id = :user_id',
-            ['id' => $id, 'user_id' => $user->getId()]
-        );
+        $serviceEntity = $entityManager->getRepository(Service::class)->findOneBy([
+            'id' => $id,
+            'user' => $user,
+        ]);
 
-        if (!$service) {
+        if (!$serviceEntity instanceof Service) {
             throw $this->createNotFoundException('Service introuvable.');
         }
 
         $serviceFormData = [
-            'id' => (string) ($service['id'] ?? ''),
-            'nomService' => (string) ($service['nomService'] ?? ''),
-            'tarif' => (string) ($service['tarif'] ?? ''),
-            'typeService' => (string) ($service['typeService'] ?? ''),
-            'frequence' => (string) ($service['frequence'] ?? 'mensuel'),
-            'dateDebut' => (string) ($service['dateDebut'] ?? (new \DateTime())->format('Y-m-d')),
-            'dateFin' => (string) ($service['dateFin'] ?? ''),
-            'statut' => (string) ($service['statut'] ?? 'actif'),
+            'id' => (string) ($serviceEntity->getId() ?? ''),
+            'nomService' => (string) ($serviceEntity->getNomService() ?? ''),
+            'tarif' => (string) ($serviceEntity->getTarif() ?? ''),
+            'typeService' => (string) ($serviceEntity->getTypeService() ?? ''),
+            'frequence' => (string) ($serviceEntity->getFrequence() ?? 'mensuel'),
+            'dateDebut' => $serviceEntity->getDateDebut() ? $serviceEntity->getDateDebut()->format('Y-m-d') : (new \DateTime())->format('Y-m-d'),
+            'dateFin' => $serviceEntity->getDateFin() ? $serviceEntity->getDateFin()->format('Y-m-d') : '',
+            'statut' => (string) ($serviceEntity->getStatut() ?? 'actif'),
         ];
         $formErrors = [];
 
         if ($request->isMethod('POST')) {
             try {
                 $serviceFormData = [
-                    'id' => (string) ($service['id'] ?? $id),
+                    'id' => (string) ($serviceEntity->getId() ?? $id),
                     'nomService' => trim((string) $request->request->get('nomService', '')),
                     'tarif' => trim((string) $request->request->get('tarif', '')),
                     'typeService' => trim((string) $request->request->get('typeService', '')),
@@ -238,10 +242,8 @@ final class ServiceController extends AbstractController
                 $formErrors = $this->validateServiceInput($serviceFormData);
 
                 if ($formErrors === []) {
-                    // Validation supplémentaire avec l'entité
-                    $serviceEntity = new Service();
                     $serviceEntity->setNomService($serviceFormData['nomService']);
-                    $serviceEntity->setTarif($serviceFormData['tarif']);
+                    $serviceEntity->setTarif(number_format((float) str_replace(',', '.', $serviceFormData['tarif']), 2, '.', ''));
                     $serviceEntity->setTypeService($serviceFormData['typeService']);
                     $serviceEntity->setFrequence($serviceFormData['frequence'] ?: null);
                     $serviceEntity->setDateDebut(new \DateTime($serviceFormData['dateDebut']));
@@ -249,22 +251,13 @@ final class ServiceController extends AbstractController
                     $serviceEntity->setStatut($serviceFormData['statut']);
 
                     // Valider l'entité
-                    $validator = $this->container->get('validator');
                     $violations = $validator->validate($serviceEntity);
                     
                     if (count($violations) > 0) {
                         throw new ValidationFailedException($serviceEntity, $violations);
                     }
 
-                    $entityManager->getConnection()->update('service', [
-                        'nom_service' => $serviceFormData['nomService'],
-                        'tarif' => number_format((float) str_replace(',', '.', $serviceFormData['tarif']), 2, '.', ''),
-                        'type_service' => $serviceFormData['typeService'],
-                        'frequence' => $serviceFormData['frequence'],
-                        'date_debut' => $serviceEntity->getDateDebut()->format('Y-m-d'),
-                        'date_fin' => $serviceEntity->getDateFin() ? $serviceEntity->getDateFin()->format('Y-m-d') : null,
-                        'statut' => $serviceFormData['statut'],
-                    ], ['id_service' => $id, 'user_id' => $user->getId()]);
+                    $entityManager->flush();
 
                     $this->addFlash('success', 'Service mis à jour avec succès.');
                     return $this->redirectToRoute('service_index');
@@ -310,11 +303,13 @@ final class ServiceController extends AbstractController
             $errors['typeService'][] = 'Le type de service est obligatoire.';
         }
 
-        if (!in_array($data['frequence'], ['unique', 'mensuel', 'trimestriel', 'annuel'], true)) {
+        $frequencesValid = ['unique', 'mensuel', 'trimestriel', 'annuel'];
+        if (!in_array($data['frequence'], $frequencesValid)) {
             $errors['frequence'][] = 'La fréquence sélectionnée est invalide.';
         }
 
-        if (!in_array($data['statut'], ['actif', 'suspendu', 'termine'], true)) {
+        $statutsValid = ['actif', 'suspendu', 'termine'];
+        if (!in_array($data['statut'], $statutsValid)) {
             $errors['statut'][] = 'Le statut sélectionné est invalide.';
         }
 
@@ -333,6 +328,40 @@ final class ServiceController extends AbstractController
         }
 
         return $errors;
+    }
+
+    #[Route('/recommendations', name: 'recommendations', methods: ['GET'])]
+    public function recommendations(EnhancedHybridRecommendationService $recommendationService, Request $request): Response
+    {
+        /** @var User|null $user */
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $limit = min(10, max(1, (int) $request->query->get('limit', 5)));
+        
+        try {
+            $recommendations = $recommendationService->getRecommendations($user, $limit);
+            
+            return $this->render('frontoffice/service/recommendations.html.twig', [
+                'recommendations' => $recommendations,
+                'user' => $user,
+                'limit' => $limit,
+                'categories' => ['abonnement', 'facture']
+            ]);
+            
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors du chargement des recommandations');
+            
+            return $this->render('frontoffice/service/recommendations.html.twig', [
+                'recommendations' => [],
+                'user' => $user,
+                'limit' => $limit,
+                'categories' => ['abonnement', 'facture']
+            ]);
+        }
     }
 
     #[Route('/{id}', name: 'show', methods: ['GET'])]
@@ -374,10 +403,15 @@ final class ServiceController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         if ($this->isCsrfTokenValid('delete' . $id, $request->getPayload()->getString('_token'))) {
-            $entityManager->getConnection()->executeStatement(
-                'DELETE FROM service WHERE id_service = :id AND user_id = :user_id',
-                ['id' => $id, 'user_id' => $user->getId()]
-            );
+            $serviceEntity = $entityManager->getRepository(Service::class)->findOneBy([
+                'id' => $id,
+                'user' => $user,
+            ]);
+
+            if ($serviceEntity instanceof Service) {
+                $entityManager->remove($serviceEntity);
+                $entityManager->flush();
+            }
         }
 
         return $this->redirectToRoute('service_index');

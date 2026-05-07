@@ -1,0 +1,15 @@
+dh_auditor:
+    # Configuration reference available at:
+    # https://github.com/DamienHarper/auditor-bundle
+
+    providers:
+        doctrine:
+            entities:
+                App\Entity\Produit: ~
+                App\Entity\Service: ~
+                App\Entity\Facture: ~
+                App\Entity\User:
+                    ignored_columns:
+                        - passwordHash
+                        - createdAt
+                        - updatedAt

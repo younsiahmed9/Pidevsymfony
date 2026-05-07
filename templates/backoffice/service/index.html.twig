@@ -99,8 +99,8 @@
                     <select class="form-select" id="statut" name="statut">
                         <option value="">Tous</option>
                         <option value="actif" {{ filters.statut == 'actif' ? 'selected' : '' }}>Actif</option>
-                        <option value="inactif" {{ filters.statut == 'inactif' ? 'selected' : '' }}>Inactif</option>
                         <option value="suspendu" {{ filters.statut == 'suspendu' ? 'selected' : '' }}>Suspendu</option>
+                        <option value="expire" {{ filters.statut == 'expire' ? 'selected' : '' }}>Expiré</option>
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -213,9 +213,9 @@
                                 <td><span class="text-muted small">{{ service.typeService }}</span></td>
                                 <td><span class="badge bg-light text-dark">{{ service.frequence|capitalize }}</span></td>
                                 <td>
-                                    {% set badge_class = service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : 'danger') %}
+                                    {% set badge_class = service.statut == 'actif' ? 'success' : (service.statut == 'suspendu' ? 'warning' : (service.statut == 'expire' ? 'danger' : 'secondary')) %}
                                     <span class="badge rounded-pill bg-{{ badge_class }}">
-                                        {{ service.statut|capitalize }}
+                                        {{ service.statut|capitalize|replace({'_': ' '}) }}
                                     </span>
                                 </td>
                                 <td class="text-center">

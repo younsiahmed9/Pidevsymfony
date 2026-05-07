@@ -18,6 +18,7 @@ security:
             custom_authenticators:
                 - App\Security\LoginFormAuthenticator
                 - App\Security\FaceIdAuthenticator
+                - App\Security\OAuthAuthenticator
             entry_point: App\Security\LoginFormAuthenticator
             logout:
                 path: app_logout
@@ -43,6 +44,7 @@ security:
         - { path: ^/face-id/login, roles: PUBLIC_ACCESS }
         - { path: ^/face-id/enroll, roles: ROLE_USER }
         - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/connect, roles: PUBLIC_ACCESS }
         - { path: ^/login$, roles: PUBLIC_ACCESS }
         - { path: ^/register$, roles: PUBLIC_ACCESS }
         - { path: ^/$, roles: PUBLIC_ACCESS }

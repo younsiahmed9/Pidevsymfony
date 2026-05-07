@@ -1,138 +1,248 @@
-{% extends 'frontoffice/base.html.twig' %}
+﻿{% extends 'frontoffice/base.html.twig' %}
 
-{% block title %}Mes Documents{% endblock %}
+{% block title %}Mes documents{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        /* Clair : texte lisible (noir / gris) sur la liste documents */
+        html:not([data-theme='dark']) .document-list-page {
+            color: #111827;
+        }
+        html:not([data-theme='dark']) .document-list-page .table:not(.table-dark),
+        html:not([data-theme='dark']) .document-list-page .table tbody td,
+        html:not([data-theme='dark']) .document-list-page .table thead th {
+            color: #111827 !important;
+        }
+        html:not([data-theme='dark']) .document-list-page h1 {
+            color: #0f172a !important;
+        }
+        html:not([data-theme='dark']) .document-list-page .text-muted,
+        html:not([data-theme='dark']) .document-list-page small.text-muted {
+            color: #4b5563 !important;
+        }
+        html:not([data-theme='dark']) .document-list-page .form-label {
+            color: #374151 !important;
+        }
+
+        /* Sombre : le thème global s’applique ; on garde le contraste des liens primaires */
+        html[data-theme='dark'] .document-list-page .table a.btn-outline-primary {
+            color: #93c5fd !important;
+            border-color: rgba(147, 197, 253, 0.55) !important;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-<section class="py-5 bg-light min-vh-100">
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-5 bg-white p-4 rounded-4 shadow-sm">
-            <div>
-                <h1 class="h2 fw-bold text-dark mb-1"><i class="fas fa-file-invoice text-primary me-2"></i>Mes Documents</h1>
-                <p class="text-muted mb-0">Stockez, organisez et retrouvez tous vos documents importants en un clic.</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{{ path('dossier_document_new') }}" class="btn btn-outline-primary btn-lg rounded-pill px-4">
-                    <i class="fas fa-folder-plus me-2"></i> Créer un dossier
-                </a>
-                <a href="{{ path('document_new') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
-                    <i class="fas fa-upload me-2"></i> Importer un document
-                </a>
-            </div>
+<div class="container py-4 document-list-page">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Mes documents</h1>
+            <p class="text-muted mb-0">Gérez vos documents, signatures et échéances.</p>
         </div>
-
-        <!-- Filters -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4">
-                <form method="GET" action="{{ path('document_index') }}" class="row g-3 align-items-end">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Recherche</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
-                            <input type="text" name="q" value="{{ q }}" class="form-control bg-light border-0 shadow-none" placeholder="Titre, tags, description...">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Type de document</label>
-                        <select name="type" class="form-select bg-light border-0 shadow-none">
-                            <option value="">Tous les types</option>
-                            {% for t in ['contrat', 'facture', 'releve', 'identite', 'assurance', 'fiscal', 'autre'] %}
-                                <option value="{{ t }}" {{ type == t ? 'selected' : '' }}>{{ t|capitalize }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">Filtrer</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="row g-4">
-            {% for document in documents %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 h-100 transition-hover overflow-hidden">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-4">
-                                <div class="p-3 rounded-4" style="background-color: {{ document.categorie.couleur|default('#4e73df') }}15;">
-                                    <i class="fas fa-file-pdf fa-2x" style="color: {{ document.categorie.couleur|default('#4e73df') }};"></i>
-                                </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-link text-muted p-0 shadow-none" type="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
-                                        <li><a class="dropdown-item py-2" href="{{ path('document_show', {id: document.id}) }}"><i class="fas fa-eye me-2 text-primary small"></i> Consulter</a></li>
-                                        <li><a class="dropdown-item py-2" href="{{ path('document_edit', {id: document.id}) }}"><i class="fas fa-edit me-2 text-warning small"></i> Modifier</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <form method="post" action="{{ path('document_delete', {'id': document.id}) }}" onsubmit="return confirm('Supprimer ce document ?');">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
-                                                <button class="dropdown-item py-2 text-danger"><i class="fas fa-trash-alt me-2 small"></i> Supprimer</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <h5 class="card-title fw-bold text-dark mb-1">{{ document.titre }}</h5>
-                            <div class="mb-3">
-                                <span class="badge bg-light text-muted px-2 py-1 rounded small text-capitalize">{{ document.typeDocument }}</span>
-                                {% if document.dossier %}
-                                    <span class="text-muted small ms-2"><i class="fas fa-folder-open me-1"></i>{{ document.dossier.nomDossier }}</span>
-                                {% endif %}
-                            </div>
-
-                            <div class="d-flex align-items-center mb-4">
-                                <i class="fas fa-tag me-2" style="color: {{ document.categorie.couleur|default('#4e73df') }};"></i>
-                                <span class="small text-dark fw-bold">{{ document.categorie.nomCategorie|default('Sans catégorie') }}</span>
-                            </div>
-
-                            <div class="small text-muted mb-3">
-                                <i class="fas fa-user me-1"></i>
-                                {{ document.utilisateur.fullName ?: document.utilisateur.email }}
-                            </div>
-
-                            <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto">
-                                {% set status_color = document.statut == 'valide' ? 'success' : (document.statut == 'expire' ? 'danger' : 'warning') %}
-                                <span class="badge bg-{{ status_color }} bg-opacity-10 text-{{ status_color }} rounded-pill px-3 py-2 small text-capitalize">
-                                    {{ document.statut }}
-                                </span>
-                                <span class="text-muted small">
-                                    <i class="far fa-calendar-alt me-1"></i> {{ document.dateDocument|date('d/m/Y') }}
-                                </span>
-                            </div>
-                        </div>
-                        <a href="{{ path('document_show', {id: document.id}) }}" class="stretched-link"></a>
-                    </div>
-                </div>
-            {% else %}
-                <div class="col-12 text-center py-5">
-                    <div class="bg-white p-5 rounded-4 shadow-sm d-inline-block border">
-                        <i class="fas fa-file-upload fa-4x text-light mb-4 d-block"></i>
-                        <h3 class="fw-bold text-dark">Aucun document</h3>
-                        <p class="text-muted mb-4">Importez vos premiers documents pour commencer à les gérer.</p>
-                        <div class="d-flex justify-content-center gap-2">
-                            <a href="{{ path('dossier_document_new') }}" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold">
-                                Créer un dossier
-                            </a>
-                            <a href="{{ path('document_new') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold">
-                                Importer mon premier document
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+        <div class="d-flex gap-2">
+            <a href="{{ path('document_export_pdf', { q: q, type: type }) }}" class="btn btn-outline-secondary">
+                Export PDF
+            </a>
+            <a href="{{ path('document_new') }}" class="btn btn-primary">Nouveau document</a>
         </div>
     </div>
-</section>
 
-<style>
-    .transition-hover {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .transition-hover:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 1.5rem 3rem rgba(0,0,0,0.1) !important;
-    }
-</style>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-2"><div class="card"><div class="card-body"><small class="text-muted">Total</small><div class="h5 mb-0">{{ stats.total|default(0) }}</div></div></div></div>
+        <div class="col-6 col-lg-2"><div class="card"><div class="card-body"><small class="text-muted">Valides</small><div class="h5 mb-0">{{ stats.valide|default(0) }}</div></div></div></div>
+        <div class="col-6 col-lg-2"><div class="card"><div class="card-body"><small class="text-muted">Expirés</small><div class="h5 mb-0">{{ stats.expire|default(0) }}</div></div></div></div>
+        <div class="col-6 col-lg-2"><div class="card"><div class="card-body"><small class="text-muted">À renouveler</small><div class="h5 mb-0">{{ stats.a_renouveler|default(0) }}</div></div></div></div>
+        <div class="col-6 col-lg-2"><div class="card"><div class="card-body"><small class="text-muted">Archivés</small><div class="h5 mb-0">{{ stats.archive|default(0) }}</div></div></div></div>
+        <div class="col-6 col-lg-2"><div class="card"><div class="card-body"><small class="text-muted">Packs</small><div class="h5 mb-0">{{ packs|length }}</div></div></div></div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ path('document_index') }}" class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label">Recherche</label>
+                    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Titre, description, tag...">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Type</label>
+                    <input type="text" name="type" value="{{ type }}" class="form-control" placeholder="Contrat, Facture...">
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-outline-primary">Filtrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Type</th>
+                        <th>Statut</th>
+                        <th>Signature</th>
+                        <th>Échéance</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for document in documents %}
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">{{ document.titre }}</div>
+                            <small class="text-muted">{{ document.createdAt ? document.createdAt|date('d/m/Y') : '-' }}</small>
+                        </td>
+                        <td>{{ document.typeDocument ?: '-' }}</td>
+                        <td>
+                            <span class="badge text-bg-light border">{{ document.statut ?: 'N/A' }}</span>
+                        </td>
+                        <td>
+                            {% set current_state = document.getSignatureState() %}
+                            <span class="badge {% if current_state == 'signed' %}bg-success{% elseif current_state == 'pending_approval' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ current_state|capitalize }}
+                            </span>
+
+                            <div class="mt-1 d-flex gap-1">
+                                {% if workflow_can(document, 'submit') %}
+                                    <form action="{{ path('document_apply_transition', {id: document.id, transition: 'submit'}) }}" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-outline-primary" title="Soumettre pour signature"><i class="fas fa-paper-plane"></i></button>
+                                    </form>
+                                {% endif %}
+
+                                {% if workflow_can(document, 'sign') %}
+                                    <form action="{{ path('document_apply_transition', {id: document.id, transition: 'sign'}) }}" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-success" title="Signer le document"><i class="fas fa-pen-nib"></i> Signer</button>
+                                    </form>
+                                {% endif %}
+
+                                {% if workflow_can(document, 'reject') %}
+                                    <form action="{{ path('document_apply_transition', {id: document.id, transition: 'reject'}) }}" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-outline-danger" title="Rejeter"><i class="fas fa-times"></i></button>
+                                    </form>
+                                {% endif %}
+
+                                {% if workflow_can(document, 'archive') %}
+                                    <form action="{{ path('document_apply_transition', {id: document.id, transition: 'archive'}) }}" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-outline-secondary" title="Archiver"><i class="fas fa-archive"></i></button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ document.dateEcheance ? document.dateEcheance|date('d/m/Y') : '-' }}</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm btn-action-toolbar" role="group" aria-label="Actions document">
+                                <a href="{{ path('document_show', {id: document.id}) }}" class="btn btn-outline-secondary btn-action-icon btn-sm" title="Voir le détail"><i class="fas fa-eye" aria-hidden="true"></i><span class="visually-hidden">Voir</span></a>
+                                <button type="button" class="btn btn-outline-success btn-action-icon btn-sm" title="Ajouter au pack" onclick="openPackModal('{{ document.id }}', '{{ document.titre|escape('js') }}')"><i class="fas fa-layer-group" aria-hidden="true"></i><span class="visually-hidden">Ajouter au pack</span></button>
+                                <a href="{{ path('document_edit', {id: document.id}) }}" class="btn btn-outline-primary btn-action-icon btn-sm" title="Modifier"><i class="fas fa-pen" aria-hidden="true"></i><span class="visually-hidden">Modifier</span></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">Aucun document trouvé.</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if expiringDocs is defined and expiringDocs|length > 0 %}
+        <div class="card mt-4">
+            <div class="card-header">Échéances proches (30 jours)</div>
+            <ul class="list-group list-group-flush">
+                {% for doc in expiringDocs %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ doc.titre }}</span>
+                        <span class="badge text-bg-warning">{{ doc.dateEcheance ? doc.dateEcheance|date('d/m/Y') : '-' }}</span>
+                    </li>
+                {% endfor %}
+
+                <div class="modal fade" id="addToPackModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Ajouter au pack</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-3 text-muted small">Document sélectionné : <strong id="packDocumentTitle"></strong></p>
+                                {% if packs is empty %}
+                                    <div class="alert alert-info mb-0">
+                                        Aucun pack n'existe encore. Créez d'abord un pack pour pouvoir y ajouter un document.
+                                    </div>
+                                {% else %}
+                                    <label for="packSelector" class="form-label fw-semibold">Choisir un pack</label>
+                                    <select id="packSelector" class="form-select mb-3">
+                                        <option value="">-- Sélectionner un pack --</option>
+                                        {% for pack in packs %}
+                                            <option value="{{ pack.id }}">{{ pack.nomPack }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-success" onclick="confirmAddToPack()">Ajouter au pack</button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ul>
+        </div>
+    {% endif %}
+
+            <script>
+            let selectedDocumentId = null;
+            let packModalInstance = null;
+
+            function openPackModal(documentId, documentTitle) {
+                selectedDocumentId = documentId;
+                document.getElementById('packDocumentTitle').textContent = documentTitle || 'Document';
+                if (!packModalInstance) {
+                    packModalInstance = new bootstrap.Modal(document.getElementById('addToPackModal'));
+                }
+                packModalInstance.show();
+            }
+
+            async function confirmAddToPack() {
+                const packId = document.getElementById('packSelector') ? document.getElementById('packSelector').value : '';
+
+                if (!selectedDocumentId) {
+                    alert('Aucun document sélectionné.');
+                    return;
+                }
+
+                if (!packId) {
+                    alert('Veuillez sélectionner un pack.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`{{ path('pack_add_document', {id: 0}) }}`.replace('0', packId), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ documentId: selectedDocumentId })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        if (packModalInstance) {
+                            packModalInstance.hide();
+                        }
+                        alert('Document ajouté au pack avec succès.');
+                        return;
+                    }
+
+                    alert(data.message || 'Erreur lors de l\'ajout au pack.');
+                } catch (error) {
+                    alert('Erreur lors de l\'ajout au pack.');
+                }
+            }
+            </script>
+</div>
 {% endblock %}

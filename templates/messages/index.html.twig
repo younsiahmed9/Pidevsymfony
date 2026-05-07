@@ -100,6 +100,10 @@
             border-top: 1px solid rgba(148, 163, 184, 0.2);
         }
 
+        .messenger-compose.moderation-shake {
+            animation: moderationShake 0.45s ease;
+        }
+
         .messenger-input {
             height: 46px !important;
             min-height: 46px !important;
@@ -130,6 +134,56 @@
         .messenger-send-btn:active {
             border: 0 !important;
             box-shadow: none !important;
+        }
+
+        .moderation-banner {
+            border-radius: 16px;
+            transform-origin: top center;
+        }
+
+        .moderation-banner.is-visible {
+            animation: moderationPop 0.35s ease, moderationShake 0.45s ease 0.35s 1;
+        }
+
+        .moderation-banner.is-blocked {
+            background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        @keyframes moderationPop {
+            0% {
+                opacity: 0;
+                transform: translateY(-8px) scale(0.96);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes moderationShake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-6px);
+            }
+
+            40% {
+                transform: translateX(6px);
+            }
+
+            60% {
+                transform: translateX(-4px);
+            }
+
+            80% {
+                transform: translateX(4px);
+            }
         }
 
         .messenger-bubble {
@@ -269,7 +323,10 @@
                             <div class="d-flex mb-3 {{ mine ? 'justify-content-end' : 'justify-content-start' }}" data-message-id="{{ message.id }}">
                                 <div class="messenger-bubble {{ mine ? 'mine' : 'theirs' }}">
                                     <div class="small" style="white-space: pre-wrap;">{{ message.body }}</div>
-                                    <div class="text-end mt-1">
+                                    <div class="text-end mt-1 d-flex align-items-center justify-content-end gap-2">
+                                        <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none star-btn" data-star-message="{{ message.id }}" aria-label="Marquer comme favori">
+                                            <i class="fas {{ message.isStarred ? 'fa-star text-warning' : 'fa-star text-muted' }}"></i>
+                                        </button>
                                         <small class="{{ mine ? 'text-white-50' : 'text-muted' }}">{{ message.createdAt|date('d/m/Y H:i') }}</small>
                                     </div>
                                 </div>
@@ -304,6 +361,10 @@
                                 <i class="fas fa-arrow-right"></i>
                             </button>
                         </form>
+                        <div class="alert alert-warning mt-3 mb-0 d-none moderation-banner" role="alert" data-moderation-banner>
+                            <div class="fw-semibold" data-moderation-title>Avertissement de moderation</div>
+                            <div class="small" data-moderation-message></div>
+                        </div>
                         <div class="small text-danger mt-2 d-none" data-message-error></div>
                     </div>
                 {% else %}

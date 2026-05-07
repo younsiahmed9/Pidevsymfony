@@ -1,0 +1,43 @@
+framework:
+    workflows:
+        fintrack_signable_document:
+            type: 'state_machine'
+            marking_store:
+                type: 'method'
+                property: 'signatureState'
+            supports:
+                - App\Entity\SignableDocumentInterface
+            initial_marking: draft
+            places:
+                - draft
+                - pending_approval
+                - signing_in_progress
+                - signed
+                - archived
+                - rejected
+            transitions:
+                submit:
+                    from: draft
+                    to: pending_approval
+                approve:
+                    from: pending_approval
+                    to: signing_in_progress
+                sign:
+                    from: [draft, pending_approval, signing_in_progress]
+                    to: signed
+                    metadata:
+                        requires_audit_trail: true
+                        required_audit_fields: ['document_hash', 'signer_id', 'signed_at']
+                        eidas_profile: 'advanced_or_qualified'
+                reject:
+                    from: [pending_approval, signing_in_progress]
+                    to: rejected
+                archive:
+                    from: signed
+                    to: archived
+                restore:
+                    from: archived
+                    to: signed
+                reopen:
+                    from: [rejected, archived]
+                    to: draft

@@ -1,0 +1,185 @@
+{# Composant d'Auto-Catégorisation par IA #}
+<div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden intelligence-card">
+    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h6 class="text-uppercase text-secondary small fw-bold mb-0">
+            <i class="fas fa-robot me-2 text-primary"></i> Intelligence Documentaire
+        </h6>
+        {% if document.categorie is null %}
+            <span class="badge bg-warning bg-opacity-10 text-warning px-2 py-1 rounded-pill small">
+                <i class="fas fa-exclamation-circle me-1"></i> Sans catégorie
+            </span>
+        {% endif %}
+    </div>
+
+    <div class="card-body p-4">
+        <div id="aiSummary" class="mb-4 d-none">
+            <h6 class="small fw-bold text-muted text-uppercase mb-2">Aperçu de l'analyse</h6>
+            <div class="p-3 bg-light rounded-3 italic small text-secondary border-start border-primary border-4">
+                "<span id="aiSummaryText"></span>"
+            </div>
+        </div>
+
+        <div id="categorizationResult" class="d-none mb-4">
+            <div class="p-4 rounded-4 border-2 border-dashed d-flex align-items-center gap-3 suggestion-box">
+                <div class="suggestion-icon-wrap rounded-circle d-flex align-items-center justify-content-center" id="suggestionIconBg" style="width: 60px; height: 60px; min-width: 60px;">
+                    <i class="fas fa-tag fa-2x" id="suggestionIcon"></i>
+                </div>
+                <div>
+                    <h6 class="mb-1 fw-bold text-dark">Catégorie suggérée : <span id="suggestionName" class="text-primary"></span></h6>
+                    <p class="text-muted small mb-0">L'IA a analysé le contenu du document et recommande ce classement.</p>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold btn-sm" onclick="cancelCategorization()">
+                    Ignorer
+                </button>
+                <button class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold btn-sm" id="btnApplySuggestion" onclick="applySuggestion()">
+                    <i class="fas fa-check-circle me-2"></i> Appliquer ce classement
+                </button>
+            </div>
+        </div>
+
+        <div id="aiAnalysisStatus" class="text-center py-3 d-none">
+            <div class="spinner-grow text-primary mb-3" role="status"></div>
+            <p class="text-muted small fw-bold mb-0">L'IA analyse votre document...</p>
+        </div>
+
+        <div id="initialAiState" class="text-center py-2">
+            <p class="text-muted small mb-3">Utilisez l'intelligence artificielle pour classer automatiquement ce document.</p>
+            <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" onclick="startAiAnalysis()">
+                <i class="fas fa-magic me-2"></i> Analyser avec l'IA
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .intelligence-card {
+        border-left: 4px solid #0d6efd !important;
+    }
+    
+    .suggestion-box {
+        background-color: #f8fbff;
+        border-color: #e3efff;
+    }
+    
+    .suggestion-icon-wrap {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+
+    .suggestion-animation {
+        animation: slideInDown 0.5s ease-out forwards;
+    }
+
+    @keyframes slideInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+{% include 'partials/_common_js.html.twig' %}
+
+<script>
+let suggestedCategoryId = null;
+
+async function startAiAnalysis() {
+    const status = document.getElementById('aiAnalysisStatus');
+    const initialState = document.getElementById('initialAiState');
+    const result = document.getElementById('categorizationResult');
+    const summary = document.getElementById('aiSummary');
+
+    initialState.classList.add('d-none');
+    status.classList.remove('d-none');
+    result.classList.add('d-none');
+    summary.classList.add('d-none');
+
+    try {
+        const response = await fetch(`/api/document-intelligence/{{ document.id }}/analyze`, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            suggestedCategoryId = data.suggestion.id;
+            
+            // Mise à jour de l'UI
+            document.getElementById('suggestionName').textContent = data.suggestion.name;
+            document.getElementById('aiSummaryText').textContent = data.summary;
+            
+            if (data.suggestion.icon) {
+                document.getElementById('suggestionIcon').className = `fas ${data.suggestion.icon} fa-2x`;
+            }
+            
+            if (data.suggestion.color) {
+                document.getElementById('suggestionIconBg').style.backgroundColor = `${data.suggestion.color}20`;
+                document.getElementById('suggestionIconBg').style.color = data.suggestion.color;
+                document.getElementById('suggestionName').style.color = data.suggestion.color;
+                document.getElementById('btnApplySuggestion').style.backgroundColor = data.suggestion.color;
+                document.getElementById('btnApplySuggestion').style.borderColor = data.suggestion.color;
+            }
+
+            status.classList.add('d-none');
+            result.classList.remove('d-none');
+            result.classList.add('suggestion-animation');
+            summary.classList.remove('d-none');
+        } else {
+            showNotification(data.message || 'L\'IA n\'a pas pu classer ce document.', 'error');
+            status.classList.add('d-none');
+            initialState.classList.remove('d-none');
+        }
+    } catch (error) {
+        showNotification('Une erreur est survenue lors de l\'analyse.', 'error');
+        status.classList.add('d-none');
+        initialState.classList.remove('d-none');
+    }
+}
+
+async function applySuggestion() {
+    if (!suggestedCategoryId) return;
+
+    try {
+        const response = await fetch(`/api/document-intelligence/{{ document.id }}/apply-suggestion`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest' 
+            },
+            body: JSON.stringify({ categoryId: suggestedCategoryId })
+        });
+
+        const responseText = await response.text();
+        let data = null;
+
+        try {
+            data = responseText ? JSON.parse(responseText) : {};
+        } catch (parseError) {
+            throw new Error(responseText || `HTTP ${response.status}`);
+        }
+
+        if (!response.ok) {
+            throw new Error(data.message || `HTTP ${response.status}`);
+        }
+
+        if (data.success) {
+            showNotification('✓ Document classé avec succès !', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message || 'Impossible d\'appliquer la catégorie.', 'error');
+        }
+    } catch (error) {
+        showNotification(error.message || 'Erreur lors de l\'application de la catégorie.', 'error');
+    }
+}
+
+function cancelCategorization() {
+    document.getElementById('categorizationResult').classList.add('d-none');
+    document.getElementById('aiSummary').classList.add('d-none');
+    document.getElementById('initialAiState').classList.remove('d-none');
+}
+</script>

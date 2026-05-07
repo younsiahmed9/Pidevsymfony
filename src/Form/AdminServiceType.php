@@ -31,8 +31,13 @@ class AdminServiceType extends AbstractType
                 'scale' => 2,
                 'constraints' => [new NotBlank(message: 'Le tarif est obligatoire.')],
             ])
-            ->add('typeService', TextType::class, [
+            ->add('typeService', ChoiceType::class, [
                 'label' => 'Type de Service',
+                'choices' => [
+                    'Abonnement' => 'abonnement',
+                    'Facture' => 'facture',
+                ],
+                'placeholder' => '-- Sélectionner un type --',
                 'constraints' => [new NotBlank(message: 'Le type du service est obligatoire.')],
             ])
             ->add('frequence', ChoiceType::class, [
@@ -49,7 +54,7 @@ class AdminServiceType extends AbstractType
                 'choices' => [
                     'Actif' => 'actif',
                     'Suspendu' => 'suspendu',
-                    'Terminé' => 'termine',
+                    'Expiré' => 'expire',
                 ],
             ])
             ->add('dateDebut', DateType::class, [

@@ -11,12 +11,12 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class BrevoEmailService
 {
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly UserRepository $userRepository,
-        private readonly string $brevoApiKey,
-        private readonly string $senderEmail,
-        private readonly string $senderName,
+        private HttpClientInterface $httpClient,
+        private EntityManagerInterface $entityManager,
+        private UserRepository $userRepository,
+        private string $brevoApiKey,
+        private string $senderEmail,
+        private string $senderName,
     ) {
     }
 

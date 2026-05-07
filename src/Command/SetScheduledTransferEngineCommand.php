@@ -15,8 +15,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class SetScheduledTransferEngineCommand extends Command
 {
     public function __construct(
-        private readonly ScheduledTransferEngineConfigManager $configManager,
-        private readonly ScheduledTransferEngineResolver $resolver,
+        private ScheduledTransferEngineConfigManager $configManager,
+        private ScheduledTransferEngineResolver $resolver,
     ) {
         parent::__construct();
     }

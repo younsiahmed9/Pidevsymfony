@@ -1,0 +1,61 @@
+{% extends 'frontoffice/base.html.twig' %}
+
+{% block title %}Validation Face ID Admin - FinTrack{% endblock %}
+
+{% block body %}
+<section class="auth-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-11 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                <div class="auth-card">
+                    <div class="auth-card-body">
+                        <div class="auth-header text-center mb-4">
+                            <div class="mb-3">
+                                <i class="fas fa-user-shield fa-3x text-primary"></i>
+                            </div>
+                            <h2 class="auth-title">Validation Face ID</h2>
+                            <p class="auth-subtitle mb-1">Authentification finale pour le compte administrateur</p>
+                            <p class="small text-muted mb-0">Compte: {{ adminEmail }}</p>
+                        </div>
+
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} border-0 rounded-3 small mb-4">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+
+                        <div class="alert alert-info border-0 rounded-3 small mb-4">
+                            <i class="fas fa-camera me-2"></i>
+                            Autorisez la camera puis lancez la reconnaissance pour terminer la connexion.
+                        </div>
+
+                        <form method="post" action="{{ path('app_face_id_login') }}" data-face-id-form>
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('face_id_login') }}">
+                            <input type="hidden" name="face_descriptor" data-face-id-input>
+                            <input type="hidden" name="face_email" value="{{ adminEmail }}" data-face-id-email>
+
+                            <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
+                                <video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
+                            </div>
+
+                            <p class="text-muted mb-4" data-face-id-status>Autorisez la camera puis vérifiez votre visage.</p>
+
+                            <button class="btn btn-primary w-100 mb-3" type="submit" data-face-id-submit>
+                                Scanner et se connecter
+                            </button>
+
+                            <div class="text-center small">
+                                <a href="{{ path('app_logout') }}" class="auth-link">Annuler et se déconnecter</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="{{ asset('frontoffice/js/face-id.js') }}"></script>
+{% endblock %}

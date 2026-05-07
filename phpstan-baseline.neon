@@ -1,0 +1,2863 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Property App\\Command\\SetScheduledTransferEngineCommand\:\:\$resolver is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Command/SetScheduledTransferEngineCommand.php
+
+		-
+			message: '#^Parameter \#1 \$utilisateur of method App\\Entity\\Document\:\:setUtilisateur\(\) expects App\\Entity\\User\|null, Symfony\\Component\\Security\\Core\\User\\UserInterface\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Controller/Api/DocumentApiController.php
+
+		-
+			message: '#^Parameter \#2 \$archivedBy of method App\\Service\\DocumentArchiveService\:\:archiveDocument\(\) expects App\\Entity\\User, Symfony\\Component\\Security\\Core\\User\\UserInterface\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Controller/Api/DocumentApiController.php
+
+		-
+			message: '#^Parameter \#2 \$initiator of method App\\Service\\DocumentSignService\:\:initiateSignature\(\) expects App\\Entity\\User, Symfony\\Component\\Security\\Core\\User\\UserInterface\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Controller/Api/DocumentApiController.php
+
+		-
+			message: '#^Parameter \#2 \$restoredBy of method App\\Service\\DocumentArchiveService\:\:restoreDocument\(\) expects App\\Entity\\User, Symfony\\Component\\Security\\Core\\User\\UserInterface\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Controller/Api/DocumentApiController.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: src/Controller/Api/DocumentIntelligenceController.php
+
+		-
+			message: '#^Parameter \#3 \$user of method App\\Service\\DocumentCategorizationService\:\:suggestFolder\(\) expects App\\Entity\\User\|null, Symfony\\Component\\Security\\Core\\User\\UserInterface\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Controller/Api/DocumentIntelligenceController.php
+
+		-
+			message: '#^Property App\\Controller\\Api\\DocumentIntelligenceController\:\:\$documentRepository is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Controller/Api/DocumentIntelligenceController.php
+
+		-
+			message: '#^Property App\\Controller\\Api\\TranslationController\:\:\$documentRepository is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Controller/Api/TranslationController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\\Entity\\User\>\:\:findByEmail\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: src/Controller/AuthController.php
+
+		-
+			message: '#^Method App\\Controller\\AuthController\:\:getDashboardRedirectParams\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AuthController.php
+
+		-
+			message: '#^Method App\\Controller\\AuthController\:\:normalizeDescriptor\(\) has parameter \$descriptor with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AuthController.php
+
+		-
+			message: '#^Method App\\Controller\\AuthController\:\:normalizeDescriptor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AuthController.php
+
+		-
+			message: '#^Method App\\Controller\\AuthController\:\:normalizeRegistrationFormErrors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/AuthController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: src/Controller/AuthController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between DateTimeInterface and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Controller/BackOffice/CompteController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DashboardController\:\:buildPortefeuilleFilters\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DashboardController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DashboardController\:\:fetchFilteredPortefeuilles\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DashboardController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DashboardController\:\:fetchFilteredPortefeuilles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DashboardController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DashboardController\:\:fetchPortefeuilleStats\(\) has parameter \$filters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DashboardController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DashboardController\:\:fetchPortefeuilleStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DashboardController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DashboardController\:\:fetchTransferStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DashboardController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DepenseController\:\:mapBudgetChoices\(\) has parameter \$budgets with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DepenseController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DepenseController\:\:mapBudgetChoices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DepenseController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DepenseController\:\:mapUserChoices\(\) has parameter \$users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DepenseController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DepenseController\:\:mapUserChoices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DepenseController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\DocumentController\:\:normalizeTagValues\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/DocumentController.php
+
+		-
+			message: '#^Call to method getMessage\(\) on an unknown class App\\Controller\\BackOffice\\EntityNotFoundException\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Call to method getViolations\(\) on an unknown class App\\Controller\\BackOffice\\ValidationFailedException\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Caught class App\\Controller\\BackOffice\\EntityNotFoundException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Caught class App\\Controller\\BackOffice\\ForeignKeyConstraintViolationException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Caught class App\\Controller\\BackOffice\\UniqueConstraintViolationException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Caught class App\\Controller\\BackOffice\\ValidationFailedException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Instantiated class App\\Controller\\BackOffice\\EntityNotFoundException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\FactureController\:\:validateFactureInput\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\FactureController\:\:validateFactureInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Throwing object of an unknown class App\\Controller\\BackOffice\\EntityNotFoundException\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BackOffice/FactureController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\ProduitController\:\:mapUserChoices\(\) has parameter \$users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/ProduitController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\ProduitController\:\:mapUserChoices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/ProduitController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\ServiceController\:\:mapUserChoices\(\) has parameter \$users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/ServiceController.php
+
+		-
+			message: '#^Method App\\Controller\\BackOffice\\ServiceController\:\:mapUserChoices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/BackOffice/ServiceController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\BudgetController\:\:validateBudgetInput\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/BudgetController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\BudgetController\:\:validateBudgetInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/BudgetController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CarteController\:\:extractSubmittedCarteData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CarteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CarteController\:\:getPortefeuilleChoices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CarteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CarteController\:\:hydrateCarteFromData\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CarteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CarteController\:\:hydrateCarteFromData\(\) has parameter \$existingCarte with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CarteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CarteController\:\:hydrateCarteFromData\(\) has parameter \$portefeuilleChoices with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CarteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CarteController\:\:normalizeViolations\(\) has parameter \$violations with no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CarteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CarteController\:\:normalizeViolations\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CarteController.php
+
+		-
+			message: '#^Call to method addTask\(\) on an unknown class CloudConvert\\Models\\Job\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/FrontOffice/CloudConvertController.php
+
+		-
+			message: '#^Call to method jobs\(\) on an unknown class CloudConvert\\CloudConvert\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/FrontOffice/CloudConvertController.php
+
+		-
+			message: '#^Call to method set\(\) on an unknown class CloudConvert\\Models\\Task\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/FrontOffice/CloudConvertController.php
+
+		-
+			message: '#^Call to method tasks\(\) on an unknown class CloudConvert\\CloudConvert\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/FrontOffice/CloudConvertController.php
+
+		-
+			message: '#^Instantiated class CloudConvert\\CloudConvert not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/FrontOffice/CloudConvertController.php
+
+		-
+			message: '#^Instantiated class CloudConvert\\Models\\Job not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/FrontOffice/CloudConvertController.php
+
+		-
+			message: '#^Instantiated class CloudConvert\\Models\\Task not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/FrontOffice/CloudConvertController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Security\\Core\\User\\UserInterface\:\:getId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/FrontOffice/CompteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CompteController\:\:normalizeViolations\(\) has parameter \$violations with no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CompteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\CompteController\:\:normalizeViolations\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/CompteController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\DepenseController\:\:validateDepenseInput\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/DepenseController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\DepenseController\:\:validateDepenseInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/DepenseController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Security\\Core\\User\\UserInterface\:\:getId\(\)\.$#'
+			identifier: method.notFound
+			count: 6
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\DocumentController\:\:createDocumentFormData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\DocumentController\:\:normalizeTagValues\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\DocumentController\:\:normalizeViolations\(\) has parameter \$violations with no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\DocumentController\:\:normalizeViolations\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Parameter \#1 \$signer of method App\\Entity\\Document\:\:setSigner\(\) expects App\\Entity\\User\|null, Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Property App\\Controller\\FrontOffice\\DocumentController\:\:\$twig is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and false will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Controller/FrontOffice/DocumentController.php
+
+		-
+			message: '#^Instanceof between App\\Entity\\User and App\\Entity\\User will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/Controller/FrontOffice/EcheanceController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\EcheanceController\:\:createEcheanceFormData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/EcheanceController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\EcheanceController\:\:normalizeViolations\(\) has parameter \$violations with no value type specified in iterable type iterable\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/EcheanceController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\EcheanceController\:\:normalizeViolations\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/EcheanceController.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: src/Controller/FrontOffice/FactureController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\FactureController\:\:validateFactureInput\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/FactureController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\FactureController\:\:validateFactureInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/FactureController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\HistoriqueController\:\:getAvailableAuditTables\(\) has parameter \$connection with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Controller/FrontOffice/HistoriqueController.php
+
+		-
+			message: '#^Offset ''facture''\|''produit''\|''service'' on array\{produit\: array\{table\: ''produit_audit'', label\: ''Produit''\}, service\: array\{table\: ''service_audit'', label\: ''Service''\}, facture\: array\{table\: ''facture_audit'', label\: ''Facture''\}\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: src/Controller/FrontOffice/HistoriqueController.php
+
+		-
+			message: '#^Call to function is_array\(\) with list\<array\<string, mixed\>\> will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Controller/FrontOffice/ProduitController.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: src/Controller/FrontOffice/ProduitController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\ProduitController\:\:validateProduitInput\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/ProduitController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\ProduitController\:\:validateProduitInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/ProduitController.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: src/Controller/FrontOffice/ServiceController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\ServiceController\:\:validateServiceInput\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/ServiceController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\ServiceController\:\:validateServiceInput\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/ServiceController.php
+
+		-
+			message: '#^Call to an undefined method App\\Controller\\FrontOffice\\ServiceRecommendationController\:\:getDoctrine\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: src/Controller/FrontOffice/ServiceRecommendationController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\ServiceRecommendationController\:\:formatRecommendation\(\) has parameter \$recommendation with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/ServiceRecommendationController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\ServiceRecommendationController\:\:formatRecommendation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/ServiceRecommendationController.php
+
+		-
+			message: '#^Instanceof between App\\Entity\\CarteVirtuelle and App\\Entity\\CarteVirtuelle will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/Controller/FrontOffice/TransactionController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\TransactionController\:\:verifyCurrency\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/TransactionController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\TransactionController\:\:verifyEmail\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/TransactionController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\TransactionController\:\:verifyGeolocation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/TransactionController.php
+
+		-
+			message: '#^Offset ''provider'' on array\{country_code\: string\|null, country_name\: string\|null, city\: string\|null, latitude\: float\|null, longitude\: float\|null, risk_score\: int, decision\: string, provider\: string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: src/Controller/FrontOffice/TransactionController.php
+
+		-
+			message: '#^Variable \$cardIds in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: src/Controller/FrontOffice/TransactionController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\VirementController\:\:buildVirementForm\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Controller/FrontOffice/VirementController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\VirementController\:\:buildVirementForm\(\) has parameter \$cardRows with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/VirementController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\VirementController\:\:buildVirementForm\(\) has parameter \$defaults with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/VirementController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\VirementController\:\:getOwnedCardRows\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/VirementController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\VirementController\:\:isCardOwnedByUser\(\) has parameter \$cardRows with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/VirementController.php
+
+		-
+			message: '#^Method App\\Controller\\FrontOffice\\VirementController\:\:resolveCardLabel\(\) has parameter \$cardRows with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/FrontOffice/VirementController.php
+
+		-
+			message: '#^Method App\\Controller\\ImageController\:\:loadImage\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Controller/ImageController.php
+
+		-
+			message: '#^Property App\\Controller\\ImageController\:\:\$cacheDir has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Controller/ImageController.php
+
+		-
+			message: '#^Property App\\Controller\\ImageController\:\:\$documentsDir has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Controller/ImageController.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: '#^Instanceof between App\\Entity\\User and App\\Entity\\User will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 2
+			path: src/Controller/MessageController.php
+
+		-
+			message: '#^Method App\\Controller\\MessageController\:\:serializeMessage\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Controller/MessageController.php
+
+		-
+			message: '#^Method KnpU\\OAuth2ClientBundle\\Client\\OAuth2ClientInterface\:\:redirect\(\) invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 3
+			path: src/Controller/OAuthController.php
+
+		-
+			message: '#^Call to an undefined method App\\Entity\\User\:\:setPassword\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/DataFixtures/ORM/RecommendationFixtures.php
+
+		-
+			message: '#^Method App\\DataFixtures\\ORM\\RecommendationFixtures\:\:createSampleInteractions\(\) has parameter \$services with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataFixtures/ORM/RecommendationFixtures.php
+
+		-
+			message: '#^Method App\\DataFixtures\\ORM\\RecommendationFixtures\:\:createSampleInteractions\(\) has parameter \$users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataFixtures/ORM/RecommendationFixtures.php
+
+		-
+			message: '#^Method App\\DataFixtures\\ORM\\RecommendationFixtures\:\:createSampleServices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataFixtures/ORM/RecommendationFixtures.php
+
+		-
+			message: '#^Method App\\DataFixtures\\ORM\\RecommendationFixtures\:\:createSampleUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/DataFixtures/ORM/RecommendationFixtures.php
+
+		-
+			message: '#^Undefined variable\: \$users$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/DataFixtures/ORM/RecommendationFixtures.php
+
+		-
+			message: '#^Property App\\Entity\\ArchiveRecord\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/ArchiveRecord.php
+
+		-
+			message: '#^Property App\\Entity\\Budget\:\:\$dateCreation \(DateTime\|null\) does not accept DateTimeInterface\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Entity/Budget.php
+
+		-
+			message: '#^Property App\\Entity\\Budget\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Budget.php
+
+		-
+			message: '#^Method App\\Entity\\CarteVirtuelle\:\:getTransactionsDest\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Method App\\Entity\\CarteVirtuelle\:\:getTransactionsSource\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$devise \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$is_active \(bool\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$numero_carte \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$plafond \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$solde \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$transactionsDest with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$transactionsSource with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Property App\\Entity\\CarteVirtuelle\:\:\$type \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/CarteVirtuelle.php
+
+		-
+			message: '#^Method App\\Entity\\Categorie\:\:getDocuments\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Categorie.php
+
+		-
+			message: '#^Property App\\Entity\\Categorie\:\:\$documents with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Categorie.php
+
+		-
+			message: '#^Property App\\Entity\\Categorie\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Categorie.php
+
+		-
+			message: '#^Property App\\Entity\\ChatConversation\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/ChatConversation.php
+
+		-
+			message: '#^Property App\\Entity\\ChatMessage\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/ChatMessage.php
+
+		-
+			message: '#^Method App\\Entity\\Compte\:\:getCredits\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Compte.php
+
+		-
+			message: '#^Method App\\Entity\\Compte\:\:getReleves\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Compte.php
+
+		-
+			message: '#^Property App\\Entity\\Compte\:\:\$credits with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Compte.php
+
+		-
+			message: '#^Property App\\Entity\\Compte\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Compte.php
+
+		-
+			message: '#^Property App\\Entity\\Compte\:\:\$releves with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Compte.php
+
+		-
+			message: '#^Property App\\Entity\\Credit\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Credit.php
+
+		-
+			message: '#^Property App\\Entity\\Depense\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Depense.php
+
+		-
+			message: '#^Method App\\Entity\\Document\:\:getEcheances\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Method App\\Entity\\Document\:\:getPacks\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Method App\\Entity\\Document\:\:getSignatories\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Method App\\Entity\\Document\:\:getSignatures\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Method App\\Entity\\Document\:\:getVersions\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Property App\\Entity\\Document\:\:\$echeances with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Property App\\Entity\\Document\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Property App\\Entity\\Document\:\:\$packs with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Property App\\Entity\\Document\:\:\$signatories with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Property App\\Entity\\Document\:\:\$signatures with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Property App\\Entity\\Document\:\:\$tags with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Property App\\Entity\\Document\:\:\$versions with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Document.php
+
+		-
+			message: '#^Property App\\Entity\\DocumentVersion\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/DocumentVersion.php
+
+		-
+			message: '#^Method App\\Entity\\Dossier\:\:getDocuments\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Dossier.php
+
+		-
+			message: '#^Property App\\Entity\\Dossier\:\:\$documents with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Dossier.php
+
+		-
+			message: '#^Property App\\Entity\\Dossier\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Dossier.php
+
+		-
+			message: '#^Property App\\Entity\\Draft\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Draft.php
+
+		-
+			message: '#^Property App\\Entity\\Echeance\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Echeance.php
+
+		-
+			message: '#^Property App\\Entity\\Facture\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Facture.php
+
+		-
+			message: '#^Property App\\Entity\\Facture\:\:\$produitServiceConstraint has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Entity/Facture.php
+
+		-
+			message: '#^Property App\\Entity\\Facture\:\:\$produitServiceConstraint is unused\.$#'
+			identifier: property.unused
+			count: 1
+			path: src/Entity/Facture.php
+
+		-
+			message: '#^Property App\\Entity\\MailDeliveryLog\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/MailDeliveryLog.php
+
+		-
+			message: '#^Property App\\Entity\\Pack\:\:\$documents with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Pack.php
+
+		-
+			message: '#^Property App\\Entity\\Pack\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Pack.php
+
+		-
+			message: '#^Method App\\Entity\\Portefeuille\:\:getCartes\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Portefeuille.php
+
+		-
+			message: '#^Property App\\Entity\\Portefeuille\:\:\$cartes with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Portefeuille.php
+
+		-
+			message: '#^Property App\\Entity\\Portefeuille\:\:\$devise_principale \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Portefeuille.php
+
+		-
+			message: '#^Property App\\Entity\\Portefeuille\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Portefeuille.php
+
+		-
+			message: '#^Property App\\Entity\\Portefeuille\:\:\$solde_total \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Portefeuille.php
+
+		-
+			message: '#^Property App\\Entity\\Produit\:\:\$dateCreation \(DateTime\|null\) does not accept DateTimeInterface\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Entity/Produit.php
+
+		-
+			message: '#^Property App\\Entity\\Produit\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Produit.php
+
+		-
+			message: '#^Method App\\Entity\\Releve\:\:getMetadonneesArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Entity/Releve.php
+
+		-
+			message: '#^Method App\\Entity\\Releve\:\:setMetadonneesArray\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Entity/Releve.php
+
+		-
+			message: '#^Property App\\Entity\\Releve\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Releve.php
+
+		-
+			message: '#^Property App\\Entity\\Releve\:\:\$typeReleve \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Releve.php
+
+		-
+			message: '#^Property App\\Entity\\Service\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Service.php
+
+		-
+			message: '#^Property App\\Entity\\ServiceCategory\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/ServiceCategory.php
+
+		-
+			message: '#^Property App\\Entity\\Signatory\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Signatory.php
+
+		-
+			message: '#^Property App\\Entity\\Signature\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Signature.php
+
+		-
+			message: '#^Method App\\Entity\\SignaturePolicy\:\:getConfig\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Entity/SignaturePolicy.php
+
+		-
+			message: '#^Method App\\Entity\\SignaturePolicy\:\:setConfig\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Entity/SignaturePolicy.php
+
+		-
+			message: '#^Property App\\Entity\\SignaturePolicy\:\:\$config type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Entity/SignaturePolicy.php
+
+		-
+			message: '#^Property App\\Entity\\SignaturePolicy\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/SignaturePolicy.php
+
+		-
+			message: '#^Property App\\Entity\\Tag\:\:\$documents with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Entity/Tag.php
+
+		-
+			message: '#^Property App\\Entity\\Tag\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Tag.php
+
+		-
+			message: '#^Property App\\Entity\\Transaction\:\:\$devise \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Transaction.php
+
+		-
+			message: '#^Property App\\Entity\\Transaction\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Transaction.php
+
+		-
+			message: '#^Property App\\Entity\\Transaction\:\:\$statut \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Transaction.php
+
+		-
+			message: '#^Method App\\Entity\\User\:\:getFaceDescriptor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Method App\\Entity\\User\:\:getFingerprintTemplate\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Method App\\Entity\\User\:\:setFingerprintTemplate\(\) has parameter \$fingerprintTemplate with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Property App\\Entity\\User\:\:\$createdAt \(DateTimeImmutable\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Property App\\Entity\\User\:\:\$faceTemplate has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Property App\\Entity\\User\:\:\$fingerprintTemplate has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Property App\\Entity\\User\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Property App\\Entity\\User\:\:\$isActive \(bool\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Property App\\Entity\\User\:\:\$updatedAt \(DateTimeImmutable\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Property App\\Entity\\UserServiceInteraction\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/UserServiceInteraction.php
+
+		-
+			message: '#^Property App\\Entity\\Utilisateur\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/Utilisateur.php
+
+		-
+			message: '#^Property App\\Entity\\VirementProgramme\:\:\$actif \(bool\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/VirementProgramme.php
+
+		-
+			message: '#^Property App\\Entity\\VirementProgramme\:\:\$attempts \(int\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/VirementProgramme.php
+
+		-
+			message: '#^Property App\\Entity\\VirementProgramme\:\:\$devise \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/VirementProgramme.php
+
+		-
+			message: '#^Property App\\Entity\\VirementProgramme\:\:\$frequence \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/VirementProgramme.php
+
+		-
+			message: '#^Property App\\Entity\\VirementProgramme\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/VirementProgramme.php
+
+		-
+			message: '#^Property App\\Entity\\VirementProgramme\:\:\$statut \(string\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/VirementProgramme.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/EventSubscriber/AccessDeniedSubscriber.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/EventSubscriber/PostFormValidationSubscriber.php
+
+		-
+			message: '#^Method App\\EventSubscriber\\PostFormValidationSubscriber\:\:sanitizePayload\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/EventSubscriber/PostFormValidationSubscriber.php
+
+		-
+			message: '#^Method App\\EventSubscriber\\PostFormValidationSubscriber\:\:sanitizePayload\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/EventSubscriber/PostFormValidationSubscriber.php
+
+		-
+			message: '#^Method App\\EventSubscriber\\PostFormValidationSubscriber\:\:validateCommonFormats\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/EventSubscriber/PostFormValidationSubscriber.php
+
+		-
+			message: '#^Method App\\EventSubscriber\\PostFormValidationSubscriber\:\:validateLength\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/EventSubscriber/PostFormValidationSubscriber.php
+
+		-
+			message: '#^Method App\\EventSubscriber\\PostFormValidationSubscriber\:\:validateNoUnsafeHtml\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/EventSubscriber/PostFormValidationSubscriber.php
+
+		-
+			message: '#^Method App\\EventSubscriber\\PostFormValidationSubscriber\:\:validatePayload\(\) has parameter \$errors with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/EventSubscriber/PostFormValidationSubscriber.php
+
+		-
+			message: '#^Method App\\EventSubscriber\\PostFormValidationSubscriber\:\:validatePayload\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/EventSubscriber/PostFormValidationSubscriber.php
+
+		-
+			message: '#^Class Symfony\\UX\\Dropzone\\Form\\DropzoneType not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Form/DocumentType.php
+
+		-
+			message: '#^Attribute class Symfony\\UX\\Autocomplete\\Form\\AsEntityAutocompleteField does not exist\.$#'
+			identifier: attribute.notFound
+			count: 1
+			path: src/Form/TagAutocompleteField.php
+
+		-
+			message: '#^Call to method toArray\(\) on an unknown class App\\Form\\Collection\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Form/TagAutocompleteField.php
+
+		-
+			message: '#^Class App\\Form\\Collection not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Form/TagAutocompleteField.php
+
+		-
+			message: '#^Class Symfony\\UX\\Autocomplete\\Form\\BaseEntityAutocompleteType not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Form/TagAutocompleteField.php
+
+		-
+			message: '#^Class App\\Repository\\ArchiveRecordRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/ArchiveRecordRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ArchiveRecordRepository\:\:findLegalArchivesRequiringPurge\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ArchiveRecordRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ArchiveRecordRepository\:\:getArchiveStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ArchiveRecordRepository.php
+
+		-
+			message: '#^Class App\\Repository\\BudgetRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/BudgetRepository.php
+
+		-
+			message: '#^Class App\\Repository\\CategorieRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/CategorieRepository.php
+
+		-
+			message: '#^Method App\\Repository\\CategorieRepository\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/CategorieRepository.php
+
+		-
+			message: '#^Class App\\Repository\\CompteRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/CompteRepository.php
+
+		-
+			message: '#^Method App\\Repository\\CompteRepository\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/CompteRepository.php
+
+		-
+			message: '#^Class App\\Repository\\CreditRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/CreditRepository.php
+
+		-
+			message: '#^Method App\\Repository\\CreditRepository\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/CreditRepository.php
+
+		-
+			message: '#^Class App\\Repository\\DepenseRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/DepenseRepository.php
+
+		-
+			message: '#^Class App\\Repository\\DocumentRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/DocumentRepository.php
+
+		-
+			message: '#^Method App\\Repository\\DocumentRepository\:\:findExpiringDocuments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/DocumentRepository.php
+
+		-
+			message: '#^Method App\\Repository\\DocumentRepository\:\:getAdminStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/DocumentRepository.php
+
+		-
+			message: '#^Method App\\Repository\\DocumentRepository\:\:getStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/DocumentRepository.php
+
+		-
+			message: '#^Method App\\Repository\\DocumentRepository\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/DocumentRepository.php
+
+		-
+			message: '#^Class App\\Repository\\DocumentVersionRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/DocumentVersionRepository.php
+
+		-
+			message: '#^Class App\\Repository\\DossierRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/DossierRepository.php
+
+		-
+			message: '#^Method App\\Repository\\DossierRepository\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/DossierRepository.php
+
+		-
+			message: '#^Class App\\Repository\\DraftRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/DraftRepository.php
+
+		-
+			message: '#^Method App\\Repository\\DraftRepository\:\:findByUser\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/DraftRepository.php
+
+		-
+			message: '#^Method App\\Repository\\DraftRepository\:\:findReadyToPublish\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/DraftRepository.php
+
+		-
+			message: '#^Class App\\Repository\\EcheanceRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/EcheanceRepository.php
+
+		-
+			message: '#^Method App\\Repository\\EcheanceRepository\:\:findOverdue\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/EcheanceRepository.php
+
+		-
+			message: '#^Method App\\Repository\\EcheanceRepository\:\:search\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/EcheanceRepository.php
+
+		-
+			message: '#^Class App\\Repository\\FactureRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/FactureRepository.php
+
+		-
+			message: '#^Class App\\Repository\\PackRepository has PHPDoc tag @method for method findBy\(\) parameter \#1 \$criteria with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/PackRepository.php
+
+		-
+			message: '#^Class App\\Repository\\PackRepository has PHPDoc tag @method for method findBy\(\) parameter \#2 \$orderBy with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/PackRepository.php
+
+		-
+			message: '#^Class App\\Repository\\PackRepository has PHPDoc tag @method for method findOneBy\(\) parameter \#1 \$criteria with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/PackRepository.php
+
+		-
+			message: '#^Class App\\Repository\\PackRepository has PHPDoc tag @method for method findOneBy\(\) parameter \#2 \$orderBy with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/PackRepository.php
+
+		-
+			message: '#^Method App\\Repository\\PackRepository\:\:findByUser\(\) has parameter \$user with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Repository/PackRepository.php
+
+		-
+			message: '#^Method App\\Repository\\PackRepository\:\:findByUser\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/PackRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ProduitRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/ProduitRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ReleveRepository has PHPDoc tag @method for method findBy\(\) parameter \#1 \$criteria with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ReleveRepository has PHPDoc tag @method for method findBy\(\) parameter \#2 \$orderBy with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ReleveRepository has PHPDoc tag @method for method findOneBy\(\) parameter \#1 \$criteria with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ReleveRepository has PHPDoc tag @method for method findOneBy\(\) parameter \#2 \$orderBy with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ReleveRepository\:\:findByCompteOrderedByDate\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ReleveRepository\:\:findByCompteOrderedByDate\(\) has parameter \$compte with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ReleveRepository\:\:findRecentReleves\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ReleveRepository\:\:findRecentReleves\(\) has parameter \$compte with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Method App\\Repository\\ReleveRepository\:\:findRecentReleves\(\) has parameter \$days with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Repository/ReleveRepository.php
+
+		-
+			message: '#^Class App\\Repository\\ServiceRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/ServiceRepository.php
+
+		-
+			message: '#^Class App\\Repository\\SignatoryRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/SignatoryRepository.php
+
+		-
+			message: '#^Method App\\Repository\\SignatoryRepository\:\:findByDocument\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/SignatoryRepository.php
+
+		-
+			message: '#^Method App\\Repository\\SignatoryRepository\:\:findByUser\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/SignatoryRepository.php
+
+		-
+			message: '#^Class App\\Repository\\SignaturePolicyRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/SignaturePolicyRepository.php
+
+		-
+			message: '#^Method App\\Repository\\SignaturePolicyRepository\:\:findByType\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/SignaturePolicyRepository.php
+
+		-
+			message: '#^Class App\\Repository\\SignatureRepository extends generic class Doctrine\\Bundle\\DoctrineBundle\\Repository\\ServiceEntityRepository but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/SignatureRepository.php
+
+		-
+			message: '#^Method App\\Repository\\SignatureRepository\:\:findByDocument\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/SignatureRepository.php
+
+		-
+			message: '#^Method App\\Repository\\SignatureRepository\:\:findPendingBySigner\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/SignatureRepository.php
+
+		-
+			message: '#^Method App\\Repository\\TagRepository\:\:searchAutocomplete\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/TagRepository.php
+
+		-
+			message: '#^Method App\\Repository\\UserServiceInteractionRepository\:\:findByInteractionType\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/UserServiceInteractionRepository.php
+
+		-
+			message: '#^Method App\\Repository\\UserServiceInteractionRepository\:\:findPopularServices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/UserServiceInteractionRepository.php
+
+		-
+			message: '#^Method App\\Repository\\UserServiceInteractionRepository\:\:findRecentInteractions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Repository/UserServiceInteractionRepository.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\\Entity\\User\>\:\:findByEmail\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Security/AppAuthenticator.php
+
+		-
+			message: '#^Class App\\Security\\DocumentVoter extends generic class Symfony\\Component\\Security\\Core\\Authorization\\Voter\\Voter but does not specify its types\: TAttribute, TSubject$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Security/DocumentVoter.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\\Entity\\User\>\:\:findByEmail\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\FaceIdAuthenticator\:\:cosineSimilarity\(\) has parameter \$left with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\FaceIdAuthenticator\:\:cosineSimilarity\(\) has parameter \$right with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\FaceIdAuthenticator\:\:findBestMatch\(\) has parameter \$descriptor with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\FaceIdAuthenticator\:\:findBestMatch\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\FaceIdAuthenticator\:\:normalizeDescriptor\(\) has parameter \$descriptor with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\FaceIdAuthenticator\:\:normalizeDescriptor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\FaceIdAuthenticator\:\:onAuthenticationFailure\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\FaceIdAuthenticator\:\:onAuthenticationSuccess\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Security/FaceIdAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\LoginFormAuthenticator\:\:onAuthenticationSuccess\(\) has parameter \$token with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Security/LoginFormAuthenticator.php
+
+		-
+			message: '#^Method App\\Security\\LoginFormAuthenticator\:\:onAuthenticationSuccess\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Security/LoginFormAuthenticator.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Security/OAuthAuthenticator.php
+
+		-
+			message: '#^Call to function method_exists\(\) with League\\OAuth2\\Client\\Provider\\ResourceOwnerInterface and ''getId'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Security/OAuthAuthenticator.php
+
+		-
+			message: '#^Method App\\Service\\AIService\:\:getFinancialAdvice\(\) has parameter \$budgets with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/AIService.php
+
+		-
+			message: '#^Method App\\Service\\AIService\:\:getFinancialAdvice\(\) has parameter \$expenses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/AIService.php
+
+		-
+			message: '#^Method App\\Service\\AIService\:\:testApiKey\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/AIService.php
+
+		-
+			message: '#^Method App\\Service\\BudgetManagementService\:\:getAvailableBudgetsForReallocation\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/BudgetManagementService.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Service/BudgetNotificationService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:buildUserContext\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:enhanceResponseWithAi\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handleCategoryFilter\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handleConversationalAi\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handleConversationalAi\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handleGreeting\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handleHelp\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handlePriceComparison\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handleRecommendationsRequest\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handleServiceInfo\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:handleUnknown\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\Chatbot\\RecommendationChatbotService\:\:processMessage\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Chatbot/RecommendationChatbotService.php
+
+		-
+			message: '#^Method App\\Service\\ContentModerationService\:\:assess\(\) should return array\{flagged\: bool, source\: string, reason\: string, categories\: array\<string\>\} but returns array\{flagged\: bool, reason\: string, categories\: array\<string\>\}\.$#'
+			identifier: return.type
+			count: 2
+			path: src/Service/ContentModerationService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentCategorizationService\:\:extractDates\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentCategorizationService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentCategorizationService\:\:extractMetadata\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentCategorizationService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentCategorizationService\:\:getKeywordsForCategory\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentCategorizationService.php
+
+		-
+			message: '#^Property App\\Service\\DocumentCategorizationService\:\:\$keywordMapping type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentCategorizationService.php
+
+		-
+			message: '#^Property App\\Service\\DocumentCategorizationService\:\:\$logger is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Service/DocumentCategorizationService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentChatService\:\:isMatch\(\) has parameter \$keywords with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentChatService.php
+
+		-
+			message: '#^Property App\\Service\\DocumentChatService\:\:\$logger is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Service/DocumentChatService.php
+
+		-
+			message: '#^Property App\\Service\\DocumentOCRService\:\:\$uploadsDir is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Service/DocumentOCRService.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\\Entity\\Signature\>\:\:findByDocument\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Service/DocumentSignService.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\\Entity\\Signature\>\:\:findPendingBySigner\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Service/DocumentSignService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentSignService\:\:getPendingSignaturesBySigner\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentSignService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentSignService\:\:getSignaturesByDocument\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentSignService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentSignService\:\:handleSignatureCallback\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentSignService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentSignService\:\:initiateSignature\(\) has parameter \$signers with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentSignService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentSignService\:\:validateSignatureRequest\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentSignService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentStorageService\:\:moveConvertedFile\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentStorageService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentStorageService\:\:storeUploadedFile\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentStorageService.php
+
+		-
+			message: '#^Method App\\Service\\DocumentVersionService\:\:registerCurrentFile\(\) has parameter \$fileInfo with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/DocumentVersionService.php
+
+		-
+			message: '#^Method App\\Service\\EcheanceService\:\:getAdminStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/EcheanceService.php
+
+		-
+			message: '#^Method App\\Service\\EcheanceService\:\:getUrgentEcheances\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/EcheanceService.php
+
+		-
+			message: '#^Method App\\Service\\EcheanceService\:\:getUserStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/EcheanceService.php
+
+		-
+			message: '#^Method App\\Service\\GeminiAIService\:\:analyzeDocumentText\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/GeminiAIService.php
+
+		-
+			message: '#^Parameter \#2 \$options of function curl_setopt_array expects array\{10002\: non\-empty\-string, 19913\: bool, 13\: int, 78\: int, 52\: bool, 68\: int, 64\: bool, 81\: 0\|2, \.\.\.\}, array\{10002\: string, 19913\: true, 13\: int, 78\: int\<min, 30\>, 52\: true, 68\: 5, 64\: false, 81\: false, \.\.\.\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Service/GeminiCardGeneratorService.php
+
+		-
+			message: '#^Property App\\Service\\GeminiCardGeneratorService\:\:\$geminiApiKey is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Service/GeminiCardGeneratorService.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: src/Service/Invoice/InvoiceApiService.php
+
+		-
+			message: '#^Method App\\Service\\Invoice\\InvoiceEmailService\:\:sendInvoicePdf\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Invoice/InvoiceEmailService.php
+
+		-
+			message: '#^Method App\\Service\\Notification\\InAppNotificationService\:\:getUnreadNotifications\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Notification/InAppNotificationService.php
+
+		-
+			message: '#^Property App\\Service\\Notification\\InAppNotificationService\:\:\$entityManager is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Service/Notification/InAppNotificationService.php
+
+		-
+			message: '#^Method App\\Service\\Notification\\PushNotificationService\:\:getUnreadNotifications\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Notification/PushNotificationService.php
+
+		-
+			message: '#^Call to method AddPage\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method Cell\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 22
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method GetY\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method Image\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method Line\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method Ln\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 8
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method MultiCell\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method Output\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method PageNo\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetAutoPageBreak\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetDefaultMonospacedFont\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetDrawColor\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetFillColor\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 7
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetFont\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 15
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetLineWidth\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetMargins\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetTextColor\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 16
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Call to method SetY\(\) on an unknown class TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Constant PDF_FONT_MONOSPACED not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Instantiated class TCPDF not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Parameter \$pdf of method App\\Service\\PdfReleveService\:\:addCompteInfo\(\) has invalid type TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Parameter \$pdf of method App\\Service\\PdfReleveService\:\:addCreditsSection\(\) has invalid type TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Parameter \$pdf of method App\\Service\\PdfReleveService\:\:addFooter\(\) has invalid type TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Parameter \$pdf of method App\\Service\\PdfReleveService\:\:addHeader\(\) has invalid type TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Parameter \$pdf of method App\\Service\\PdfReleveService\:\:addQrCode\(\) has invalid type TCPDF\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/PdfReleveService.php
+
+		-
+			message: '#^Comparison operation "\<\=" between 1\|2 and 2 is always true\.$#'
+			identifier: smallerOrEqual.alwaysTrue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:extractDiscount\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:extractReason\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:findFirstNumericValue\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:findFirstNumericValue\(\) has parameter \$keys with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:findKeyRecursive\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:resolveDiscountPercent\(\) has parameter \$validation with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:validateAndApplyToAvailableProducts\(\) has parameter \$metadata with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:validateAndApplyToAvailableProducts\(\) has parameter \$productIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Promotion\\VoucherifyPromotionService\:\:validateVoucher\(\) has parameter \$metadata with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between non\-empty\-string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: src/Service/Promotion/VoucherifyPromotionService.php
+
+		-
+			message: '#^Constant App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:CACHE_TTL is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:applyPopularityBoost\(\) has parameter \$scores with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:applyPopularityBoost\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:calculateCategorySimilarity\(\) has parameter \$preferredCategories with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:calculateCollaborativeScore\(\) has parameter \$interactions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:calculateCollaborativeScore\(\) has parameter \$users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:calculateCosineSimilarity\(\) has parameter \$vectorA with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:calculateCosineSimilarity\(\) has parameter \$vectorB with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:combineEnhancedScores\(\) has parameter \$collaborativeScores with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:combineEnhancedScores\(\) has parameter \$contentScores with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:combineEnhancedScores\(\) has parameter \$similarityScores with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:combineEnhancedScores\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:createInteractionVector\(\) has parameter \$interactions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:createInteractionVector\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:findSimilarUsers\(\) has parameter \$userInteractions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:findSimilarUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getAllUsersWithInteractions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getCollaborativeFilteringScores\(\) has parameter \$userInteractions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getCollaborativeFilteringScores\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getContentBasedScores\(\) has parameter \$preferredCategories with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getContentBasedScores\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getRecommendations\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getServicePopularity\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getServicesFromSimilarUsers\(\) has parameter \$similarUsers with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getServicesFromSimilarUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getSimilarityBasedScores\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getUserInteractions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getUserPreferredCategories\(\) has parameter \$interactions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:getUserPreferredCategories\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Property App\\Service\\Recommendation\\EnhancedHybridRecommendationService\:\:\$cache type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/EnhancedHybridRecommendationService.php
+
+		-
+			message: '#^Constant App\\Service\\Recommendation\\HybridRecommendationService\:\:CACHE_TTL is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:applyPopularityBoost\(\) has parameter \$scores with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:applyPopularityBoost\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:calculateCategorySimilarity\(\) has parameter \$preferredCategories with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:calculateCollaborativeScore\(\) has parameter \$interactions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:calculateCollaborativeScore\(\) has parameter \$users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:calculateCosineSimilarity\(\) has parameter \$vectorA with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:calculateCosineSimilarity\(\) has parameter \$vectorB with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:combineScores\(\) has parameter \$collaborativeScores with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:combineScores\(\) has parameter \$contentScores with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:combineScores\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:createInteractionVector\(\) has parameter \$interactions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:createInteractionVector\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:findSimilarUsers\(\) has parameter \$userInteractions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:findSimilarUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getAllUsersWithInteractions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getCollaborativeFilteringScores\(\) has parameter \$userInteractions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getCollaborativeFilteringScores\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getContentBasedScores\(\) has parameter \$preferredCategories with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getContentBasedScores\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getRecommendations\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getServicePopularity\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getServicesFromSimilarUsers\(\) has parameter \$similarUsers with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getServicesFromSimilarUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getUserInteractions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getUserPreferredCategories\(\) has parameter \$interactions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\HybridRecommendationService\:\:getUserPreferredCategories\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Property App\\Service\\Recommendation\\HybridRecommendationService\:\:\$cache type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/HybridRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\SimilarityRecommendationService\:\:findServiceByName\(\) has parameter \$excludeIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/SimilarityRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\SimilarityRecommendationService\:\:findSimilarServices\(\) has parameter \$excludeIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/SimilarityRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\SimilarityRecommendationService\:\:findSimilarServices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/SimilarityRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\SimilarityRecommendationService\:\:getPopularAlternatives\(\) has parameter \$excludeIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/SimilarityRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\SimilarityRecommendationService\:\:getPopularAlternatives\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/SimilarityRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\SimilarityRecommendationService\:\:getSimilarityRecommendations\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/SimilarityRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\SimilarityRecommendationService\:\:getSimilarityStats\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/SimilarityRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\Recommendation\\SimilarityRecommendationService\:\:getUserServices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Recommendation/SimilarityRecommendationService.php
+
+		-
+			message: '#^Method App\\Service\\SavingsBundleService\:\:getBudgetsResiduals\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SavingsBundleService.php
+
+		-
+			message: '#^Method App\\Service\\SavingsBundleService\:\:sweepToSavings\(\) has parameter \$sweeps with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SavingsBundleService.php
+
+		-
+			message: '#^Method App\\Service\\SavingsBundleService\:\:sweepToSavings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SavingsBundleService.php
+
+		-
+			message: '#^Method App\\Service\\SmartPromotionService\:\:apply\(\) has parameter \$productIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SmartPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\SmartPromotionService\:\:findEligibleProducts\(\) has parameter \$productIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SmartPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\SmartPromotionService\:\:preview\(\) has parameter \$productIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/SmartPromotionService.php
+
+		-
+			message: '#^Method App\\Service\\Sms\\MultiSmsService\:\:sendSmsWithFallback\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Sms/MultiSmsService.php
+
+		-
+			message: '#^Property App\\Service\\Sms\\SimpleSmsService\:\:\$httpClient is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Service/Sms/SimpleSmsService.php
+
+		-
+			message: '#^Property App\\Service\\Sms\\SmsApiService\:\:\$apiKey is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Service/Sms/SmsApiService.php
+
+		-
+			message: '#^Deprecated in PHP 8\.1\: Required parameter \$logger follows optional parameter \$messagingServiceSid\.$#'
+			identifier: parameter.requiredAfterOptional
+			count: 1
+			path: src/Service/SmsService.php
+
+		-
+			message: '#^Instanceof between App\\Service\\Sms\\BrevoSmsService and App\\Service\\Sms\\BrevoSmsService will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/Service/SmsService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: src/Service/SmsService.php
+
+		-
+			message: '#^Method App\\Service\\Transfer\\BrevoEmailService\:\:encodePayload\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Transfer/BrevoEmailService.php
+
+		-
+			message: '#^Method App\\Service\\Transfer\\BrevoEmailService\:\:sendAndLog\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Transfer/BrevoEmailService.php
+
+		-
+			message: '#^Method App\\Service\\Transfer\\BrevoEmailService\:\:sendNormalTransferConfirmation\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Transfer/BrevoEmailService.php
+
+		-
+			message: '#^Method App\\Service\\Transfer\\BrevoEmailService\:\:sendProgrammedTransferCreatedConfirmation\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Transfer/BrevoEmailService.php
+
+		-
+			message: '#^Method App\\Service\\Transfer\\BrevoEmailService\:\:sendScheduledTransferConfirmation\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Transfer/BrevoEmailService.php
+
+		-
+			message: '#^Method App\\Service\\Transfer\\CurrencyRateService\:\:extractRate\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Transfer/CurrencyRateService.php
+
+		-
+			message: '#^Method App\\Service\\Transfer\\GeoLocateService\:\:extract\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/Transfer/GeoLocateService.php
+
+		-
+			message: '#^Offset ''name'' on array\{name\: ''IPAPI''\|''IPLOCATE''\|''IPWHOIS'', url\: non\-falsy\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Service/Transfer/GeoLocateService.php
+
+		-
+			message: '#^Offset ''url'' on array\{name\: ''IPAPI''\|''IPLOCATE''\|''IPWHOIS'', url\: non\-falsy\-string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Service/Transfer/GeoLocateService.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between non\-falsy\-string and '''' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Service/Transfer/GeoLocateService.php
+
+		-
+			message: '#^Property App\\Service\\Transfer\\N8nScheduledTransferDispatcher\:\:\$entityManager is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Service/Transfer/N8nScheduledTransferDispatcher.php
+
+		-
+			message: '#^Method App\\Service\\TranslationService\:\:getSupportedLanguages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TranslationService.php
+
+		-
+			message: '#^Method App\\Service\\TranslationService\:\:joinTranslatedChunks\(\) has parameter \$chunks with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TranslationService.php
+
+		-
+			message: '#^Method App\\Service\\TranslationService\:\:splitTextIntoChunks\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/TranslationService.php
+
+		-
+			message: '#^Access to property \$messages on an unknown class Twilio\\Rest\\Client\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/TwilioService.php
+
+		-
+			message: '#^Instantiated class Twilio\\Http\\CurlClient not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/TwilioService.php
+
+		-
+			message: '#^Instantiated class Twilio\\Rest\\Client not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/TwilioService.php
+
+		-
+			message: '#^Method App\\Service\\VerificationService\:\:getStoredData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/VerificationService.php
+
+		-
+			message: '#^Method App\\Service\\VerificationService\:\:initiateVerification\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Service/VerificationService.php
+
+		-
+			message: '#^Access to an undefined property Ratchet\\ConnectionInterface\:\:\$httpRequest\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/WebSocket/ChatMessageNotifier.php
+
+		-
+			message: '#^Method App\\WebSocket\\ChatMessageNotifier\:\:publishToUser\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/WebSocket/ChatMessageNotifier.php
+
+		-
+			message: '#^Property App\\WebSocket\\ChatMessageNotifier\:\:\$clients with generic class SplObjectStorage does not specify its types\: TObject, TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/WebSocket/ChatMessageNotifier.php
+
+		-
+			message: '#^Parameter \#1 \$created_at of method App\\Entity\\Utilisateur\:\:setCreatedAt\(\) expects DateTimeImmutable, string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: tests/Controller/UtilisateurControllerTest.php
+
+		-
+			message: '#^Parameter \#1 \$updated_at of method App\\Entity\\Utilisateur\:\:setUpdatedAt\(\) expects DateTimeImmutable, string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: tests/Controller/UtilisateurControllerTest.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Symfony\\\\Component\\\\Dotenv\\\\Dotenv'' and ''bootEnv'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: tests/bootstrap.php

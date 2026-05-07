@@ -12,6 +12,12 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class AdminProduitType extends AbstractType
 {
+    private const TYPE_CHOICES = [
+        'Carte Prépayée' => 'carte_prepaye',
+        'Carte Cadeaux' => 'carte_cadeaux',
+        'Carte Abonnement' => 'carte_abonnement',
+    ];
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -34,8 +40,10 @@ class AdminProduitType extends AbstractType
                 'label' => 'Code Unique',
                 'required' => false,
             ])
-            ->add('typeProduit', TextType::class, [
-                'label' => 'Type de Produit',
+            ->add('typeProduit', ChoiceType::class, [
+                'label' => 'Type de Carte',
+                'choices' => self::TYPE_CHOICES,
+                'placeholder' => '-- Sélectionner un type --',
                 'constraints' => [new NotBlank(message: 'Le type du produit est obligatoire.')],
             ])
             ->add('statut', ChoiceType::class, [
@@ -43,8 +51,7 @@ class AdminProduitType extends AbstractType
                 'choices' => [
                     'Disponible' => 'disponible',
                     'Vendu' => 'vendu',
-                    'Hors Service' => 'hors_service',
-                    'En Réparation' => 'en_reparation',
+                    'Expiré' => 'expire',
                 ],
             ]);
     }

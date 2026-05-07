@@ -8,12 +8,25 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: DocumentRepository::class)]
 #[ORM\Table(name: 'document')]
-class Document
+class Document implements SignableDocumentInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id_document', type: 'integer')]
     private ?int $id = null;
+
+    #[ORM\Column(name: 'signature_status', length: 255)]
+    private string $signatureState = self::STATE_DRAFT;
+
+    #[ORM\Column(name: 'signature_hash', length: 255, nullable: true)]
+    private ?string $documentHash = null;
+
+    #[ORM\Column(name: 'signature_date', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $signedAt = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'signer_id', referencedColumnName: 'id', nullable: true)]
+    private ?User $signer = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false)]
@@ -41,10 +54,6 @@ class Document
 
     #[ORM\Column(name: 'type_document', length: 100)]
     #[Assert\NotBlank(message: 'Le type de document est obligatoire.')]
-    #[Assert\Choice(
-        choices: ['contrat', 'facture', 'releve', 'identite', 'assurance', 'fiscal', 'autre'],
-        message: 'Veuillez choisir un type de document valide.'
-    )]
     private string $typeDocument = '';
 
     #[ORM\Column(name: 'chemin_fichier', length: 500)]
@@ -54,6 +63,18 @@ class Document
     #[ORM\Column(name: 'taille_fichier', type: 'integer', nullable: true)]
     private ?int $tailleFichier = null;
 
+    #[ORM\Column(name: 'mime_type', length: 150, nullable: true)]
+    private ?string $mimeType = null;
+
+    #[ORM\Column(name: 'checksum', length: 64, nullable: true)]
+    private ?string $checksum = null;
+
+    #[ORM\Column(name: 'original_filename', length: 255, nullable: true)]
+    private ?string $originalFilename = null;
+
+    #[ORM\Column(name: 'current_version_number', type: 'integer')]
+    private int $currentVersionNumber = 1;
+
     #[ORM\Column(name: 'date_document', type: 'date', nullable: true)]
     private ?\DateTimeInterface $dateDocument = null;
 
@@ -62,10 +83,6 @@ class Document
 
     #[ORM\Column(type: 'string', columnDefinition: "ENUM('valide','expire','a_renouveler','archive') NOT NULL DEFAULT 'valide'")]
     #[Assert\NotBlank(message: 'Le statut est obligatoire.')]
-    #[Assert\Choice(
-        choices: ['valide', 'expire', 'a_renouveler', 'archive'],
-        message: 'Veuillez choisir un statut valide.'
-    )]
     private string $statut = 'valide';
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -75,12 +92,11 @@ class Document
     )]
     private ?string $description = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Length(
-        max: 255,
-        maxMessage: 'Les tags ne peuvent pas dépasser {{ limit }} caractères.'
-    )]
-    private ?string $tags = null;
+    #[ORM\ManyToMany(targetEntity: Tag::class, inversedBy: 'documents', cascade: ['persist'])]
+    #[ORM\JoinTable(name: 'document_tag')]
+    #[ORM\JoinColumn(name: 'document_id', referencedColumnName: 'id_document', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id_tag', onDelete: 'CASCADE')]
+    private Collection $tags;
 
     #[ORM\Column(name: 'created_at', type: 'datetime')]
     private \DateTimeInterface $createdAt;
@@ -88,12 +104,39 @@ class Document
     #[ORM\Column(name: 'updated_at', type: 'datetime')]
     private \DateTimeInterface $updatedAt;
 
+    #[ORM\Column(name: 'archived_at', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $archivedAt = null;
+
+    #[ORM\Column(name: 'deleted_at', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $deletedAt = null;
+
     #[ORM\OneToMany(mappedBy: 'document', targetEntity: Echeance::class, cascade: ['persist', 'remove'])]
     private Collection $echeances;
 
-    public function __construct()
+    #[ORM\ManyToMany(targetEntity: Pack::class, mappedBy: 'documents')]
+    private Collection $packs;
+
+#[ORM\OneToMany(mappedBy: 'document', targetEntity: DocumentVersion::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['versionNumber' => 'DESC'])]
+    private Collection $versions;
+
+    #[ORM\OneToMany(mappedBy: 'document', targetEntity: Signature::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $signatures;
+
+    #[ORM\OneToMany(mappedBy: 'document', targetEntity: Signatory::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $signatories;
+
+    #[ORM\OneToOne(mappedBy: 'document', targetEntity: ArchiveRecord::class, cascade: ['persist', 'remove'])]
+    private ?ArchiveRecord $archiveRecord = null;
+
+public function __construct()
     {
         $this->echeances = new ArrayCollection();
+        $this->packs = new ArrayCollection();
+        $this->tags = new ArrayCollection();
+        $this->versions = new ArrayCollection();
+        $this->signatures = new ArrayCollection();
+        $this->signatories = new ArrayCollection();
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
     }
@@ -113,6 +156,15 @@ class Document
     public function setCheminFichier(string $cheminFichier): static { $this->cheminFichier = $cheminFichier; return $this; }
     public function getTailleFichier(): ?int { return $this->tailleFichier; }
     public function setTailleFichier(?int $tailleFichier): static { $this->tailleFichier = $tailleFichier; return $this; }
+    public function getMimeType(): ?string { return $this->mimeType; }
+    public function setMimeType(?string $mimeType): static { $this->mimeType = $mimeType; return $this; }
+    public function getChecksum(): ?string { return $this->checksum; }
+    public function setChecksum(?string $checksum): static { $this->checksum = $checksum; return $this; }
+    public function getOriginalFilename(): ?string { return $this->originalFilename; }
+    public function setOriginalFilename(?string $originalFilename): static { $this->originalFilename = $originalFilename; return $this; }
+    public function getCurrentVersionNumber(): int { return $this->currentVersionNumber; }
+    public function setCurrentVersionNumber(int $currentVersionNumber): static { $this->currentVersionNumber = max(1, $currentVersionNumber); return $this; }
+    public function incrementCurrentVersionNumber(): static { ++$this->currentVersionNumber; return $this; }
     public function getDateDocument(): ?\DateTimeInterface { return $this->dateDocument; }
     public function setDateDocument(?\DateTimeInterface $dateDocument): static { $this->dateDocument = $dateDocument; return $this; }
     public function getDateEcheance(): ?\DateTimeInterface { return $this->dateEcheance; }
@@ -121,12 +173,187 @@ class Document
     public function setStatut(string $statut): static { $this->statut = $statut; return $this; }
     public function getDescription(): ?string { return $this->description; }
     public function setDescription(?string $description): static { $this->description = $description; return $this; }
-    public function getTags(): ?string { return $this->tags; }
-    public function setTags(?string $tags): static { $this->tags = $tags; return $this; }
+    /**
+     * @return Collection<int, Tag>
+     */
+    public function getTags(): Collection { return $this->tags; }
+
+    public function addTag(Tag $tag): static
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags->add($tag);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): static
+    {
+        $this->tags->removeElement($tag);
+
+        return $this;
+    }
+
+    public function clearTags(): static
+    {
+        $this->tags->clear();
+
+        return $this;
+    }
+
+    public function getTagsAsString(): string
+    {
+        return implode(', ', array_map(
+            static fn (Tag $tag): string => $tag->getNomTag(),
+            $this->tags->toArray()
+        ));
+    }
     public function getCreatedAt(): \DateTimeInterface { return $this->createdAt; }
     public function setCreatedAt(\DateTimeInterface $createdAt): static { $this->createdAt = $createdAt; return $this; }
     public function getUpdatedAt(): \DateTimeInterface { return $this->updatedAt; }
     public function setUpdatedAt(\DateTimeInterface $updatedAt): static { $this->updatedAt = $updatedAt; return $this; }
+    public function getArchivedAt(): ?\DateTimeInterface { return $this->archivedAt; }
+    public function setArchivedAt(?\DateTimeInterface $archivedAt): static { $this->archivedAt = $archivedAt; return $this; }
+    public function getDeletedAt(): ?\DateTimeInterface { return $this->deletedAt; }
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): static { $this->deletedAt = $deletedAt; return $this; }
+    public function isDeleted(): bool { return $this->deletedAt !== null; }
+    public function isArchived(): bool { return $this->archivedAt !== null || $this->statut === 'archive'; }
     public function getEcheances(): Collection { return $this->echeances; }
+    public function getPacks(): Collection { return $this->packs; }
+    public function getVersions(): Collection { return $this->versions; }
+public function addVersion(DocumentVersion $version): static
+    {
+        if (!$this->versions->contains($version)) {
+            $this->versions->add($version);
+            $version->setDocument($this);
+        }
+
+        return $this;
+    }
+
+    public function getSignatures(): Collection
+    {
+        return $this->signatures;
+    }
+
+    public function addSignature(Signature $signature): static
+    {
+        if (!$this->signatures->contains($signature)) {
+            $this->signatures->add($signature);
+            $signature->setDocument($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSignature(Signature $signature): static
+    {
+        if ($this->signatures->removeElement($signature)) {
+            if ($signature->getDocument() === $this) {
+                $signature->setDocument(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getSignatories(): Collection
+    {
+        return $this->signatories;
+    }
+
+    public function addSignatory(Signatory $signatory): static
+    {
+        if (!$this->signatories->contains($signatory)) {
+            $this->signatories->add($signatory);
+            $signatory->setDocument($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSignatory(Signatory $signatory): static
+    {
+        if ($this->signatories->removeElement($signatory)) {
+            if ($signatory->getDocument() === $this) {
+                $signatory->setDocument(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getArchiveRecord(): ?ArchiveRecord
+    {
+        return $this->archiveRecord;
+    }
+
+    public function setArchiveRecord(?ArchiveRecord $archiveRecord): static
+    {
+        $this->archiveRecord = $archiveRecord;
+        return $this;
+    }
+
     public function __toString(): string { return $this->titre; }
+
+    // --- Implementation of SignableDocumentInterface ---
+
+    public function getSignatureState(): string
+    {
+        return $this->signatureState;
+    }
+
+    public function setSignatureState(string $state): static
+    {
+        $this->signatureState = $state;
+        return $this;
+    }
+
+    public function getDocumentHash(): ?string
+    {
+        return $this->documentHash;
+    }
+
+    public function setDocumentHash(?string $hash): static
+    {
+        $this->documentHash = $hash;
+        return $this;
+    }
+
+    public function getSignedAt(): ?\DateTimeImmutable
+    {
+        return $this->signedAt instanceof \DateTimeInterface 
+            ? \DateTimeImmutable::createFromInterface($this->signedAt) 
+            : null;
+    }
+
+    public function setSignedAt(?\DateTimeImmutable $date): static
+    {
+        $this->signedAt = $date instanceof \DateTimeImmutable 
+            ? \DateTime::createFromImmutable($date) 
+            : null;
+        return $this;
+    }
+
+    public function getSignedByUserId(): ?int
+    {
+        return $this->signer ? $this->signer->getId() : null;
+    }
+
+    public function setSignedByUserId(?int $signedByUserId): static
+    {
+        // For the interface, we just store the ID if needed, 
+        // but the subscriber will set the Signer User object directly.
+        return $this;
+    }
+
+    public function getSigner(): ?User
+    {
+        return $this->signer;
+    }
+
+    public function setSigner(?User $signer): void
+    {
+        $this->signer = $signer;
+    }
 }

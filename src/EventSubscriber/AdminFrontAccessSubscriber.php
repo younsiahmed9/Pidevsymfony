@@ -13,8 +13,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class AdminFrontAccessSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private readonly Security $security,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private Security $security,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 

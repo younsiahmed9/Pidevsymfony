@@ -7,6 +7,8 @@ use App\Entity\ChatMessage;
 use App\Entity\User;
 use App\Repository\ChatConversationRepository;
 use App\Repository\ChatMessageRepository;
+use App\Service\ContentModerationService;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use App\Service\MessageRewriteService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,8 +20,10 @@ use Symfony\Component\Routing\Attribute\Route;
 final class MessageController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly MessageRewriteService $messageRewriteService,
+        private EntityManagerInterface $entityManager,
+        private MessageRewriteService $messageRewriteService,
+        private ContentModerationService $contentModerationService,
+        private TokenStorageInterface $tokenStorage,
     ) {
     }
 
@@ -165,6 +169,66 @@ final class MessageController extends AbstractController
             return $this->redirectToRoute('app_messages');
         }
 
+        try {
+            $moderationResult = $this->contentModerationService->assess($messageBody);
+        } catch (\Throwable $exception) {
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => false,
+                    'code' => 'moderation_unavailable',
+                    'error' => 'La moderation est indisponible pour le moment. Reessayez plus tard.',
+                ], Response::HTTP_SERVICE_UNAVAILABLE);
+            }
+
+            $this->addFlash('error', 'La moderation est indisponible pour le moment. Reessayez plus tard.');
+            return $this->redirectToRoute('app_messages');
+        }
+
+        if ($moderationResult['flagged']) {
+            $currentUser->incrementModerationWarningCount();
+            $warningCount = $currentUser->getModerationWarningCount();
+            $now = new \DateTimeImmutable();
+            $currentUser->setUpdatedAt($now);
+
+            $blocked = $warningCount >= 2;
+            if ($blocked) {
+                $currentUser->setIsActive(false);
+                $currentUser->setModerationBlockedAt($now);
+
+                // Invalidate server-side session and clear security token immediately
+                try {
+                    $this->tokenStorage->setToken(null);
+                    $session = $request->getSession();
+                    if ($session) {
+                        $session->invalidate();
+                    }
+                } catch (\Throwable $e) {
+                    // best-effort: do not break the moderation flow if token storage fails
+                }
+            }
+
+            $this->entityManager->flush();
+
+            $errorMessage = $blocked
+                ? 'Votre compte a ete bloque apres une deuxieme violation.'
+                : 'Votre message a ete signale. Restez professionnel, sinon votre compte sera bloque au prochain incident.';
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => false,
+                    'code' => $blocked ? 'account_blocked' : 'moderation_warning',
+                    'error' => $errorMessage,
+                    'warningCount' => $warningCount,
+                    'blocked' => $blocked,
+                    'details' => $moderationResult['reason'],
+                ], $blocked ? Response::HTTP_LOCKED : Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            $this->addFlash('error', $errorMessage);
+
+            return $this->redirectToRoute($blocked ? 'app_login' : 'app_messages', ['with' => $recipient->getId()]);
+        }
+
         $conversation = $chatConversationRepository->findBetweenUsers($currentUser, $recipient);
         if (!$conversation instanceof ChatConversation) {
             $conversation = (new ChatConversation())
@@ -253,7 +317,9 @@ final class MessageController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        if (!$this->isCsrfTokenValid('messages_rewrite', (string) $request->request->get('_csrf_token', ''))) {
+        $csrfToken = (string) ($request->request->get('_csrf_token') ?: $request->request->get('_rewrite_csrf_token') ?: $request->headers->get('X-CSRF-TOKEN', ''));
+
+        if (!$this->isCsrfTokenValid('messages_rewrite', $csrfToken)) {
             return $this->json(['success' => false, 'error' => 'Invalid security token.'], Response::HTTP_FORBIDDEN);
         }
 
@@ -276,13 +342,42 @@ final class MessageController extends AbstractController
         } catch (\Throwable $exception) {
             return $this->json([
                 'success' => false,
-                'error' => 'Impossible de reecrire le message pour le moment.',
+                'error' => $exception->getMessage() ?: 'Impossible de reecrire le message pour le moment.',
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         return $this->json([
             'success' => true,
             'rewritten' => $rewritten,
+        ]);
+    }
+
+    #[Route('/messages/toggle-star/{id}', name: 'app_messages_toggle_star', methods: ['POST'])]
+    public function toggleStar(int $id, ChatMessageRepository $chatMessageRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $currentUser = $this->getUser();
+        if (!$currentUser instanceof User) {
+            return $this->json(['success' => false, 'error' => 'Unauthorized.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $message = $chatMessageRepository->find($id);
+        if (!$message instanceof ChatMessage) {
+            return $this->json(['success' => false, 'error' => 'Message not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($message->getSender()?->getId() !== $currentUser->getId() && $message->getRecipient()?->getId() !== $currentUser->getId()) {
+            return $this->json(['success' => false, 'error' => 'Forbidden.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $newState = !$message->isStarred();
+        $message->setIsStarred($newState);
+        $this->entityManager->flush();
+
+        return $this->json([
+            'success' => true,
+            'isStarred' => $newState,
         ]);
     }
 
@@ -389,6 +484,7 @@ final class MessageController extends AbstractController
                 : 'Unknown',
             'createdAt' => $message->getCreatedAt()?->format('Y-m-d H:i') ?? '',
             'isRead' => $message->isRead(),
+            'isStarred' => $message->isStarred(),
         ];
     }
 }

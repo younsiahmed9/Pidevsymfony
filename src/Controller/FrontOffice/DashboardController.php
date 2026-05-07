@@ -24,13 +24,50 @@ final class DashboardController extends AbstractController
             return $this->redirectToRoute('admin_index');
         }
 
-        $balanceTotal = (float) $entityManager->getConnection()->fetchOne(
+        $conn = $entityManager->getConnection();
+        $uid = $user->getId();
+
+        $balanceTotal = (float) $conn->fetchOne(
             'SELECT COALESCE(SUM(solde_total), 0) FROM portefeuille WHERE user_id = :uid',
-            ['uid' => $user->getId()]
+            ['uid' => $uid]
         );
+
+        $nb_portefeuilles = (int) $conn->fetchOne(
+            'SELECT COUNT(*) FROM portefeuille WHERE user_id = :uid',
+            ['uid' => $uid]
+        );
+
+        $nb_cartes_actives = (int) $conn->fetchOne(
+            'SELECT COUNT(*) FROM carte_virtuelle cv
+             INNER JOIN portefeuille p ON cv.portefeuille_id = p.id
+             WHERE p.user_id = :uid AND cv.is_active = 1',
+            ['uid' => $uid]
+        );
+
+        $nb_virements_actifs = (int) $conn->fetchOne(
+            'SELECT COUNT(*) FROM virement_programme WHERE user_id = :uid AND actif = 1',
+            ['uid' => $uid]
+        );
+
+        $sqlDernieresTransactions = '
+            SELECT t.id, t.`date`, t.description, t.type, t.statut, t.montant, t.devise
+            FROM transaction t
+            WHERE EXISTS (
+              SELECT 1 FROM carte_virtuelle cv
+              INNER JOIN portefeuille p ON cv.portefeuille_id = p.id
+              WHERE p.user_id = :uid AND (cv.id = t.carte_source_id OR cv.id = t.carte_dest_id)
+            )
+            ORDER BY t.`date` DESC
+            LIMIT 10';
+
+        $dernieres_transactions = $conn->fetchAllAssociative($sqlDernieresTransactions, ['uid' => $uid]);
 
         return $this->render('frontoffice/dashboard/index.html.twig', [
             'balanceTotal' => $balanceTotal,
+            'nb_portefeuilles' => $nb_portefeuilles,
+            'nb_cartes_actives' => $nb_cartes_actives,
+            'nb_virements_actifs' => $nb_virements_actifs,
+            'dernieres_transactions' => $dernieres_transactions,
         ]);
     }
 }

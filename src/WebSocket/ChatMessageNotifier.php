@@ -17,7 +17,7 @@ final class ChatMessageNotifier implements MessageComponentInterface
     private int $lastSeenMessageId = 0;
 
     public function __construct(
-        private readonly Connection $connection,
+        private Connection $connection,
     ) {
         $this->clients = new SplObjectStorage();
         $this->initializeLastSeenMessageId();

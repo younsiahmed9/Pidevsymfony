@@ -55,6 +55,17 @@
                                 <div class="text-danger small mt-1">{{ form_errors(profileForm.fullName) }}</div>
                             </div>
 
+                            {% if profileForm.phone is defined %}
+                            <div class="col-md-6">
+                                {{ form_label(profileForm.phone, 'Numéro de téléphone', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
+                                {{ form_widget(profileForm.phone) }}
+                                {% if profileForm.phone.vars.help %}
+                                    <div class="form-text">{{ profileForm.phone.vars.help }}</div>
+                                {% endif %}
+                                <div class="text-danger small mt-1">{{ form_errors(profileForm.phone) }}</div>
+                            </div>
+                            {% endif %}
+
                             <div class="col-12">
                                 {{ form_label(profileForm.email, 'Adresse Email', {'label_attr': {'class': 'form-label fw-bold small text-muted'}}) }}
                                 {{ form_widget(profileForm.email, {'attr': {'class': 'form-control shadow-none'}}) }}
@@ -62,9 +73,11 @@
                             </div>
 
                             <div class="col-12 mt-4 text-end">
-                                <button type="button" class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#faceIdEnrollModal">
-                                    <i class="fas fa-face-smile me-2"></i>{{ app.user.hasFaceTemplate ? 'Mettre a jour Face ID' : 'Activer Face ID' }}
-                                </button>
+                                {% if app.user.role == 'ADMIN' %}
+                                    <button type="button" class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#faceIdEnrollModal">
+                                        <i class="fas fa-face-smile me-2"></i>{{ app.user.hasFaceTemplate ? 'Mettre a jour Face ID' : 'Activer Face ID' }}
+                                    </button>
+                                {% endif %}
                                 <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Mettre à jour</button>
                             </div>
 
@@ -76,30 +89,32 @@
     </div>
 </section>
 
-<div class="modal fade" id="faceIdEnrollModal" tabindex="-1" aria-labelledby="faceIdEnrollModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="faceIdEnrollModalLabel">Enrollement Face ID</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="post" action="{{ path('app_face_id_enroll') }}" data-face-id-form>
-                <div class="modal-body">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('face_id_enroll') }}">
-                    <input type="hidden" name="face_descriptor" data-face-id-input>
-                    <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
-                        <video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
+{% if app.user.role == 'ADMIN' %}
+    <div class="modal fade" id="faceIdEnrollModal" tabindex="-1" aria-labelledby="faceIdEnrollModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="faceIdEnrollModalLabel">Enrollement Face ID</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{{ path('app_face_id_enroll') }}" data-face-id-form>
+                    <div class="modal-body">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('face_id_enroll') }}">
+                        <input type="hidden" name="face_descriptor" data-face-id-input>
+                        <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden mb-3">
+                            <video class="w-100 h-100" autoplay muted playsinline data-face-id-video></video>
+                        </div>
+                        <p class="text-muted mb-0" data-face-id-status>Autorisez la camera puis capturez votre visage.</p>
                     </div>
-                    <p class="text-muted mb-0" data-face-id-status>Autorisez la camera puis capturez votre visage.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary" data-face-id-submit>Capturer et enregistrer</button>
-                </div>
-            </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary" data-face-id-submit>Capturer et enregistrer</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+{% endif %}
 {% endblock %}
 
 {% block javascripts %}

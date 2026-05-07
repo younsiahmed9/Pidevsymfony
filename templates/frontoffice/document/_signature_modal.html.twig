@@ -1,0 +1,89 @@
+<div class="modal fade" id="signatureModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Signer le document</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted">Dessinez votre signature ci-dessous puis cliquez sur Enregistrer.</p>
+        <div class="signature-canvas-wrapper bg-light p-2 rounded">
+          <canvas id="signatureCanvas" style="width:100%;height:200px;border:1px dashed #ccc;background:white"></canvas>
+        </div>
+        <div class="mt-2 d-flex gap-2">
+          <button id="clearSignatureBtn" class="btn btn-sm btn-outline-secondary">Effacer</button>
+          <button id="saveSignatureBtn" class="btn btn-sm btn-primary ms-auto">Enregistrer et Signer</button>
+        </div>
+        <div id="signatureFeedback" class="mt-2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  let canvas = document.getElementById('signatureCanvas');
+  if (!canvas) return;
+
+  // Resize canvas to device pixels
+  function resize() {
+    const ratio = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    canvas.width = w * ratio;
+    canvas.height = h * ratio;
+    canvas.getContext('2d').scale(ratio, ratio);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+  }
+
+  const ctx = canvas.getContext('2d');
+  resize();
+  window.addEventListener('resize', resize);
+
+  let drawing = false;
+  let last = {x:0,y:0};
+
+  function pos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
+      y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
+    };
+  }
+
+  canvas.addEventListener('mousedown', (e) => { drawing = true; last = pos(e); });
+  canvas.addEventListener('touchstart', (e) => { drawing = true; last = pos(e); e.preventDefault(); });
+  canvas.addEventListener('mousemove', (e) => { if (!drawing) return; const p = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; });
+  canvas.addEventListener('touchmove', (e) => { if (!drawing) return; const p = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; e.preventDefault(); });
+  canvas.addEventListener('mouseup', () => { drawing = false; });
+  canvas.addEventListener('touchend', () => { drawing = false; });
+
+  document.getElementById('clearSignatureBtn').addEventListener('click', () => {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  });
+
+  document.getElementById('saveSignatureBtn').addEventListener('click', async () => {
+    const dataUrl = canvas.toDataURL('image/png');
+    const feedback = document.getElementById('signatureFeedback');
+    feedback.innerHTML = 'Envoi en cours...';
+
+    try {
+      const res = await fetch('{{ path('document_sign_with_image', {id: document.id}) }}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ signature: dataUrl })
+      });
+      const data = await res.json();
+      if (data.success) {
+        feedback.innerHTML = '<div class="alert alert-success small">' + (data.message || 'Signé') + '</div>';
+        setTimeout(() => location.reload(), 800);
+      } else {
+        feedback.innerHTML = '<div class="alert alert-danger small">' + (data.message || 'Erreur') + '</div>';
+      }
+    } catch (e) {
+      feedback.innerHTML = '<div class="alert alert-danger small">Erreur de connexion</div>';
+    }
+  });
+})();
+</script>
